@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
 	let {
-		align = $bindable<'left' | 'center' | 'right'>('center'),
+		align = $bindable<'left' | 'center' | 'right'>(),
 		onSelect = undefined,
 		variant = 'inline',
 		class: customClass = ''
@@ -16,17 +16,19 @@
 		class?: string;
 	} = $props();
 
+	let effectiveAlign = $derived(align || 'center');
+
 	function cycleAlign() {
 		const next: 'left' | 'center' | 'right' =
-			align === 'left' ? 'center' : align === 'center' ? 'right' : 'left';
+			effectiveAlign === 'left' ? 'center' : effectiveAlign === 'center' ? 'right' : 'left';
 		align = next;
 		onSelect?.(next);
 	}
 
 	let titleText = $derived(
-		align === 'left'
+		effectiveAlign === 'left'
 			? 'Aligné à gauche (cliquer pour centrer)'
-			: align === 'center'
+			: effectiveAlign === 'center'
 				? 'Centré (cliquer pour aligner à droite)'
 				: 'Aligné à droite (cliquer pour aligner à gauche)'
 	);
@@ -48,22 +50,22 @@
 		stroke="currentColor"
 		stroke-width="2.2"
 		stroke-linecap="round"
-		class="align-icon align-{align}"
+		class="align-icon align-{effectiveAlign}"
 	>
 		<!-- Ligne 1 : pleine largeur -->
 		<line x1="3" y1="6" x2="21" y2="6"></line>
 		<!-- Ligne 2 : animée selon l'alignement -->
 		<line
-			x1={align === 'left' ? 3 : align === 'center' ? 6 : 11}
+			x1={effectiveAlign === 'left' ? 3 : effectiveAlign === 'center' ? 6 : 11}
 			y1="12"
-			x2={align === 'left' ? 13 : align === 'center' ? 18 : 21}
+			x2={effectiveAlign === 'left' ? 13 : effectiveAlign === 'center' ? 18 : 21}
 			y2="12"
 		></line>
 		<!-- Ligne 3 : animée selon l'alignement -->
 		<line
-			x1={align === 'left' ? 3 : align === 'center' ? 4 : 7}
+			x1={effectiveAlign === 'left' ? 3 : effectiveAlign === 'center' ? 4 : 7}
 			y1="18"
-			x2={align === 'left' ? 17 : align === 'center' ? 20 : 21}
+			x2={effectiveAlign === 'left' ? 17 : effectiveAlign === 'center' ? 20 : 21}
 			y2="18"
 		></line>
 	</svg>

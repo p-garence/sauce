@@ -54,7 +54,7 @@
 
 	// Structure du carrousel de slides
 	let items = $state<EditorCarouselItem[]>([
-		{ id: generateId(), type: 'text', text: '', url: '', file: null }
+		{ id: generateId(), type: 'text', text: '', url: '', file: null, align: 'center' }
 	]);
 	let currentIndex = $state(0);
 	let isSimpleText = $derived(items.length === 1 && items[0].type === 'text');
@@ -153,7 +153,7 @@
 		items.splice(index, 1);
 
 		if (items.length === 0) {
-			items = [{ id: generateId(), type: 'text', text: '', url: '', file: null }];
+			items = [{ id: generateId(), type: 'text', text: '', url: '', file: null, align: 'center' }];
 			currentIndex = 0;
 		} else if (currentIndex >= items.length) {
 			currentIndex = items.length - 1;
@@ -235,7 +235,7 @@
 				}
 			}
 		});
-		items = [{ id: generateId(), type: 'text', text: '', url: '', file: null }];
+		items = [{ id: generateId(), type: 'text', text: '', url: '', file: null, align: 'center' }];
 		currentIndex = 0;
 		customTags = [];
 		removedTags = [];
