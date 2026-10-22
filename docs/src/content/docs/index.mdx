@@ -6,11 +6,11 @@ hero:
   tagline: Plateforme sociale décentralisée et fédérée construite avec SvelteKit 2, Svelte 5 (Runes), Drizzle ORM et Better-Auth.
   actions:
     - text: Explorer les Composants
-      link: /components/overview/
+      link: /wikidev/components/overview/
       icon: right-arrow
       variant: primary
     - text: Guides & Procédures
-      link: /guides/nouveau-composant/
+      link: /wikidev/guides/nouveau-composant/
       icon: document
       variant: secondary
 ---
@@ -22,22 +22,22 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 <CardGrid stagger>
 	<Card title="Architecture & Runes Svelte 5" icon="puzzle">
 		Maîtrisez les concepts de réactivité Svelte 5, le **pattern de fusion dérivée** pour une UI optimiste résiliente, et la séparation propre contrôleurs / services.
-		[Lire l'architecture &rarr;](/architecture/overview/)
+		[Lire l'architecture &rarr;](/wikidev/architecture/overview/)
 	</Card>
 	<Card title="Composants UI Réutilisables" icon="open-book">
 		Explorez les composants découplés : `<Modal>`, `<SearchInput>`, `<PostCarousel>`, `<PostActionsBar>`, et les formulaires de paramètres.
-		[Consulter le catalogue &rarr;](/components/overview/)
+		[Consulter le catalogue &rarr;](/wikidev/components/overview/)
 	</Card>
 	<Card title="Services Backend Centralisés" icon="server">
 		Découvrez comment le backend isole la logique métier dans `$lib/server/` (`follows.ts`, `comments.ts`, `posts.ts`, `chat.ts`) avec transactions strictes.
-		[Explorer les services &rarr;](/architecture/services/)
+		[Explorer les services &rarr;](/wikidev/architecture/services/)
 	</Card>
 	<Card title="API REST Exhaustive" icon="setting">
 		Contrats d'API complets pour les flux, posts, commentaires, abonnements, clés d'invitation et messagerie instantanée.
-		[Voir la référence API &rarr;](/api/overview/)
+		[Voir la référence API &rarr;](/wikidev/api/overview/)
 	</Card>
 	<Card title="Procédures & Débogage" icon="list-format">
 		Guides pratiques étape par étape : création de nouveaux composants, tests E2E avec Playwright, et administration de la base de données PostgreSQL.
-		[Consulter les guides &rarr;](/guides/tests-e2e/)
+		[Consulter les guides &rarr;](/wikidev/guides/tests-e2e/)
 	</Card>
 </CardGrid>
