@@ -87,8 +87,8 @@ export const GET: RequestHandler = async ({ request, url }) => {
 		}
 	}
 
-	// 3. Compléter avec une recherche globale si nécessaire
-	if (results.length < 8 && q.length > 0) {
+	// 3. Compléter avec une recherche globale si nécessaire (même si q est vide)
+	if (results.length < 8) {
 		const others = await db
 			.select({
 				id: userTable.id,
@@ -102,7 +102,7 @@ export const GET: RequestHandler = async ({ request, url }) => {
 					not(eq(userTable.id, currentUserId)),
 					allowMentionsCondition,
 					notBlocked,
-					or(ilike(userTable.username, `${q}%`), ilike(userTable.name, `%${q}%`))
+					q ? or(ilike(userTable.username, `${q}%`), ilike(userTable.name, `%${q}%`)) : undefined
 				)
 			)
 			.limit(8 - results.length);

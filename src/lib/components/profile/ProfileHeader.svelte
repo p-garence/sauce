@@ -77,22 +77,29 @@
 <section class="profile-info-section">
 	<div class="profile-top-row">
 		<div class="avatar-container">
-			<StoryAvatar
-				image={profile.image}
-				username={profile.username || ''}
-				size={84}
-				borderWidth={3}
-				hasStory={Boolean(storyBundle && storyBundle.stories.length > 0)}
-				unviewed={Boolean(storyBundle?.hasUnviewed)}
-				groupRing={Boolean(storyBundle?.hasGroupStory)}
-				groupColor={storyBundle?.primaryGroupColor}
-				onclick={storyBundle && storyBundle.stories.length > 0 ? onAvatarClick : null}
-				title={storyBundle && storyBundle.stories.length > 0
-					? `Voir la story de ${profile.name || profile.username}`
-					: `Photo de profil de ${profile.name || profile.username}`}
-			/>
-			{#if profile.role === 'admin'}
-				<span class="role-badge admin">Admin</span>
+			{#if profile.username === 'serveur'}
+				<div class="avatar-server-large" title="Profil officiel du serveur">
+					<Icon name="status.server" size={42} />
+				</div>
+				<span class="role-badge system">Système</span>
+			{:else}
+				<StoryAvatar
+					image={profile.image}
+					username={profile.username || ''}
+					size={84}
+					borderWidth={3}
+					hasStory={Boolean(storyBundle && storyBundle.stories.length > 0)}
+					unviewed={Boolean(storyBundle?.hasUnviewed)}
+					groupRing={Boolean(storyBundle?.hasGroupStory)}
+					groupColor={storyBundle?.primaryGroupColor}
+					onclick={storyBundle && storyBundle.stories.length > 0 ? onAvatarClick : null}
+					title={storyBundle && storyBundle.stories.length > 0
+						? `Voir la story de ${profile.name || profile.username}`
+						: `Photo de profil de ${profile.name || profile.username}`}
+				/>
+				{#if profile.role === 'admin'}
+					<span class="role-badge admin">Admin</span>
+				{/if}
 			{/if}
 		</div>
 
@@ -107,12 +114,14 @@
 						initialStatus={isFollowing ? 'following' : 'none'}
 						onToggle={onFollowToggle}
 					/>
-					<a
-						href={resolve(`/api/chat/direct/${profile.username}`)}
-						class="btn-action message"
-					>
-						Message
-					</a>
+					{#if profile.username !== 'serveur'}
+						<a
+							href={resolve(`/api/chat/direct/${profile.username}`)}
+							class="btn-action message"
+						>
+							Message
+						</a>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -265,6 +274,21 @@
 	}
 	.role-badge.admin {
 		background: #e0245e;
+	}
+	.role-badge.system {
+		background: #0284c7;
+	}
+	.avatar-server-large {
+		width: 84px;
+		height: 84px;
+		border-radius: 50%;
+		background: linear-gradient(135deg, #0284c7, #0369a1);
+		color: #ffffff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+		border: 3px solid #ffffff;
 	}
 	.action-group {
 		display: flex;

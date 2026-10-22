@@ -45,11 +45,6 @@
 
 <div class="editor-container" class:is-carousel={!isSimpleText}>
 	{#if item.type === 'text'}
-		<MentionSuggestions
-			bind:this={mentionRef}
-			bind:value={item.text}
-			inputElement={richInputRef?.getElement()}
-		/>
 		<div class="text-slide-content-wrapper">
 			<RichTextInput
 				bind:this={richInputRef}
@@ -64,6 +59,12 @@
 		</div>
 
 		<div class="text-slide-toolbar">
+			<MentionSuggestions
+				bind:this={mentionRef}
+				bind:value={item.text}
+				inputElement={richInputRef?.getElement()}
+				placement="top"
+			/>
 			<EmojiButton onSelect={handleEmojiSelect} variant="inline" align="left" />
 			<TextAlignSelector bind:align={item.align} />
 		</div>
@@ -224,6 +225,7 @@
 	}
 
 	.text-slide-toolbar {
+		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;

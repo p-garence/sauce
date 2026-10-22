@@ -10,12 +10,14 @@
 		value = $bindable(''),
 		inputElement,
 		chatId,
-		onselect
+		onselect,
+		placement = 'top'
 	}: {
 		value: string;
 		inputElement?: HTMLElement | HTMLInputElement | HTMLTextAreaElement | null;
 		chatId?: string;
 		onselect?: (username: string) => void;
+		placement?: 'top' | 'bottom';
 	} = $props();
 
 	type SuggestionUser = {
@@ -205,7 +207,7 @@
 </script>
 
 {#if isOpen && suggestions.length > 0}
-	<div class="mention-dropdown" role="listbox">
+	<div class="mention-dropdown placement-{placement}" role="listbox">
 		{#each suggestions as user, i (user.id)}
 			<button
 				type="button"
@@ -252,10 +254,15 @@
 		border: 1px solid var(--border-color, #e2e8f0);
 		border-radius: 12px;
 		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-		z-index: 100;
+		z-index: 1000;
 		display: flex;
 		flex-direction: column;
 		padding: 4px;
+	}
+
+	.mention-dropdown.placement-bottom {
+		bottom: auto;
+		top: calc(100% + 6px);
 	}
 
 	.mention-item {

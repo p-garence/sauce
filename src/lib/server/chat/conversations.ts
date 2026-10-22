@@ -67,6 +67,9 @@ export async function getOrCreateDirectChat(
 	});
 
 	if (!targetUser) throw error(404, 'Utilisateur introuvable');
+	if (targetUser.id === 'server-system-user' || targetUser.username === 'serveur') {
+		throw error(400, "Impossible d'envoyer un message privé au serveur.");
+	}
 	if (targetUser.id === currentUserId)
 		throw error(400, 'Vous ne pouvez pas vous parler à vous-même');
 

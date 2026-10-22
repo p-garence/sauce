@@ -11,6 +11,7 @@ import {
 import { encodeCursor } from '$lib/server/cursor';
 import { getUserStoryBundle } from '$lib/server/stories';
 import { isBlockedBidirectional, sanitizeUserForViewer } from '$lib/server/permissions';
+import { ensureSystemUser } from '$lib/server/admin';
 import type { PageServerLoad } from './$types';
 import type { PostData } from '$lib/types';
 import type { CursorData } from '$lib/server/cursor';
@@ -23,6 +24,10 @@ export const load: PageServerLoad = async ({ params, url, parent }) => {
 	const currentUser = sessionUser;
 	const targetUsername = params.username;
 	const sortMode = (url.searchParams.get('sort') as PostSortMode) || 'chrono';
+
+	if (targetUsername === 'serveur') {
+		await ensureSystemUser();
+	}
 
 	const profileUser = await db.query.user.findFirst({
 		where: eq(userTable.username, targetUsername)

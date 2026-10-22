@@ -14,12 +14,55 @@ import {
 	stories,
 	messages
 } from '$lib/server/db/schema';
-import { eq, sql, count, lt, and, type SQL } from 'drizzle-orm';
+import { eq, or, sql, count, lt, and, type SQL } from 'drizzle-orm';
 import { deleteMediaFiles } from '$lib/server/media';
 import { canSeePost } from '$lib/server/posts';
 import { canSeeStory } from '$lib/server/stories';
 import type { CursorData } from '$lib/server/cursor';
 import type { CarouselItem } from '$lib/types';
+
+export const SYSTEM_USER_ID = 'server-system-user';
+export const SYSTEM_USER_USERNAME = 'serveur';
+
+/**
+ * Garantit l'existence de l'utilisateur système "Le serveur" en base de données.
+ */
+export async function ensureSystemUser() {
+	const existing = await db.query.user.findFirst({
+		where: or(eq(user.id, SYSTEM_USER_ID), eq(user.username, SYSTEM_USER_USERNAME))
+	});
+	let systemUser = existing;
+	if (!systemUser) {
+		const [created] = await db
+			.insert(user)
+			.values({
+				id: SYSTEM_USER_ID,
+				name: 'Le serveur',
+				username: SYSTEM_USER_USERNAME,
+				email: 'server@system.local',
+				role: 'admin',
+				bio: 'Compte officiel des annonces et informations système du serveur.'
+			})
+			.onConflictDoUpdate({
+				target: user.id,
+				set: {
+					name: 'Le serveur',
+					username: SYSTEM_USER_USERNAME
+				}
+			})
+			.returning();
+		systemUser = created;
+	}
+
+	// Aligner les posts système existants avec le compte serveur
+	await db
+		.update(posts)
+		.set({ authorId: SYSTEM_USER_ID })
+		.where(and(eq(posts.isSystem, true), sql`${posts.authorId} != ${SYSTEM_USER_ID}`))
+		.catch(() => {});
+
+	return systemUser;
+}
 
 /**
  * Ensure the requesting user has the admin role.

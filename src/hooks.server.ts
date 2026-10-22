@@ -9,6 +9,7 @@ import { eq } from 'drizzle-orm';
 
 import { cleanupExpiredStories } from '$lib/server/stories';
 import { ensureOptimizationIndexes } from '$lib/server/db/indexes';
+import { ensureSystemUser } from '$lib/server/admin';
 
 let lastStoryCleanup = 0;
 
@@ -25,6 +26,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (!building) {
 		await ensureOptimizationIndexes();
+		await ensureSystemUser().catch((e) => console.error('Erreur ensureSystemUser:', e));
 	}
 
 	// SÉCURITÉ : Interdire l'inscription publique directe via l'API Better Auth (qui contournerait les clés d'invitation)

@@ -6,6 +6,10 @@ import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ params, request }) => {
 	const session = await requireSession(request);
 
+	if (params.username === 'serveur') {
+		throw redirect(303, '/profil/serveur');
+	}
+
 	const chatId = await getOrCreateDirectChat(session.user.id, params.username);
 
 	throw redirect(303, `/chat/${chatId}`);

@@ -105,7 +105,10 @@ export const roadmapData: RoadmapCategory[] = [
 			{ title: "Gestion de l'URL et proxy", status: 'done' },
 			{ title: 'Mise en place des tests (e2e)', status: 'done' },
 			{ title: 'Documentation technique', status: 'done' },
-			{ title: "Passage sur l'API", status: 'done' }
+			{ title: "Passage sur l'API", status: 'done' },
+			{ title: 'Backup données automatique', status: 'todo' },
+			{ title: 'Déploiement serveur', status: 'todo' },
+			{ title: 'Securisation serveur', status: 'todo' }
 		]
 	},
 	{
@@ -156,7 +159,9 @@ export const roadmapData: RoadmapCategory[] = [
 			},
 			{ title: 'Systeme de notification serveur ', status: 'done' },
 			{ title: 'Systeme de report', status: 'todo' },
-			{ title: 'Changement des constante serveur ', status: 'todo' }
+			{ title: 'Changement des constante serveur ', status: 'todo' },
+			{ title: 'System de permissions modérateur / admin', status: 'todo' },
+			{ title: 'Interface', status: 'todo' }
 		]
 	},
 	{

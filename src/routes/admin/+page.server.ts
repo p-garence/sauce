@@ -8,6 +8,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { createPost } from '$lib/server/posts';
 import {
 	assertAdmin,
+	ensureSystemUser,
 	getAdminUsers,
 	getAdminPosts,
 	getAdminStories,
@@ -331,8 +332,9 @@ export const actions: Actions = {
 					}
 				}
 
+				const systemUser = await ensureSystemUser();
 				const newPost = await createPost({
-					authorId: locals.user.id,
+					authorId: systemUser.id,
 					content: caption,
 					mediaUrls: finalCarousel,
 					visibility: 'public',

@@ -159,14 +159,15 @@ export async function getPostById(
 	if (!post) return null;
 
 	let isFollowing = false;
-	if (currentUserId && post.authorId !== currentUserId) {
+	const effectiveAuthorId = post.isSystem ? 'server-system-user' : post.authorId;
+	if (currentUserId && effectiveAuthorId !== currentUserId) {
 		const [followCheck] = await db
 			.select({ id: follows.followingId })
 			.from(follows)
 			.where(
 				and(
 					eq(follows.followerId, currentUserId),
-					eq(follows.followingId, post.authorId),
+					eq(follows.followingId, effectiveAuthorId),
 					eq(follows.status, 'accepted')
 				)
 			);
@@ -226,7 +227,7 @@ export async function getPostById(
 		isSystem: Boolean(post.isSystem),
 		author: {
 			name: post.isSystem ? 'Le serveur' : post.author.name || 'Utilisateur Inconnu',
-			id: post.author.id,
+			id: post.isSystem ? 'server-system-user' : post.author.id,
 			username: post.isSystem ? 'serveur' : post.author.username || 'Inconnu',
 			avatar: post.isSystem ? null : post.author.image,
 			isFollowing

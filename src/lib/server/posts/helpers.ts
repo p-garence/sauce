@@ -70,7 +70,7 @@ export function formatPosts(
 			isSystem: Boolean(post.isSystem),
 			author: {
 				name: post.isSystem ? 'Le serveur' : post.author.name || 'Utilisateur Inconnu',
-				id: post.author.id,
+				id: post.isSystem ? 'server-system-user' : post.author.id,
 				username: post.isSystem ? 'serveur' : post.author.username || post.author.name || 'Inconnu',
 				avatar: post.isSystem ? null : post.author.image,
 				isFollowing: Boolean(post.isFollowingAuthor)

@@ -17,27 +17,44 @@
 
 	let isOpen = $state(false);
 	let openUpwards = $state(false);
+	let menuMaxHeight = $state<number | null>(null);
 	let buttonRef = $state<HTMLButtonElement | null>(null);
 
 	function toggleMenu(e: MouseEvent) {
 		e.stopPropagation();
 		e.preventDefault();
 		if (!isOpen) {
-			if (direction === 'up') {
-				openUpwards = true;
-			} else if (direction === 'down') {
-				openUpwards = false;
-			} else if (buttonRef) {
+			if (buttonRef) {
 				const rect = buttonRef.getBoundingClientRect();
 				const scrollParent = buttonRef.closest(
-					'.messages-container, .scroll-container, main, [data-scroll-container]'
+					'.messages-container, .scroll-container, [data-scroll-container]'
 				);
 				let spaceBelow = window.innerHeight - rect.bottom;
+				let spaceAbove = rect.top;
+
 				if (scrollParent) {
 					const parentRect = scrollParent.getBoundingClientRect();
 					spaceBelow = Math.min(spaceBelow, parentRect.bottom - rect.bottom);
+					spaceAbove = Math.min(spaceAbove, rect.top - parentRect.top);
 				}
-				openUpwards = spaceBelow < 200;
+
+				if (direction === 'up') {
+					openUpwards = spaceAbove >= 120 || spaceAbove >= spaceBelow;
+				} else if (direction === 'down') {
+					openUpwards = false;
+				} else {
+					const estimatedMenuHeight = 180;
+					openUpwards =
+						spaceBelow < estimatedMenuHeight &&
+						spaceAbove > spaceBelow &&
+						spaceAbove >= 140;
+				}
+
+				const availableSpace = openUpwards ? spaceAbove : spaceBelow;
+				menuMaxHeight = Math.floor(Math.max(100, availableSpace - 12));
+			} else {
+				openUpwards = direction === 'up';
+				menuMaxHeight = null;
 			}
 		}
 		isOpen = !isOpen;
@@ -70,7 +87,11 @@
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div class="menu-overlay" onclick={closeMenu}></div>
 
-		<div class="dropdown-menu" class:up={openUpwards}>
+		<div
+			class="dropdown-menu"
+			class:up={openUpwards}
+			style={menuMaxHeight ? `max-height: ${menuMaxHeight}px;` : ''}
+		>
 			{#each actions as action, i (i)}
 				<button
 					class="menu-item {action.variant === 'danger' ? 'danger' : ''}"
@@ -133,7 +154,8 @@
 		border-radius: 8px;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 		min-width: 170px;
-		overflow: hidden;
+		overflow-y: auto;
+		overflow-x: hidden;
 		z-index: 200;
 		display: flex;
 		flex-direction: column;

@@ -26,9 +26,11 @@ export async function getProfilePosts(
 	cursor?: CursorData | null,
 	sortMode: PostSortMode = 'chrono'
 ): Promise<{ posts: PostData[]; nextCursor: CursorData | null }> {
+	const isTargetSystem = targetUserId === 'server-system-user';
 	const conditions: (SQL | undefined)[] = [
-		eq(posts.authorId, targetUserId),
-		eq(posts.isSystem, false),
+		isTargetSystem
+			? eq(posts.isSystem, true)
+			: and(eq(posts.authorId, targetUserId), eq(posts.isSystem, false)),
 		canSeePost(currentUserId)
 	];
 

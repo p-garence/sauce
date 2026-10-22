@@ -49,7 +49,11 @@
 
 <header class="post-header">
 	{#if isSystemPost}
-		<div class="author-profile-link non-clickable">
+		<a
+			href={resolve('/profil/serveur')}
+			class="author-profile-link"
+			onclick={goToProfile}
+		>
 			<div class="avatar avatar-server">
 				<Icon name="status.server" size={18} />
 			</div>
@@ -57,7 +61,7 @@
 				<strong>Le serveur</strong>
 				<FormattedDate date={post.createdAt} class="date" />
 			</div>
-		</div>
+		</a>
 	{:else}
 		<a
 			href={resolve(`/profil/${post.author.username}`)}
@@ -80,23 +84,27 @@
 
 	{#if isLoggedIn}
 		<div class="header-actions">
-			{#if !isSystemPost}
-				{#if isOwnPost}
-					<VisibilitySelect
-						postId={post.id}
-						initialGroupId={post.groupId}
-						initialVisibility={post.visibility || 'public'}
-						onToggle={(newVis, newGroupId) => {
-							onVisibilityChange?.(newVis, newGroupId ?? null);
-						}}
-					/>
-				{:else}
-					<FollowButton
-						targetId={post.author.id}
-						variant="small"
-						initialStatus={post.author.isFollowing ? 'following' : 'none'}
-					/>
-				{/if}
+			{#if isSystemPost}
+				<FollowButton
+					targetId={post.author.id}
+					variant="small"
+					initialStatus={post.author.isFollowing ? 'following' : 'none'}
+				/>
+			{:else if isOwnPost}
+				<VisibilitySelect
+					postId={post.id}
+					initialGroupId={post.groupId}
+					initialVisibility={post.visibility || 'public'}
+					onToggle={(newVis, newGroupId) => {
+						onVisibilityChange?.(newVis, newGroupId ?? null);
+					}}
+				/>
+			{:else}
+				<FollowButton
+					targetId={post.author.id}
+					variant="small"
+					initialStatus={post.author.isFollowing ? 'following' : 'none'}
+				/>
 			{/if}
 			<ActionMenu actions={postActions} />
 		</div>
@@ -116,11 +124,6 @@
 		gap: 12px;
 		text-decoration: none;
 		color: inherit;
-	}
-	.author-profile-link.non-clickable {
-		cursor: default;
-		pointer-events: none;
-		user-select: text;
 	}
 	.avatar,
 	.avatar-placeholder,

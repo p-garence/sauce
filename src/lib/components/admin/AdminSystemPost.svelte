@@ -47,6 +47,8 @@
 	let fileInput = $state<HTMLInputElement>();
 	let captionRichInputRef = $state<RichTextInput | null>(null);
 	let captionMentionRef: MentionSuggestions | undefined = $state();
+	let notifMentionRef: MentionSuggestions | undefined = $state();
+	let notifInputElement = $state<HTMLInputElement | null>(null);
 
 	function insertCaptionEmoji(emoji: EmojiItem) {
 		captionRichInputRef?.insertEmoji(emoji);
@@ -339,14 +341,24 @@
 					</span>
 					<span class="required-star">*</span>
 				</label>
-				<input
-					id="notif-message-input"
-					type="text"
-					class="notif-input"
-					placeholder="Ex : 🚀 Nouvelle mise à jour majeure disponible ! Cliquez pour en savoir plus."
-					bind:value={notificationMessage}
-					required
-				/>
+				<div class="notif-input-wrapper">
+					<MentionSuggestions
+						bind:this={notifMentionRef}
+						bind:value={notificationMessage}
+						inputElement={notifInputElement}
+						placement="bottom"
+					/>
+					<input
+						id="notif-message-input"
+						type="text"
+						class="notif-input"
+						placeholder="Ex : 🚀 Nouvelle mise à jour majeure disponible ! Cliquez pour en savoir plus."
+						bind:value={notificationMessage}
+						bind:this={notifInputElement}
+						onkeydown={(e) => notifMentionRef?.handleKeydown(e)}
+						required
+					/>
+				</div>
 				<span class="field-hint">
 					Ce message apparaîtra dans la bulle de notification et l'alerte push chez tous les
 					utilisateurs.
@@ -582,10 +594,15 @@
 		color: #64748b;
 	}
 
+	.notif-input-wrapper {
+		position: relative;
+		width: 100%;
+	}
+
 	.post-editor-box {
+		position: relative;
 		border: 1px solid #e2e8f0;
 		border-radius: 12px;
-		overflow: hidden;
 		background: #f8fafc;
 	}
 
@@ -620,6 +637,7 @@
 	}
 
 	.caption-section {
+		position: relative;
 		padding: 16px;
 		background: #ffffff;
 		border-top: 1px solid #e2e8f0;
