@@ -61,49 +61,64 @@ export async function searchPosts(
 
 	const isPopularSort = sortMode === 'popular' || sortMode === 'popular_week';
 
-	if (cursor && cursor.lastValue) {
-		if (hasQuery) {
-			const parts = String(cursor.lastValue).split(':');
-			const lastScore = parseInt(parts[0], 10);
-			const lastSecondary = parts.slice(1).join(':');
+	if (cursor && cursor.lastValue !== undefined && cursor.lastValue !== null) {
+		const rawVal = String(cursor.lastValue);
 
-			if (!Number.isNaN(lastScore)) {
-				if (isPopularSort) {
-					const lastLikes = parseInt(lastSecondary, 10);
-					if (!Number.isNaN(lastLikes)) {
-						conditions.push(
-							or(
-								sql`${networkScore} < ${lastScore}`,
-								and(sql`${networkScore} = ${lastScore}`, lt(posts.likesCount, lastLikes)),
-								and(
-									sql`${networkScore} = ${lastScore}`,
-									eq(posts.likesCount, lastLikes),
-									lt(posts.id, cursor.lastId)
-								)
+		if (hasQuery) {
+			// Recherche textuelle active : curseur réseau (score:valeur)
+			let lastScore = 0;
+			let secondaryStr = rawVal;
+			const colonIndex = rawVal.indexOf(':');
+			if (colonIndex !== -1) {
+				lastScore = parseInt(rawVal.slice(0, colonIndex), 10) || 0;
+				secondaryStr = rawVal.slice(colonIndex + 1);
+			}
+
+			if (isPopularSort) {
+				const lastLikes = parseInt(secondaryStr, 10);
+				if (!Number.isNaN(lastLikes)) {
+					conditions.push(
+						or(
+							sql`${networkScore} < ${lastScore}`,
+							and(sql`${networkScore} = ${lastScore}`, lt(posts.likesCount, lastLikes)),
+							and(
+								sql`${networkScore} = ${lastScore}`,
+								eq(posts.likesCount, lastLikes),
+								lt(posts.id, cursor.lastId)
 							)
-						);
-					}
-				} else {
-					const parsedDate = new Date(lastSecondary);
-					if (!Number.isNaN(parsedDate.getTime())) {
-						conditions.push(
-							or(
-								sql`${networkScore} < ${lastScore}`,
-								and(sql`${networkScore} = ${lastScore}`, lt(posts.createdAt, parsedDate)),
-								and(
-									sql`${networkScore} = ${lastScore}`,
-									eq(posts.createdAt, parsedDate),
-									lt(posts.id, cursor.lastId)
-								)
+						)
+					);
+				}
+			} else {
+				const parsedDate = new Date(secondaryStr);
+				if (!Number.isNaN(parsedDate.getTime())) {
+					conditions.push(
+						or(
+							sql`${networkScore} < ${lastScore}`,
+							and(sql`${networkScore} = ${lastScore}`, lt(posts.createdAt, parsedDate)),
+							and(
+								sql`${networkScore} = ${lastScore}`,
+								eq(posts.createdAt, parsedDate),
+								lt(posts.id, cursor.lastId)
 							)
-						);
-					}
+						)
+					);
 				}
 			}
 		} else {
-			// Pas de recherche textuelle : curseur simple (likes ou date)
-			const valStr = String(cursor.lastValue);
-			const cleanVal = valStr.includes(':') ? valStr.split(':').slice(1).join(':') : valStr;
+			// Pas de recherche textuelle : curseur simple (sans networkScore)
+			// Si un vieux curseur réseau (ex: "3:2026-10-...") arrive, on extrait la partie date/likes
+			let cleanVal = rawVal;
+			if (
+				cursor.type === 'network_chrono' ||
+				cursor.type === 'network_popular' ||
+				/^[0-3]:/.test(rawVal)
+			) {
+				const colonIndex = rawVal.indexOf(':');
+				if (colonIndex !== -1) {
+					cleanVal = rawVal.slice(colonIndex + 1);
+				}
+			}
 
 			if (isPopularSort) {
 				const lastLikes = parseInt(cleanVal, 10);

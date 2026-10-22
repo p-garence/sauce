@@ -55,7 +55,13 @@
 			const res = await fetch(url);
 			if (res.ok) {
 				const data = await res.json();
-				results = isNewSearch ? data.posts : [...results, ...data.posts];
+				if (isNewSearch) {
+					results = data.posts;
+				} else {
+					const existingIds = new Set(results.map((p) => p.id));
+					const uniqueNewPosts = data.posts.filter((p: PostData) => !existingIds.has(p.id));
+					results = [...results, ...uniqueNewPosts];
+				}
 				nextCursor = data.nextCursor;
 				saveState();
 			}
