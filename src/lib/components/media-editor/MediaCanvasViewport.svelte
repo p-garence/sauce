@@ -93,6 +93,8 @@
 	let activePhotoPointerId = $state<number | null>(null);
 	let startX = 0;
 	let startY = 0;
+	let initialPanX = 0;
+	let initialPanY = 0;
 
 	function photoPointerDown(e: PointerEvent) {
 		if (activeMode !== 'crop') return;
@@ -101,6 +103,8 @@
 		isDragging = true;
 		startX = e.clientX - panX;
 		startY = e.clientY - panY;
+		initialPanX = panX;
+		initialPanY = panY;
 		try {
 			(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
 		} catch {
@@ -113,6 +117,9 @@
 		if (e.pointerType === 'mouse' && (e.buttons & 1) !== 1) {
 			isDragging = false;
 			activePhotoPointerId = null;
+			if (panX !== initialPanX || panY !== initialPanY) {
+				onHistoryPush?.();
+			}
 			return;
 		}
 		panX = e.clientX - startX;
@@ -127,6 +134,9 @@
 				(e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
 			} catch {
 				/* ignore */
+			}
+			if (panX !== initialPanX || panY !== initialPanY) {
+				onHistoryPush?.();
 			}
 		}
 	}

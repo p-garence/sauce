@@ -44,6 +44,9 @@ export interface HistorySnapshot {
 	texts: TextItem[];
 	strokes: DrawingStroke[];
 	images: ImageOverlayItem[];
+	panX?: number;
+	panY?: number;
+	zoom?: number;
 }
 
 export type EditorMode = 'crop' | 'text' | 'draw' | 'image';

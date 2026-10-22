@@ -77,7 +77,9 @@
 	let brushRelSize = $state(0.015);
 
 	// Historique Undo / Redo
-	let history = $state<HistorySnapshot[]>([{ texts: [], strokes: [], images: [] }]);
+	let history = $state<HistorySnapshot[]>([
+		{ texts: [], strokes: [], images: [], panX: 0, panY: 0, zoom: 1 }
+	]);
 	let historyIndex = $state(0);
 
 	let canUndo = $derived(historyIndex > 0);
@@ -87,8 +89,26 @@
 		const nextSnapshot: HistorySnapshot = {
 			texts: JSON.parse(JSON.stringify(texts)),
 			strokes: JSON.parse(JSON.stringify(strokes)),
-			images: JSON.parse(JSON.stringify(images))
+			images: JSON.parse(JSON.stringify(images)),
+			panX,
+			panY,
+			zoom
 		};
+
+		// Éviter d'enregistrer deux snapshots consécutifs identiques
+		const currentSnapshot = history[historyIndex];
+		if (
+			currentSnapshot &&
+			currentSnapshot.panX === panX &&
+			currentSnapshot.panY === panY &&
+			currentSnapshot.zoom === zoom &&
+			JSON.stringify(currentSnapshot.texts) === JSON.stringify(texts) &&
+			JSON.stringify(currentSnapshot.strokes) === JSON.stringify(strokes) &&
+			JSON.stringify(currentSnapshot.images || []) === JSON.stringify(images)
+		) {
+			return;
+		}
+
 		history = [...history.slice(0, historyIndex + 1), nextSnapshot];
 		historyIndex = history.length - 1;
 	}
@@ -100,6 +120,9 @@
 		texts = JSON.parse(JSON.stringify(snapshot.texts));
 		strokes = JSON.parse(JSON.stringify(snapshot.strokes));
 		images = JSON.parse(JSON.stringify(snapshot.images || []));
+		if (snapshot.panX !== undefined) panX = snapshot.panX;
+		if (snapshot.panY !== undefined) panY = snapshot.panY;
+		if (snapshot.zoom !== undefined) zoom = snapshot.zoom;
 		if (activeTextId && !texts.find((t) => t.id === activeTextId)) {
 			activeTextId = null;
 			if (activeMode === 'text') activeMode = 'crop';
@@ -117,6 +140,9 @@
 		texts = JSON.parse(JSON.stringify(snapshot.texts));
 		strokes = JSON.parse(JSON.stringify(snapshot.strokes));
 		images = JSON.parse(JSON.stringify(snapshot.images || []));
+		if (snapshot.panX !== undefined) panX = snapshot.panX;
+		if (snapshot.panY !== undefined) panY = snapshot.panY;
+		if (snapshot.zoom !== undefined) zoom = snapshot.zoom;
 	}
 
 	function cleanupImages() {
@@ -157,7 +183,7 @@
 			activeTextId = null;
 			activeMode = 'crop';
 			isEditingText = false;
-			history = [{ texts: [], strokes: [], images: [] }];
+			history = [{ texts: [], strokes: [], images: [], panX: 0, panY: 0, zoom: 1 }];
 			historyIndex = 0;
 		});
 
@@ -479,6 +505,7 @@
 				<CropToolbar
 					{zoom}
 					onZoomChange={(z) => (zoom = z)}
+					onZoomCommit={pushHistory}
 					{canUndo}
 					{canRedo}
 					onUndo={undo}

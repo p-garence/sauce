@@ -4,6 +4,7 @@
 		canUndo: boolean;
 		canRedo: boolean;
 		onZoomChange: (zoom: number) => void;
+		onZoomCommit?: () => void;
 		onAddText: () => void;
 		onStartDrawing: () => void;
 		onAddImage?: (file: File) => void;
@@ -18,6 +19,7 @@
 		canUndo,
 		canRedo,
 		onZoomChange,
+		onZoomCommit,
 		onAddText,
 		onStartDrawing,
 		onAddImage,
@@ -47,6 +49,7 @@
 			step="0.01"
 			value={zoom}
 			oninput={(e) => onZoomChange(parseFloat(e.currentTarget.value))}
+			onchange={() => onZoomCommit?.()}
 		/>
 	</div>
 
