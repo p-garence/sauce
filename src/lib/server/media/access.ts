@@ -127,25 +127,23 @@ export async function canAccessMediaFile(
 
 		// C. Vérification pour les stories
 		const [parentStory] = await db
-			.select({ id: stories.id, authorId: stories.authorId, visibility: stories.visibility })
+			.select({
+				id: stories.id,
+				authorId: stories.authorId,
+				visibility: stories.visibility,
+				expiresAt: stories.expiresAt
+			})
 			.from(stories)
 			.where(eq(stories.mediaUrl, mediaUrl))
 			.limit(1);
 
 		if (parentStory) {
-			isPublicStory = parentStory.visibility === 'public';
-			if (!isPublicStory && !viewerId) {
-				throw error(401, 'Non autorisé. Vous devez être connecté pour voir cette story.');
-			}
-			if (parentStory.authorId !== viewerId) {
-				const [visibleStory] = await db
-					.select({ id: stories.id })
-					.from(stories)
-					.where(and(eq(stories.id, parentStory.id), canSeeStorySql(viewerId)))
-					.limit(1);
+			const isExpired = parentStory.expiresAt <= new Date();
+			isPublicStory = !isExpired && parentStory.visibility === 'public';
 
-				if (!visibleStory) {
-					// Vérifie si le média est référencé dans une réponse de story au sein d'un chat auquel l'utilisateur participe
+			if (parentStory.authorId !== viewerId) {
+				if (isExpired) {
+					// Story expirée / archivée : seul l'auteur peut y accéder (sauf si citée dans un chat participant)
 					let allowedViaChatReply = false;
 					if (viewerId) {
 						const replyRows = await db
@@ -162,7 +160,38 @@ export async function canAccessMediaFile(
 						allowedViaChatReply = replyRows.length > 0;
 					}
 					if (!allowedViaChatReply) {
-						throw error(403, "Vous n'avez pas accès à cette story.");
+						throw error(403, "Cette story est archivée et n'est plus accessible.");
+					}
+				} else {
+					if (!isPublicStory && !viewerId) {
+						throw error(401, 'Non autorisé. Vous devez être connecté pour voir cette story.');
+					}
+
+					const [visibleStory] = await db
+						.select({ id: stories.id })
+						.from(stories)
+						.where(and(eq(stories.id, parentStory.id), canSeeStorySql(viewerId)))
+						.limit(1);
+
+					if (!visibleStory) {
+						let allowedViaChatReply = false;
+						if (viewerId) {
+							const replyRows = await db
+								.select({ id: messages.id })
+								.from(messages)
+								.innerJoin(chatParticipants, eq(messages.chatId, chatParticipants.chatId))
+								.where(
+									and(
+										eq(chatParticipants.userId, viewerId),
+										sql`${messages.content} LIKE ${'%' + mediaUrl + '%'}`
+									)
+								)
+								.limit(1);
+							allowedViaChatReply = replyRows.length > 0;
+						}
+						if (!allowedViaChatReply) {
+							throw error(403, "Vous n'avez pas accès à cette story.");
+						}
 					}
 				}
 			}

@@ -361,8 +361,13 @@ export async function getAdminStories(options?: {
 		},
 		extras: {
 			canView: adminId
-				? sql<boolean>`CASE WHEN (${canSeeStory(adminId)}) THEN true ELSE false END`.as('can_view')
-				: sql<boolean>`true`.as('can_view')
+				? sql<boolean>`CASE 
+					WHEN ${stories.authorId} = ${adminId} THEN true
+					WHEN ${stories.expiresAt} <= NOW() THEN false
+					WHEN (${canSeeStory(adminId)}) THEN true 
+					ELSE false 
+				END`.as('can_view')
+				: sql<boolean>`false`.as('can_view')
 		},
 		orderBy: (storiesTable, { desc }) => [desc(storiesTable.createdAt)],
 		limit

@@ -48,6 +48,7 @@
 	let { initialStories = [], initialCursor = null, totalStories = 0 }: Props = $props();
 
 	let storySearch = $state('');
+	let statusFilter = $state<'all' | 'active' | 'archived' | 'expired'>('all');
 	let storiesList = $state(untrack(() => [...initialStories]));
 	let storiesCursor = $state(untrack(() => initialCursor));
 	let isLoadingMoreStories = $state(false);
@@ -79,12 +80,20 @@
 	const filteredStories = $derived(
 		storiesList.filter((s) => {
 			const query = storySearch.toLowerCase().trim();
-			if (!query) return true;
-			return (
+			const matchesQuery =
+				!query ||
 				(s.caption && s.caption.toLowerCase().includes(query)) ||
 				(s.author?.username && s.author.username.toLowerCase().includes(query)) ||
-				(s.author?.name && s.author.name.toLowerCase().includes(query))
-			);
+				(s.author?.name && s.author.name.toLowerCase().includes(query));
+
+			if (!matchesQuery) return false;
+
+			if (statusFilter === 'all') return true;
+			const isExpired = new Date(s.expiresAt) <= new Date();
+			if (statusFilter === 'active') return !isExpired;
+			if (statusFilter === 'archived') return isExpired && s.isArchived;
+			if (statusFilter === 'expired') return isExpired && !s.isArchived;
+			return true;
 		})
 	);
 </script>
@@ -97,6 +106,40 @@
 			bind:value={storySearch}
 			class="search-input"
 		/>
+		<div class="filter-group">
+			<button
+				type="button"
+				class="filter-btn"
+				class:active={statusFilter === 'all'}
+				onclick={() => (statusFilter = 'all')}
+			>
+				Toutes
+			</button>
+			<button
+				type="button"
+				class="filter-btn"
+				class:active={statusFilter === 'active'}
+				onclick={() => (statusFilter = 'active')}
+			>
+				Actives
+			</button>
+			<button
+				type="button"
+				class="filter-btn"
+				class:active={statusFilter === 'archived'}
+				onclick={() => (statusFilter = 'archived')}
+			>
+				Archivées
+			</button>
+			<button
+				type="button"
+				class="filter-btn"
+				class:active={statusFilter === 'expired'}
+				onclick={() => (statusFilter = 'expired')}
+			>
+				Expirées
+			</button>
+		</div>
 		<span class="results-count">
 			{filteredStories.length} affichée(s) sur {totalStories}
 		</span>
@@ -136,9 +179,25 @@
 										{story.caption || '(Sans légende)'}
 									</p>
 								</div>
+							{:else if isExpired && story.isArchived}
+								<div class="archived-content-notice">
+									<span class="badge badge-archived">Archive utilisateur</span>
+									<span class="sub-text italic">Story archivée (non consultable par l'administrateur)</span>
+								</div>
+							{:else if isExpired}
+								<div class="expired-content-notice">
+									<span class="badge badge-expired">Story expirée</span>
+									<span class="sub-text italic">Non consultable</span>
+								</div>
 							{:else}
 								<div class="private-content-warning">
-									<span class="badge badge-private">Story privée</span>
+									<span class="badge badge-private">
+										{story.visibility === 'followers'
+											? 'Réservée aux abonnés'
+											: story.visibility === 'group'
+												? 'Réservée au groupe'
+												: 'Story privée'}
+									</span>
 									<span class="sub-text italic">Non partagée avec l'administrateur</span>
 								</div>
 							{/if}
@@ -225,6 +284,37 @@
 		border: 1px solid #d1d5db;
 		border-radius: 8px;
 		font-size: 0.9rem;
+	}
+
+	.filter-group {
+		display: inline-flex;
+		background: #f3f4f6;
+		border-radius: 8px;
+		padding: 2px;
+		gap: 2px;
+	}
+
+	.filter-btn {
+		background: none;
+		border: none;
+		padding: 6px 12px;
+		font-size: 0.82rem;
+		font-weight: 500;
+		color: #4b5563;
+		border-radius: 6px;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.filter-btn:hover {
+		color: #111827;
+	}
+
+	.filter-btn.active {
+		background: #ffffff;
+		color: #111827;
+		font-weight: 600;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 	}
 
 	.results-count {
@@ -341,7 +431,9 @@
 		display: inline-block;
 	}
 
-	.private-content-warning {
+	.private-content-warning,
+	.archived-content-notice,
+	.expired-content-notice {
 		display: flex;
 		flex-direction: column;
 		gap: 4px;

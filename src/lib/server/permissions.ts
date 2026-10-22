@@ -272,22 +272,23 @@ export async function assertCanSeePost(viewerId: string | null | undefined, post
 /**
  * Filtre SQL Drizzle déterminant si `viewerId` est autorisé à voir une story.
  * Par défaut, exige également que la story ne soit pas expirée (`expiresAt > now()`),
- * sauf si `options.allowAuthorExpired` est activé pour l'auteur lui-même.
+ * sauf si `options.ignoreExpiration` est activé ou si `options.allowAuthorExpired` est activé pour l'auteur lui-même.
  */
 export function canSeeStorySql(
 	viewerId?: string | null,
-	options?: { allowAuthorExpired?: boolean }
+	options?: { allowAuthorExpired?: boolean; ignoreExpiration?: boolean }
 ): SQL {
 	const now = new Date();
-	const notExpired =
-		options?.allowAuthorExpired && viewerId
+	const notExpired = options?.ignoreExpiration
+		? undefined
+		: options?.allowAuthorExpired && viewerId
 			? or(eq(stories.authorId, viewerId), gt(stories.expiresAt, now))!
 			: gt(stories.expiresAt, now);
 
 	const isPublic = eq(stories.visibility, 'public');
 
 	if (!viewerId) {
-		return and(notExpired, isPublic)!;
+		return notExpired ? and(notExpired, isPublic)! : isPublic;
 	}
 
 	const isAuthor = eq(stories.authorId, viewerId);
@@ -334,7 +335,11 @@ export function canSeeStorySql(
 	);
 
 	const visibilityMatch = or(isAuthor, isPublic, isNetwork, isConnection, isGroupAllowed)!;
-	return and(notExpired, notBlockedSql(viewerId, stories.authorId), visibilityMatch)!;
+	const conditions: SQL[] = [notBlockedSql(viewerId, stories.authorId), visibilityMatch];
+	if (notExpired) {
+		conditions.push(notExpired);
+	}
+	return and(...conditions)!;
 }
 
 /**
@@ -343,7 +348,7 @@ export function canSeeStorySql(
 export async function assertCanSeeStory(
 	viewerId: string | null | undefined,
 	storyId: string,
-	options?: { allowAuthorExpired?: boolean }
+	options?: { allowAuthorExpired?: boolean; ignoreExpiration?: boolean }
 ) {
 	if (!isValidUuid(storyId)) {
 		throw error(404, 'Story introuvable.');

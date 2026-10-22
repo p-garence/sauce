@@ -21,10 +21,14 @@ import { canSeeStorySql } from '$lib/server/permissions';
  * Règle de visibilité SQL des stories pour un spectateur donné.
  *
  * @param viewerId Identifiant de l'utilisateur consultant la story
+ * @param options Options de filtrage (ex: ignoreExpiration)
  * @returns Clause SQL de filtrage
  */
-export function canSeeStory(viewerId?: string | null): SQL {
-	return canSeeStorySql(viewerId);
+export function canSeeStory(
+	viewerId?: string | null,
+	options?: { allowAuthorExpired?: boolean; ignoreExpiration?: boolean }
+): SQL {
+	return canSeeStorySql(viewerId, options);
 }
 
 /**
