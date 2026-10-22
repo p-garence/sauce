@@ -5,14 +5,20 @@
 
 	let { form } = $props();
 
-	// Modes : 'login' ou 'register'
-	let mode = $state<'login' | 'register'>('login');
+	// Modes : 'login' | 'register' | 'forgot'
+	let mode = $state<'login' | 'register' | 'forgot'>('login');
 
 	// États de connexion
 	let identifier = $state('');
 	let secretKey = $state('');
 	let error = $state('');
 	let loading = $state(false);
+
+	// États de réinitialisation de mot de passe
+	let forgotEmail = $state('');
+	let forgotLoading = $state(false);
+	let forgotSuccess = $state(false);
+	let forgotError = $state('');
 
 	async function handleLogin(e: Event) {
 		e.preventDefault();
@@ -31,20 +37,45 @@
 		}
 		loading = false;
 	}
+
+	async function handleRequestReset(e: Event) {
+		e.preventDefault();
+		if (!forgotEmail) return;
+		forgotLoading = true;
+		forgotError = '';
+		forgotSuccess = false;
+
+		try {
+			const { error: err } = await authClient.requestPasswordReset({
+				email: forgotEmail
+			});
+			if (err) {
+				forgotError = err.message || 'Une erreur est survenue lors de la demande.';
+			} else {
+				forgotSuccess = true;
+			}
+		} catch {
+			forgotError = 'Une erreur inattendue est survenue. Veuillez réessayer.';
+		} finally {
+			forgotLoading = false;
+		}
+	}
 </script>
 
 <main class="auth-container">
 	<a href={resolve('/')} class="back-link">← Retour à l'accueil</a>
 
 	<div class="auth-box">
-		<div class="tabs">
-			<button type="button" class:active={mode === 'login'} onclick={() => (mode = 'login')}>
-				Connexion
-			</button>
-			<button type="button" class:active={mode === 'register'} onclick={() => (mode = 'register')}>
-				J'ai une clé
-			</button>
-		</div>
+		{#if mode !== 'forgot'}
+			<div class="tabs">
+				<button type="button" class:active={mode === 'login'} onclick={() => (mode = 'login')}>
+					Connexion
+				</button>
+				<button type="button" class:active={mode === 'register'} onclick={() => (mode = 'register')}>
+					J'ai une clé
+				</button>
+			</div>
+		{/if}
 
 		{#if mode === 'login'}
 			<form onsubmit={handleLogin} class="auth-form">
@@ -59,9 +90,63 @@
 					<label for="secretKey">Mot de passe</label>
 					<input id="secretKey" type="password" bind:value={secretKey} required />
 				</div>
+				<div class="forgot-link-wrapper">
+					<button
+						type="button"
+						class="link-btn"
+						onclick={() => {
+							mode = 'forgot';
+							forgotEmail = identifier || '';
+							forgotSuccess = false;
+							forgotError = '';
+						}}
+					>
+						Mot de passe oublié ?
+					</button>
+				</div>
 				<button type="submit" disabled={loading}>
 					{loading ? 'Chargement...' : 'Se connecter'}
 				</button>
+			</form>
+		{:else if mode === 'forgot'}
+			<form onsubmit={handleRequestReset} class="auth-form">
+				<h2>Mot de passe oublié</h2>
+				<p class="desc-text">
+					Saisissez l'adresse e-mail associée à votre compte pour recevoir un lien de réinitialisation.
+				</p>
+
+				{#if forgotSuccess}
+					<div class="info-box">
+						Un e-mail vous a été envoyé si un compte correspond à cette adresse. Pensez à vérifier vos spams.
+					</div>
+				{/if}
+				{#if forgotError}
+					<div class="error-box">{forgotError}</div>
+				{/if}
+
+				{#if !forgotSuccess}
+					<div class="input-group">
+						<label for="forgotEmail">Email</label>
+						<input id="forgotEmail" type="email" bind:value={forgotEmail} required />
+					</div>
+					<button type="submit" disabled={forgotLoading}>
+						{forgotLoading ? 'Envoi en cours...' : 'Envoyer le lien de récupération'}
+					</button>
+				{/if}
+
+				<div class="back-action-wrapper">
+					<button
+						type="button"
+						class="link-btn"
+						onclick={() => {
+							mode = 'login';
+							forgotSuccess = false;
+							forgotError = '';
+						}}
+					>
+						← Revenir à la connexion
+					</button>
+				</div>
 			</form>
 		{:else}
 			<form
@@ -205,5 +290,43 @@
 	}
 	.back-link:hover {
 		color: #1a1a1a;
+	}
+	.forgot-link-wrapper {
+		display: flex;
+		justify-content: flex-end;
+		margin-top: -6px;
+	}
+	.link-btn {
+		background: none;
+		border: none;
+		padding: 0;
+		color: #666;
+		font-size: 0.85rem;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+	.link-btn:hover {
+		color: #1a1a1a;
+	}
+	.back-action-wrapper {
+		display: flex;
+		justify-content: center;
+		margin-top: 8px;
+	}
+	.info-box {
+		background-color: #ecfdf5;
+		color: #065f46;
+		padding: 12px;
+		border-radius: 6px;
+		font-size: 0.9rem;
+		border: 1px solid #a7f3d0;
+		line-height: 1.4;
+	}
+	.desc-text {
+		font-size: 0.9rem;
+		color: #666;
+		line-height: 1.4;
+		margin: 0 0 4px 0;
+		text-align: center;
 	}
 </style>

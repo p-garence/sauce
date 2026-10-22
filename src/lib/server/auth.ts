@@ -7,12 +7,25 @@ import { redirect, error } from '@sveltejs/kit';
 import nodeCrypto from 'node:crypto';
 import { db } from '$lib/server/db';
 import * as schema from './db/schema';
+import { sendPasswordResetEmail } from '$lib/server/email';
 
 export const auth = betterAuth({
 	baseURL: env.ORIGIN,
 	secret: env.BETTER_AUTH_SECRET,
 	database: drizzleAdapter(db, { provider: 'pg', schema: schema }),
-	emailAndPassword: { enabled: true },
+	emailAndPassword: {
+		enabled: true,
+		resetPasswordTokenExpiresIn: 900, // 15 minutes (900 secondes)
+		revokeSessionsOnPasswordReset: true,
+		async sendResetPassword({ user, token }) {
+			const resetUrl = `${env.ORIGIN}/reinitialiser-mot-de-passe?token=${encodeURIComponent(token)}`;
+			await sendPasswordResetEmail({
+				to: user.email,
+				name: user.name || (user as { username?: string }).username || undefined,
+				resetUrl
+			});
+		}
+	},
 	plugins: [
 		sveltekitCookies(getRequestEvent) // make sure this is the last plugin in the array
 	],
