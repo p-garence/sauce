@@ -1,4 +1,4 @@
-import { and, sql, eq, or, desc, ilike, type SQL } from 'drizzle-orm';
+import { and, sql, eq, or, desc, ilike, lt, type SQL } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { posts, postLikes, hiddenPosts, user, follows } from '$lib/server/db/schema';
 import type { PostData } from '$lib/types';
@@ -74,11 +74,11 @@ export async function searchPosts(
 						conditions.push(
 							or(
 								sql`${networkScore} < ${lastScore}`,
-								and(sql`${networkScore} = ${lastScore}`, sql`${posts.likesCount} < ${lastLikes}`),
+								and(sql`${networkScore} = ${lastScore}`, lt(posts.likesCount, lastLikes)),
 								and(
 									sql`${networkScore} = ${lastScore}`,
-									sql`${posts.likesCount} = ${lastLikes}`,
-									sql`${posts.id} < ${cursor.lastId}`
+									eq(posts.likesCount, lastLikes),
+									lt(posts.id, cursor.lastId)
 								)
 							)
 						);
@@ -86,18 +86,14 @@ export async function searchPosts(
 				} else {
 					const parsedDate = new Date(lastSecondary);
 					if (!Number.isNaN(parsedDate.getTime())) {
-						const lastIso = parsedDate.toISOString();
 						conditions.push(
 							or(
 								sql`${networkScore} < ${lastScore}`,
+								and(sql`${networkScore} = ${lastScore}`, lt(posts.createdAt, parsedDate)),
 								and(
 									sql`${networkScore} = ${lastScore}`,
-									sql`${posts.createdAt} < ${lastIso}::timestamptz`
-								),
-								and(
-									sql`${networkScore} = ${lastScore}`,
-									sql`${posts.createdAt} = ${lastIso}::timestamptz`,
-									sql`${posts.id} < ${cursor.lastId}`
+									eq(posts.createdAt, parsedDate),
+									lt(posts.id, cursor.lastId)
 								)
 							)
 						);
@@ -114,22 +110,18 @@ export async function searchPosts(
 				if (!Number.isNaN(lastLikes)) {
 					conditions.push(
 						or(
-							sql`${posts.likesCount} < ${lastLikes}`,
-							and(sql`${posts.likesCount} = ${lastLikes}`, sql`${posts.id} < ${cursor.lastId}`)
+							lt(posts.likesCount, lastLikes),
+							and(eq(posts.likesCount, lastLikes), lt(posts.id, cursor.lastId))
 						)
 					);
 				}
 			} else {
 				const parsedDate = new Date(cleanVal);
 				if (!Number.isNaN(parsedDate.getTime())) {
-					const lastIso = parsedDate.toISOString();
 					conditions.push(
 						or(
-							sql`${posts.createdAt} < ${lastIso}::timestamptz`,
-							and(
-								sql`${posts.createdAt} = ${lastIso}::timestamptz`,
-								sql`${posts.id} < ${cursor.lastId}`
-							)
+							lt(posts.createdAt, parsedDate),
+							and(eq(posts.createdAt, parsedDate), lt(posts.id, cursor.lastId))
 						)
 					);
 				}

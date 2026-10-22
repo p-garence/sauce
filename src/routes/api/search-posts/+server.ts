@@ -17,11 +17,15 @@ export const GET: RequestHandler = async ({ request, url }) => {
 
 	const limit = clampLimit(url.searchParams.get('limit'), POSTS_PER_GRID, MAX_POSTS_PER_REQUEST);
 
-	// On appelle notre nouvelle super fonction !
-	const { posts, nextCursor } = await searchPosts(viewerId, q, sort, limit, cursor);
+	try {
+		const { posts, nextCursor } = await searchPosts(viewerId, q, sort, limit, cursor);
 
-	return json({
-		posts,
-		nextCursor: encodeCursor(nextCursor)
-	});
+		return json({
+			posts,
+			nextCursor: encodeCursor(nextCursor)
+		});
+	} catch (error) {
+		console.error('Erreur search-posts:', error);
+		return json({ error: 'Erreur recherche posts' }, { status: 500 });
+	}
 };
