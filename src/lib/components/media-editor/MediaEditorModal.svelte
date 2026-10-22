@@ -507,20 +507,26 @@
 	.overlay {
 		position: fixed;
 		inset: 0;
-		background: rgba(0, 0, 0, 0.85);
-		z-index: 9999;
+		width: 100%;
+		height: 100dvh;
+		background: rgba(0, 0, 0, 0.95);
+		z-index: var(--z-modal, 9999);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		touch-action: none;
+		overflow: hidden;
 	}
 
 	.modal {
-		background: #111;
+		background: #000;
 		color: #fff;
-		width: 100vw;
-		height: 100vh;
+		width: 100%;
+		height: 100dvh;
+		max-height: 100dvh;
 		display: flex;
 		flex-direction: column;
+		position: relative;
 	}
 
 	@media (min-width: 640px) {
@@ -528,7 +534,7 @@
 			width: 90vw;
 			height: 90vh;
 			max-width: 600px;
-			max-height: 800px;
+			max-height: 850px;
 			border-radius: 12px;
 			overflow: hidden;
 		}
@@ -538,9 +544,16 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 16px;
+		padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px;
 		background: #000;
 		border-bottom: 1px solid #222;
+		flex-shrink: 0;
+	}
+
+	@media (min-width: 640px) {
+		header {
+			padding: 16px;
+		}
 	}
 
 	header h3 {
@@ -566,20 +579,29 @@
 
 	.workspace {
 		flex: 1;
+		min-height: 0;
+		min-width: 0;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: #1a1a1a;
+		background: #111;
 		overflow: hidden;
 	}
 
 	.controls {
-		padding: 16px;
+		padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
 		background: #000;
 		display: flex;
 		flex-direction: column;
 		gap: 12px;
 		border-top: 1px solid #222;
+		flex-shrink: 0;
+	}
+
+	@media (min-width: 640px) {
+		.controls {
+			padding: 16px;
+		}
 	}
 
 	.video-info {

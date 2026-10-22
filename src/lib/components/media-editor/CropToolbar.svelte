@@ -154,14 +154,19 @@
 		flex-shrink: 0;
 		background: #000;
 		border-top: 1px solid #222;
-		padding-bottom: env(safe-area-inset-bottom, 0px);
 	}
 
 	.standard-controls {
 		display: flex;
 		flex-direction: column;
-		padding: 10px 16px;
+		padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
 		gap: 10px;
+	}
+
+	@media (min-width: 600px) {
+		.standard-controls {
+			padding: 10px 16px;
+		}
 	}
 
 	.slider-row {

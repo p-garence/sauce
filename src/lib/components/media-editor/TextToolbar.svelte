@@ -157,17 +157,21 @@
 		flex-shrink: 0;
 		background: #000;
 		border-top: 1px solid #222;
-		padding-bottom: env(safe-area-inset-bottom, 0px);
 	}
 
 	.text-toolbar {
 		display: flex;
 		flex-direction: column;
-		padding: 10px 14px;
+		padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
 		gap: 10px;
 		background: #111;
-		padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
 		position: relative;
+	}
+
+	@media (min-width: 600px) {
+		.text-toolbar {
+			padding: 10px 14px;
+		}
 	}
 
 	.toolbar-row {

@@ -402,12 +402,18 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 12px 16px;
+		padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px;
 		flex-shrink: 0;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 		background: rgba(0, 0, 0, 0.5);
 		backdrop-filter: blur(10px);
 		-webkit-backdrop-filter: blur(10px);
+	}
+
+	@media (min-width: 640px) {
+		.insta-header {
+			padding: 12px 16px;
+		}
 	}
 
 	.header-title {
