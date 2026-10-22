@@ -75,3 +75,49 @@ description: Spécification des routes API pour récupérer, poster et aimer des
   "action": "like"
 }
 ```
+
+---
+
+## 4. Modifier un commentaire
+
+- **Méthode** : `PATCH`
+- **Chemin** : `/api/comments/[id]`
+- **Authentification** : Requise (Auteur uniquement)
+
+### Requête
+
+```json
+{
+  "content": "Texte mis à jour du commentaire."
+}
+```
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true,
+  "comment": {
+    "id": "c_12345",
+    "content": "Texte mis à jour du commentaire.",
+    "updatedAt": "2026-10-11T03:10:00.000Z"
+  }
+}
+```
+
+---
+
+## 5. Supprimer un commentaire
+
+- **Méthode** : `DELETE`
+- **Chemin** : `/api/comments/[id]`
+- **Authentification** : Requise (Auteur du commentaire ou de la publication)
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true,
+  "deletedId": "c_12345"
+}
+```

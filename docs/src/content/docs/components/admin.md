@@ -11,33 +11,43 @@ L'interface d'administration accessible sur `/admin` est strictement réservée 
 
 ## 2. `AdminUsersTab.svelte`
 
+- **Fichier** : `src/lib/components/admin/AdminUsersTab.svelte`
 - **Domaine** : Administration & Utilisateurs
-- **Responsabilité(s)** : Recherche d'utilisateurs, consultation des rôles, promotion/rétrogradation d'administrateurs, suspension de compte ou réinitialisation d'accès.
+- **Responsabilité(s)** : Recherche d'utilisateurs avec filtrage instantané par pseudo/nom/email, modification des quotas d'upload, attribution de clés d'invitation, bannissement réactif ou promotion en administrateur.
 
 ### Props
 
 | Nom | Type | Défaut | Description |
 | :--- | :--- | :--- | :--- |
-| `users` | `AdminUserSummary[]` | `[]` | Liste paginée des utilisateurs enregistrés sur l'instance. |
-| `onupdaterole` | `(userId: string, role: string) => void` | Requis | Callback lors du changement de rôle d'un membre. |
+| `users` | `AdminUserItem[]` | `[]` | Liste complète des utilisateurs enregistrés sur l'instance. |
 
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
-- **APIs réseau** : `PATCH /api/admin/users/[id]`.
+- **APIs réseau** : Actions de formulaire SvelteKit `?/banUser`, `?/updateUserQuota`, `?/addInvites`, `?/deleteUser`.
 
 ---
 
 ## 3. `AdminPostsTab.svelte` & `AdminStoriesTab.svelte`
 
+- **Fichier** : `src/lib/components/admin/AdminPostsTab.svelte` & `src/lib/components/admin/AdminStoriesTab.svelte`
 - **Domaine** : Modération
-- **Responsabilité(s)** : Surveillance des publications récentes et stories éphémères, filtrage par statut ou auteur, et suppression définitive de contenus litigieux avec suppression immédiate des fichiers médias associés.
+- **Responsabilité(s)** : Surveillance des publications récentes et stories éphémères de l'instance, pagination dynamique par curseur, filtrage textuel et suppression définitive avec purge immédiate des fichiers médias physiques.
 
-### Props
+### Props (`AdminPostsTab.svelte`)
 
 | Nom | Type | Défaut | Description |
 | :--- | :--- | :--- | :--- |
-| `items` | `Array<AdminPost \| AdminStory>` | `[]` | Liste des contenus pour modération. |
-| `ondelete` | `(id: string) => void` | Requis | Déclenchement de la suppression admin. |
+| `initialPosts` | `AdminPostItem[]` | Requis | Liste initiale des publications chargées. |
+| `initialCursor` | `string \| null` | Requis | Curseur de pagination pour le chargement infini. |
+| `totalPosts` | `number` | Requis | Compteur global de publications sur l'instance. |
+
+### Props (`AdminStoriesTab.svelte`)
+
+| Nom | Type | Défaut | Description |
+| :--- | :--- | :--- | :--- |
+| `initialStories` | `AdminStoryItem[]` | Requis | Liste initiale des stories chargées. |
+| `initialCursor` | `string \| null` | Requis | Curseur de pagination pour le chargement des stories suivantes. |
+| `totalStories` | `number` | Requis | Compteur global de stories sur l'instance. |
 
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
@@ -47,20 +57,37 @@ L'interface d'administration accessible sur `/admin` est strictement réservée 
 
 ## 4. `AdminStorageTab.svelte`
 
+- **Fichier** : `src/lib/components/admin/AdminStorageTab.svelte`
 - **Domaine** : Maintenance Système
-- **Responsabilité(s)** : Diagnostic global du disque serveur, taille cumulée des dossiers `uploads/` et `postgres/`, détection et nettoyage des fichiers orphelins (médias non référencés depuis plus de 24h).
+- **Responsabilité(s)** : Diagnostic global de l'espace disque du serveur (libre vs occupé), taille cumulée des dossiers `uploads/` et `postgres/`, détection et nettoyage des fichiers orphelins (médias non référencés depuis plus de 24h).
+
+### Props
+
+| Nom | Type | Défaut | Description |
+| :--- | :--- | :--- | :--- |
+| `serverStorage` | `ServerStorageData \| null` | Requis | Métriques physiques de l'espace disque serveur. |
+| `orphans` | `OrphanMediaData \| null` | Requis | Liste et poids des fichiers médias non référencés. |
 
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
-- **APIs réseau** : Endpoints de diagnostic serveur.
+- **APIs réseau** : `GET /api/admin/media/orphans` et `DELETE /api/admin/media/orphans`.
 
 ---
 
 ## 5. `AdminAppearance.svelte`
 
+- **Fichier** : `src/lib/components/admin/AdminAppearance.svelte`
 - **Domaine** : Personnalisation Globale
-- **Responsabilité(s)** : Gestion des packs d'émojis et icônes officiels fournis par défaut à l'ensemble des membres de l'instance, avec activation globale en un clic.
+- **Responsabilité(s)** : Panneau d'administration de l'apparence orchestrant la sélection des packs d'icônes par défaut (`AdminIconsManager`) et l'activation collective des packs d'émojis officiels (`AdminEmojisManager`).
+
+### Props
+
+| Nom | Type | Défaut | Description |
+| :--- | :--- | :--- | :--- |
+| `instanceSettings` | `InstanceSettingsData` | Requis | Paramètres globaux de l'instance. |
+| `publishedIconSets` | `IconSet[]` | `[]` | Packs d'icônes publics disponibles sur l'instance. |
+| `publishedEmojiSets` | `EmojiSet[]` | `[]` | Packs d'émojis publics disponibles sur l'instance. |
 
 ### Dépendances
-- **Stores & États globaux** : Met à jour la configuration d'apparence de l'instance.
+- **Stores & États globaux** : Configuration d'apparence globale.
 - **APIs réseau** : `POST /api/admin/appearance`.

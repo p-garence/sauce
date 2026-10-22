@@ -1,96 +1,145 @@
 ---
 title: Endpoints Messagerie & Chat
-description: Spécification des routes API pour créer des conversations et échanger des messages privés.
+description: Spécification des routes API pour initialiser des conversations directes ou de groupe, charger l'historique et gérer les messages.
 ---
 
-## 1. Créer ou récupérer une discussion
-
-- **Méthode** : `POST`
-- **Chemin** : `/api/chats`
-- **Authentification** : Requise
-
-### Requête pour un chat direct
-
-```json
-{
-  "type": "direct",
-  "participantIds": ["user_target_id"]
-}
-```
-
-*Remarque : Si une discussion directe existe déjà entre ces deux utilisateurs, elle est automatiquement retournée sans créer de doublon.*
-
-### Requête pour un chat de groupe
-
-```json
-{
-  "type": "group",
-  "name": "Équipe Projet",
-  "participantIds": ["user_1", "user_2", "user_3"]
-}
-```
-
----
-
-## 2. Envoyer un message
-
-- **Méthode** : `POST`
-- **Chemin** : `/api/chats/[id]/messages`
-- **Authentification** : Requise (Participant au chat uniquement)
-
-### Requête
-
-```json
-{
-  "content": "Bonjour ! Le projet avance très bien."
-}
-```
-
-### Réponse (201 Created)
-
-```json
-{
-  "id": "msg_abc123",
-  "chatId": "chat_xyz789",
-  "senderId": "user_current",
-  "content": "Bonjour ! Le projet avance très bien.",
-  "createdAt": "2026-10-11T03:15:00.000Z"
-}
-```
-
----
-
-## 3. Discussions non lues & Sourdines
+## 1. Ouvrir une discussion directe
 
 - **Méthode** : `GET`
-- **Chemin** : `/api/chat/unread`
+- **Chemin** : `/api/chat/direct/[username]`
 - **Authentification** : Requise
 
-Retourne la liste des IDs des discussions contenant des messages non lus (excluant les discussions en sourdine sauf si l'utilisateur y a été `@mentionné`), ainsi que la liste des discussions actuellement en sourdine.
+Récupère la conversation directe existante entre l'utilisateur connecté et le destinataire ciblé, ou en crée une nouvelle sans doublon.
 
 ### Réponse (200 OK)
 
 ```json
 {
-  "unreadChatIds": ["chat_1", "chat_2"],
-  "mutedChatIds": ["chat_3"]
+  "chatId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 }
 ```
 
 ---
 
-## 4. Suggestions de mentions & Statuts de permission
+## 2. Créer un groupe de discussion
 
-### Suggestions autocomplétion
-- **Méthode** : `GET`
-- **Chemin** : `/api/mention-suggestions?q=[query]&chatId=[optionalChatId]`
+- **Méthode** : `POST`
+- **Chemin** : `/api/chat/group/create`
 - **Authentification** : Requise
 
-Retourne jusqu'à 8 suggestions d'utilisateurs autorisant les mentions (`allowMentions !== false`), en priorisant les membres de la discussion (si `chatId` est fourni), puis les abonnements, puis le reste de la communauté.
+### Requête
 
-### Vérification de permission
+```json
+{
+  "name": "Équipe Projet",
+  "description": "Discussion technique du projet",
+  "participantIds": ["u_123", "u_456"]
+}
+```
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true,
+  "chatId": "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+}
+```
+
+---
+
+## 3. Charger l'historique des messages
+
 - **Méthode** : `GET`
-- **Chemin** : `/api/mention-status?usernames=alice,bob`
+- **Chemin** : `/api/chat/history?chatId={id}&before={isoTimestamp}&limit=30`
+- **Authentification** : Requise (Membre du salon uniquement)
+
+Alimente la pagination ascendante lors du défilement vers le haut dans la conversation.
+
+### Réponse (200 OK)
+
+```json
+{
+  "messages": [
+    {
+      "id": "msg_123",
+      "senderId": "u_abc",
+      "content": "Bonjour à tous !",
+      "mediaUrl": null,
+      "audioUrl": null,
+      "createdAt": "2026-10-10T14:30:00.000Z",
+      "isRead": true
+    }
+  ],
+  "hasMore": false
+}
+```
+
+---
+
+## 4. Marquer une conversation comme lue
+
+- **Méthode** : `POST`
+- **Chemin** : `/api/chat/read`
 - **Authentification** : Requise
 
-Retourne un dictionnaire `{ [username]: boolean }` indiquant si chaque compte mentionné est valide et autorise les mentions. Si `false`, les liens associés ne doivent pas être cliquables.
+### Requête
+
+```json
+{
+  "chatId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+## 5. Modifier un message envoyé
+
+- **Méthode** : `PATCH`
+- **Chemin** : `/api/chat/messages/[id]`
+- **Authentification** : Requise (Auteur du message uniquement)
+
+### Requête
+
+```json
+{
+  "content": "Texte corrigé du message"
+}
+```
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true,
+  "message": {
+    "id": "msg_123",
+    "content": "Texte corrigé du message",
+    "updatedAt": "2026-10-10T14:35:00.000Z"
+  }
+}
+```
+
+---
+
+## 6. Supprimer un message envoyé
+
+- **Méthode** : `DELETE`
+- **Chemin** : `/api/chat/messages/[id]`
+- **Authentification** : Requise (Auteur du message uniquement)
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true
+}
+```

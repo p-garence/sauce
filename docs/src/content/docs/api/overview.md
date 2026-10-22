@@ -42,26 +42,38 @@ Si le cookie de session est absent ou invalide, une réponse standard `401 Unaut
 
 | Domaine | Méthode & Chemin | Description |
 | :--- | :--- | :--- |
-| **Publications** | `GET /api/feed` | Récupère le flux de posts selon le filtre actif |
-| | `POST /api/posts` | Crée une nouvelle publication |
-| | `PATCH /api/posts/[id]/visibility` | Modifie la visibilité d'un post |
-| | `DELETE /api/posts/[id]` | Supprime définitivement un post |
-| | `POST /api/posts/[id]/like` | Aime un post |
-| | `DELETE /api/posts/[id]/like` | Retire le like d'un post |
-| | `POST /api/posts/[id]/hide` | Masque un post du flux |
+| **Publications** | `GET /api/feed-posts` | Récupère le flux de posts selon le filtre actif et curseur |
+| | `GET /api/posts/[id]` | Consulte une publication unique avec contrôle d'accès |
+| | `PATCH /api/posts/[id]/visibility` | Modifie la visibilité d'un post (`public`, `followers`, `group`, `private`) |
+| | `DELETE /api/posts/[id]` | Supprime définitivement un post et ses médias physiques |
+| | `POST /api/like` | Like ou unlike une publication (`action: 'like' \| 'unlike'`) |
+| | `GET /api/posts/[id]/likes` | Liste les utilisateurs ayant aimé une publication |
+| | `POST /api/posts/hide` | Masque ou démasque un post du flux (`action: 'hide' \| 'unhide'`) |
 | **Abonnements** | `GET /api/follow?targetId=...` | Vérifie l'état de suivi d'un utilisateur |
-| | `POST /api/follow` | S'abonne, se désabonne ou annule une demande |
+| | `POST /api/follow` | S'abonne, se désabonne ou annule une demande en attente |
 | | `POST /api/follow/manage` | Accepte ou refuse une demande d'abonnement reçue |
 | **Commentaires**| `GET /api/comments?postId=...` | Liste les commentaires paginés d'un post |
-| | `POST /api/comments` | Publie un commentaire ou une réponse |
+| | `POST /api/comments` | Publie un commentaire racine ou une réponse ciblée |
+| | `PATCH /api/comments/[id]` | Modifie le texte d'un commentaire existant |
+| | `DELETE /api/comments/[id]` | Supprime définitivement un commentaire |
 | | `POST /api/comments/like` | Like ou unlike un commentaire |
-| **Messagerie** | `POST /api/chats` | Crée une discussion directe ou de groupe |
-| | `POST /api/chats/[id]/messages` | Envoie un message dans une discussion |
+| **Messagerie** | `GET /api/chat/direct/[username]` | Récupère ou ouvre une discussion directe |
+| | `POST /api/chat/group/create` | Crée un groupe de discussion |
+| | `GET /api/chat/history` | Charge l'historique antérieur des messages d'un chat |
+| | `POST /api/chat/read` | Marque les messages d'un chat comme lus |
+| | `PATCH /api/chat/messages/[id]` | Modifie le contenu d'un message envoyé |
+| | `DELETE /api/chat/messages/[id]` | Supprime un message envoyé |
 | **Utilisateurs** | `GET /api/users/[username]` | Profil public selon préférences de visibilité |
+| | `GET /api/users/block` | Liste les profils bloqués |
+| | `POST /api/users/block` | Bloque ou débloque un profil utilisateur |
 | **Administration** | `GET /api/admin/stats` | Métriques globales du serveur |
-| | `GET /api/admin/users` | Liste des utilisateurs enregistrés |
-| | `PATCH /api/admin/users/[id]` | Modération (ban, rôle, nom, invitations) |
+| | `GET /api/admin/users` | Liste paginée des utilisateurs enregistrés |
+| | `PATCH /api/admin/users/[id]` | Modération (ban, rôle, nom, quota, invitations) |
 | | `DELETE /api/admin/users/[id]` | Suppression d'un compte utilisateur |
+| | `DELETE /api/admin/posts` | Purge admin d'une publication litigieuse |
+| | `DELETE /api/admin/stories` | Purge admin d'une story |
+| | `GET /api/admin/media/orphans` | Diagnostic des médias orphelins sur le disque |
+| | `DELETE /api/admin/media/orphans` | Nettoyage des fichiers orphelins non référencés |
 | **Instances & Réseau** | `GET /api/instances` | Répertoire des instances et serveurs |
 | | `POST /api/instances` | Enregistrement d'un domaine d'instance |
 | | `PATCH /api/instances/[id]` | Modification du niveau de confiance |

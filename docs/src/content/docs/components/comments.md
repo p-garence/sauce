@@ -5,59 +5,63 @@ description: Fiches de référence du système de discussion, réponses hiérarc
 
 ## 1. `CommentSection.svelte`
 
+- **Fichier** : `src/lib/components/comments/CommentSection.svelte`
 - **Domaine** : Commentaires
-- **Responsabilité(s)** : Volet repliable affichant la liste des commentaires d'un post, la pagination des pages et l'intégration du compositeur.
+- **Responsabilité(s)** : Volet dépliable affichant la liste paginée et triée des commentaires d'une publication (`CommentItem`), gérant le chargement par curseur et intégrant le compositeur de saisie (`CommentComposer`).
 
 ### Props
 
 | Nom | Type | Défaut | Description |
 | :--- | :--- | :--- | :--- |
-| `postId` | `string` | Requis | Identifiant du post parent. |
-| `isOpen` | `boolean` | `false` | État d'ouverture du volet de commentaires. |
-| `currentUserId` | `string \| null` | `null` | Utilisateur authentifié. |
-| `onclose` | `() => void` | `undefined` | Callback lors de la fermeture du volet. |
+| `postId` | `string` | Requis | Identifiant de la publication ciblée. |
+| `isOpen` | `boolean` | `false` | État d'ouverture du volet (liable via `bind:isOpen`). |
+| `onCommentAdded` | `() => void` | `undefined` | Callback lors de la publication réussie d'un nouveau commentaire. |
+| `onCommentDeleted` | `(deletedCount: number) => void` | `undefined` | Callback lors de la suppression d'un commentaire (actualise le compteur du post). |
 
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
-- **APIs réseau** : `GET /api/comments?postId=...` pour le chargement des commentaires.
+- **APIs réseau** : `GET /api/comments?postId=...` pour charger les pages de commentaires.
 
 ---
 
 ## 2. `CommentBaseItem.svelte`
 
+- **Fichier** : `src/lib/components/comments/CommentBaseItem.svelte`
 - **Domaine** : Commentaires
-- **Responsabilité(s)** : Rendu unifié d'un commentaire ou d'une réponse : avatar, auteur, horodatage, contenu texte riche avec mentions, message vocal, like optimiste, édition inline et suppression.
+- **Responsabilité(s)** : Composant atomique factorisé pour un commentaire racine ou une réponse : affichage de l'auteur avec lien profil, date relative (`FormattedDate`), texte enrichi (`RichContent`), likes optimistes, édition inline avec mentions et émojis, et suppression.
 
 ### Props
 
 | Nom | Type | Défaut | Description |
 | :--- | :--- | :--- | :--- |
-| `comment` | `CommentData` | Requis | Données du commentaire (id, auteur, texte, vocal, likes, date). |
-| `currentUserId` | `string \| null` | `null` | Identifiant de l'utilisateur courant. |
-| `isReply` | `boolean` | `false` | Adapte l'indentation et la taille des boutons pour une sous-réponse. |
-| `onreply` | `(comment: CommentData) => void` | `undefined` | Invoqué lors du clic sur le bouton Répondre. |
-| `ondelete` | `(id: string) => void` | `undefined` | Notification de suppression du commentaire. |
+| `comment` | `CommentData` | Requis | Données du commentaire (liable via `bind:comment`). |
+| `isReply` | `boolean` | `false` | Vrai s'il s'agit d'une réponse imbriquée de second niveau. |
+| `onReply` | `() => void` | `undefined` | Callback déclenché pour répondre spécifiquement à ce commentaire. |
+| `onDeleted` | `(id: string, softDeleted?: boolean) => void` | `undefined` | Callback notifié après suppression effective. |
+| `onUpdated` | `(updated: CommentData) => void` | `undefined` | Callback notifié après modification du texte. |
+| `children` | `Snippet` | `undefined` | Fente pour intégrer la liste récursive des sous-réponses. |
 
 ### Dépendances
-- **Stores & États globaux** : Aucun état global
-- **APIs réseau** : `POST/DELETE /api/comments/like`, `PATCH/DELETE /api/comments/[id]`.
+- **Stores & États globaux** : Lit l'utilisateur connecté via `page.state.sessionUser`.
+- **APIs réseau** : `POST /api/comments/like`, `PATCH /api/comments/[id]`, `DELETE /api/comments/[id]`.
 
 ---
 
 ## 3. `CommentComposer.svelte`
 
+- **Fichier** : `src/lib/components/comments/CommentComposer.svelte`
 - **Domaine** : Commentaires
-- **Responsabilité(s)** : Formulaire de saisie de commentaire ou réponse avec support du texte enrichi, suggestions de mentions `@`, sélecteur d'émojis et enregistrement d'un mémo vocal.
+- **Responsabilité(s)** : Formulaire de rédaction de commentaire ou de réponse avec support du texte enrichi, suggestions de mentions `@utilisateur`, sélecteur d'émojis personnalisés et envoi asynchrone sans rechargement.
 
 ### Props
 
 | Nom | Type | Défaut | Description |
 | :--- | :--- | :--- | :--- |
 | `postId` | `string` | Requis | Identifiant de la publication cible. |
-| `replyTo` | `CommentData \| null` | `null` | Commentaire parent auquel l'utilisateur répond, ou `null` pour un commentaire racine. |
-| `onsubmit` | `(newComment: CommentData) => void` | Requis | Callback notifié à la création effective du commentaire. |
-| `oncancelreply` | `() => void` | `undefined` | Annule le mode réponse en cours. |
+| `replyTo` | `{ id: string; username: string } \| null` | `null` | Cible de réponse active (liable via `bind:replyTo`). |
+| `onCommentSubmitted` | `(added: CommentData) => void` | `undefined` | Callback déclenché à l'ajout réussi d'un commentaire. |
+| `onCancelReply` | `() => void` | `undefined` | Callback pour annuler le mode réponse ciblé. |
 
 ### Dépendances
-- **Stores & États globaux** : Aucun état global
-- **APIs réseau** : `POST /api/comments` et `POST /api/upload` (pour le message vocal).
+- **Stores & États globaux** : `page.state.sessionUser` pour vérifier l'authentification.
+- **APIs réseau** : `POST /api/comments` pour la création du commentaire.

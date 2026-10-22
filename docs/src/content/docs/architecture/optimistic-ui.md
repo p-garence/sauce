@@ -84,8 +84,10 @@ Voici l'implémentation complète utilisée dans l'application :
 
     try {
       // B. Appel API en arrière-plan
-      const res = await fetch(`/api/posts/${postId}/like`, {
-        method: targetLiked ? 'POST' : 'DELETE'
+      const res = await fetch('/api/like', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId, action: targetLiked ? 'like' : 'unlike' })
       });
 
       if (!res.ok) throw new Error('Échec API');

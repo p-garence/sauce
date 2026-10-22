@@ -17,10 +17,13 @@ export default defineConfig({
 			},
 			sidebar: [
 				{
-					label: 'Bienvenue',
+					label: 'Guides & Procédures',
 					items: [
-						{ label: 'Introduction', slug: 'index' },
-						{ label: 'Démarrage rapide', slug: 'getting-started' }
+						{ label: 'Démarrage rapide', slug: 'index' },
+						{ label: 'Créer un composant UI', slug: 'guides/nouveau-composant' },
+						{ label: 'Ajouter un service backend', slug: 'guides/nouveau-service' },
+						{ label: 'Tests E2E & Débogage Playwright', slug: 'guides/tests-e2e' },
+						{ label: 'Base de données & Migrations', slug: 'guides/database' }
 					]
 				},
 				{
@@ -56,15 +59,6 @@ export default defineConfig({
 						{ label: 'Utilisateurs (/api/users)', slug: 'api/users' },
 						{ label: 'Administration (/api/admin)', slug: 'api/admin' },
 						{ label: 'Instances Réseau (/api/instances)', slug: 'api/instances' }
-					]
-				},
-				{
-					label: 'Guides & Procédures',
-					items: [
-						{ label: 'Créer un composant UI', slug: 'guides/nouveau-composant' },
-						{ label: 'Ajouter un service backend', slug: 'guides/nouveau-service' },
-						{ label: 'Tests E2E & Débogage Playwright', slug: 'guides/tests-e2e' },
-						{ label: 'Base de données & Migrations', slug: 'guides/database' }
 					]
 				}
 			]

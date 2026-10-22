@@ -5,6 +5,7 @@ description: Fiches de référence des composants d'interface génériques et r�
 
 ## 1. `Modal.svelte`
 
+- **Fichier** : `src/lib/components/ui/Modal.svelte`
 - **Domaine** : UI Générique
 - **Responsabilité(s)** : Boîte de dialogue accessible avec fond obscurci, fermeture au clic extérieur et touche Échap.
 
@@ -26,7 +27,7 @@ description: Fiches de référence des composants d'interface génériques et r�
 
 ```svelte
 <script lang="ts">
-  import Modal from '$lib/components/Modal.svelte';
+  import Modal from '$lib/components/ui/Modal.svelte';
 
   let showModal = $state(false);
 </script>
@@ -45,6 +46,7 @@ description: Fiches de référence des composants d'interface génériques et r�
 
 ## 2. `SearchInput.svelte`
 
+- **Fichier** : `src/lib/components/ui/SearchInput.svelte`
 - **Domaine** : Navigation & Recherche
 - **Responsabilité(s)** : Saisie de recherche avec délai d'attente (debounce), bouton de réinitialisation et indicateur d'activité.
 
@@ -66,7 +68,7 @@ description: Fiches de référence des composants d'interface génériques et r�
 
 ```svelte
 <script lang="ts">
-  import SearchInput from '$lib/components/SearchInput.svelte';
+  import SearchInput from '$lib/components/ui/SearchInput.svelte';
 
   let query = $state('');
   let isSearching = $state(false);
@@ -83,6 +85,7 @@ description: Fiches de référence des composants d'interface génériques et r�
 
 ## 3. `Icon.svelte`
 
+- **Fichier** : `src/lib/components/ui/Icon.svelte`
 - **Domaine** : Affichage Graphique
 - **Responsabilité(s)** : Rendu d'icônes vectorielles natives Lucide ou personnalisées issues de packs SVG.
 
@@ -94,6 +97,16 @@ description: Fiches de référence des composants d'interface génériques et r�
 | `size` | `number` | `20` | Taille en pixels de l'icône (largeur et hauteur). |
 | `class` | `string` | `""` | Classes CSS personnalisées à injecter sur le conteneur SVG. |
 
+### Exemple d'utilisation
+
+```svelte
+<script lang="ts">
+  import Icon from '$lib/components/ui/Icon.svelte';
+</script>
+
+<Icon name="heart" size={24} class="text-red-500" />
+```
+
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
 - **APIs réseau** : Aucune
@@ -102,6 +115,7 @@ description: Fiches de référence des composants d'interface génériques et r�
 
 ## 4. `EmojiButton.svelte` & `EmojiPickerPopover.svelte`
 
+- **Fichier** : `src/lib/components/ui/EmojiButton.svelte` & `src/lib/components/ui/EmojiPickerPopover.svelte`
 - **Domaine** : Édition & Saisie
 - **Responsabilité(s)** : Déclencheur et panneau flottant pour la sélection d'émojis Unicode ou personnalisés.
 
@@ -120,6 +134,7 @@ description: Fiches de référence des composants d'interface génériques et r�
 
 ## 5. `VoiceMessagePlayer.svelte`
 
+- **Fichier** : `src/lib/components/chat/VoiceMessagePlayer.svelte`
 - **Domaine** : Médias & Audio
 - **Responsabilité(s)** : Lecture de messages audio avec visualisation de la forme d'onde, durée et contrôle de lecture.
 
@@ -138,6 +153,7 @@ description: Fiches de référence des composants d'interface génériques et r�
 
 ## 6. `VisibilitySelect.svelte`
 
+- **Fichier** : `src/lib/components/post/VisibilitySelect.svelte`
 - **Domaine** : Publication & Confidentialité
 - **Responsabilité(s)** : Sélecteur d'audience pour les publications et stories (`public`, `followers`, `group`, `private`).
 
@@ -152,3 +168,25 @@ description: Fiches de référence des composants d'interface génériques et r�
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
 - **APIs réseau** : Aucune
+
+---
+
+## 7. `NotificationMenu.svelte` & `NotificationItem.svelte`
+
+- **Fichier** : `src/lib/components/navigation/NotificationMenu.svelte` & `src/lib/components/navigation/NotificationItem.svelte`
+- **Domaine** : Navigation & Temps Réel
+- **Responsabilité(s)** : Menu déroulant affichant le badge de notifications non lues, l'agrégation intelligente par sujet/entité et le marquage comme lu en temps réel via Server-Sent Events (SSE).
+
+### Props (`NotificationMenu.svelte`)
+Composant autonome connecté au flux global `globalStreamState.svelte.ts`. Ne requiert aucune prop obligatoire.
+
+### Props (`NotificationItem.svelte`)
+
+| Nom | Type | Défaut | Description |
+| :--- | :--- | :--- | :--- |
+| `item` | `GroupedNotification` | Requis | Notification agrégée ou unitaire à afficher. |
+| `onread` | `(id: string) => void` | `undefined` | Callback lors du marquage comme lu. |
+
+### Dépendances
+- **Stores & États globaux** : `globalStreamState.svelte.ts` pour la synchronisation du flux SSE.
+- **APIs réseau** : `POST /api/notifications/read` pour acquitter les notifications.

@@ -46,3 +46,57 @@ Les données retournées respectent strictement les paramètres `profileVisibili
   "error": "Utilisateur introuvable"
 }
 ```
+
+---
+
+## 2. Lister les utilisateurs bloqués
+
+- **Méthode** : `GET`
+- **Chemin** : `/api/users/block`
+- **Authentification** : Requise
+
+Retourne la liste complète des profils bloqués par l'utilisateur connecté.
+
+### Réponse (200 OK)
+
+```json
+{
+  "blockedUsers": [
+    {
+      "id": "u_blocked_1",
+      "username": "spammer",
+      "name": "Compte Bloqué",
+      "image": null,
+      "blockedAt": "2026-10-10T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## 3. Bloquer ou débloquer un utilisateur
+
+- **Méthode** : `POST`
+- **Chemin** : `/api/users/block`
+- **Authentification** : Requise
+
+### Requête
+
+```json
+{
+  "targetUserId": "u_blocked_1",
+  "action": "block"
+}
+```
+
+Valeurs autorisées pour `action` : `"block"` ou `"unblock"`.
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true,
+  "action": "block"
+}
+```

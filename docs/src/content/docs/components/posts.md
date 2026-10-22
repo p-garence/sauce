@@ -5,74 +5,77 @@ description: Fiches de référence des composants de l'écosystème de publicati
 
 ## 1. `Post.svelte`
 
+- **Fichier** : `src/lib/components/post/Post.svelte`
 - **Domaine** : Publications
-- **Responsabilité(s)** : Carte principale de publication orchestrant l'en-tête utilisateur, le carrousel de slides, la légende textuelle et la barre d'interactions.
+- **Responsabilité(s)** : Carte principale de publication orchestrant l'en-tête auteur (`PostHeader`), le carrousel multimédia (`PostCarousel`), le texte enrichi (`RichContent`), la barre d'actions (`PostActionsBar`) et le volet de commentaires (`CommentSection`).
 
 ### Props
 
 | Nom | Type | Défaut | Description |
 | :--- | :--- | :--- | :--- |
-| `post` | `FeedPost` | Requis | Objet complet de la publication (auteur, diapositives, compteurs, visibilité). |
-| `currentUserId` | `string \| null` | `null` | Identifiant de l'utilisateur connecté pour les permissions d'interaction. |
-| `ondelete` | `(id: string) => void` | `undefined` | Callback lors de la suppression de la publication. |
+| `post` | `PostData` | Requis | Objet complet de la publication (auteur, carrousel, compteurs, visibilité). |
 
 ### Dépendances
-- **Stores & États globaux** : Aucun état global
-- **APIs réseau** : Aucune directe (déléguée aux sous-composants `LikeButton` et `ActionMenu`).
+- **Stores & États globaux** : `page.data.sessionUser` pour l'utilisateur connecté, `postState.svelte.ts` et `feedMemory.svelte.ts`.
+- **APIs réseau** : `POST /api/like`, `POST /api/posts/hide`, `POST /api/posts/view` (tracking de vue).
 
 ---
 
 ## 2. `PostHeader.svelte`
 
+- **Fichier** : `src/lib/components/post/PostHeader.svelte`
 - **Domaine** : Publications
-- **Responsabilité(s)** : En-tête affichant l'avatar de l'auteur, son nom, le lien vers le profil, l'indicateur de visibilité et le menu contextuel d'actions.
+- **Responsabilité(s)** : En-tête affichant l'avatar de l'auteur, son nom, le lien vers le profil, l'indicateur ou sélecteur de visibilité (`VisibilitySelect`), le bouton d'abonnement rapide (`FollowButton`) et le menu contextuel (`ActionMenu`).
 
 ### Props
 
 | Nom | Type | Défaut | Description |
 | :--- | :--- | :--- | :--- |
-| `author` | `PostAuthor` | Requis | Profil de l'auteur (id, username, name, avatarUrl). |
-| `createdAt` | `string \| Date` | Requis | Date de publication pour l'horodatage relatif. |
-| `visibility` | `string` | `"public"` | Niveau de visibilité (`public`, `followers`, `group`). |
-| `isOwner` | `boolean` | `false` | Indique si l'utilisateur courant est l'auteur du post. |
-| `onaction` | `(action: string) => void` | `undefined` | Callback lors d'une action du menu (masquer, modifier, supprimer). |
+| `post` | `PostData` | Requis | Données de la publication (auteur, date, visibilité). |
+| `isLoggedIn` | `boolean` | Requis | Indique si le visiteur est connecté. |
+| `isOwnPost` | `boolean` | Requis | Vrai si le visiteur est l'auteur de la publication. |
+| `isSystemPost` | `boolean` | Requis | Vrai s'il s'agit d'un message officiel du système. |
+| `postActions` | `MenuAction[]` | Requis | Liste des actions disponibles dans le menu contextuel. |
+| `onVisibilityChange` | `(newVis: PostVisibility, newGroupId: string \| null) => void` | `undefined` | Callback lors de la modification de la visibilité par l'auteur. |
 
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
-- **APIs réseau** : Aucune
+- **APIs réseau** : Aucune directe
 
 ---
 
 ## 3. `PostCarousel.svelte`
 
+- **Fichier** : `src/lib/components/post/PostCarousel.svelte`
 - **Domaine** : Publications
-- **Responsabilité(s)** : Défilement horizontal fluide des diapositives multimédias avec lecture automatique des vidéos au défilement et pagination.
+- **Responsabilité(s)** : Carrousel horizontal fluide supportant les diapositives texte enrichi et les médias (images et vidéos avec lecture automatique via `IntersectionObserver`).
 
 ### Props
 
 | Nom | Type | Défaut | Description |
 | :--- | :--- | :--- | :--- |
-| `slides` | `PostSlide[]` | Requis | Tableau des diapositives (images, vidéos ou diapositives texte stylisées). |
-| `aspectRatio` | `string` | `"1/1"` | Ratio d'affichage contraint du carrousel. |
+| `mediaUrls` | `CarouselItem[]` | Requis | Tableau des diapositives (texte avec style/alignement, image WebP ou vidéo MP4). |
 
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
-- **APIs réseau** : Streaming des médias
+- **APIs réseau** : Streaming des médias via `/media/[filename]`.
 
 ---
 
 ## 4. `CarouselSlideEditor.svelte`
 
+- **Fichier** : `src/lib/components/post/editor/CarouselSlideEditor.svelte`
 - **Domaine** : Édition & Création
-- **Responsabilité(s)** : Édition visuelle de la diapositive sélectionnée (saisie de texte enrichi avec mentions, sélecteur d'émojis, alignement du texte ou prévisualisation de média).
+- **Responsabilité(s)** : Édition et prévisualisation de la slide active d'une publication (panneau de texte enrichi avec mentions, émojis et alignement, ou média photo/vidéo avec raccourci vers la retouche).
 
 ### Props
 
 | Nom | Type | Défaut | Description |
 | :--- | :--- | :--- | :--- |
-| `slide` | `EditableSlide` | Requis | Objet de la slide courante en cours de modification. |
-| `onupdate` | `(updated: EditableSlide) => void` | Requis | Callback notifié à chaque changement de texte, média ou style. |
-| `onopenmediaeditor` | `() => void` | `undefined` | Déclenche l'ouverture de l'éditeur de dessin et filtres. |
+| `item` | `EditorCarouselItem` | Requis | Slide active en cours d'édition (texte, couleur, image ou vidéo). |
+| `isSimpleText` | `boolean` | `false` | Vrai si la publication ne contient qu'un unique panneau textuel simple. |
+| `onRemove` | `() => void` | `undefined` | Callback pour supprimer la slide courante. |
+| `onEditMedia` | `() => void` | `undefined` | Ouvre l'éditeur de dessin, filtres et recadrage multimédia. |
 
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
@@ -82,18 +85,19 @@ description: Fiches de référence des composants de l'écosystème de publicati
 
 ## 5. `CarouselThumbnailsBar.svelte`
 
+- **Fichier** : `src/lib/components/post/editor/CarouselThumbnailsBar.svelte`
 - **Domaine** : Édition & Création
-- **Responsabilité(s)** : Barre horizontale affichant les miniatures des diapositives, l'indicateur actif, le réordonnancement et les boutons d'ajout de slides (texte ou média).
+- **Responsabilité(s)** : Barre horizontale affichant les miniatures des diapositives, l'indicateur de slide active, le réordonnancement (déplacement gauche/droite) et les boutons d'ajout de slides (texte ou média).
 
 ### Props
 
 | Nom | Type | Défaut | Description |
 | :--- | :--- | :--- | :--- |
-| `slides` | `EditableSlide[]` | Requis | Liste ordonnée des diapositives créées. |
-| `activeIndex` | `number` | `0` | Index de la slide actuellement sélectionnée. |
-| `onselect` | `(index: number) => void` | Requis | Notification du changement de slide active. |
-| `onaddslide` | `(type: 'text' \| 'media') => void` | Requis | Ajout d'une nouvelle diapositive. |
-| `onremoveslide` | `(index: number) => void` | Requis | Suppression de la diapositive à l'index spécifié. |
+| `items` | `EditorCarouselItem[]` | Requis | Liste ordonnée de toutes les diapositives du carrousel. |
+| `currentIndex` | `number` | `0` | Index de la slide actuellement active (liable via `bind:currentIndex`). |
+| `onMove` | `(index: number, direction: 'left' \| 'right') => void` | `undefined` | Callback optionnel pour réordonner une diapositive. |
+| `onAddMedia` | `() => void` | `undefined` | Déclenche le sélecteur de fichier pour ajouter une photo ou vidéo. |
+| `onAddText` | `() => void` | `undefined` | Ajoute un nouveau panneau de texte stylisé. |
 
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
@@ -103,17 +107,21 @@ description: Fiches de référence des composants de l'écosystème de publicati
 
 ## 6. `AssetPackPickerModal.svelte`
 
+- **Fichier** : `src/lib/components/post/editor/AssetPackPickerModal.svelte`
 - **Domaine** : Publications & Personnalisation
-- **Responsabilité(s)** : Modale permettant à l'auteur de lier un de ses packs d'icônes ou d'émojis à une publication pour que les autres utilisateurs puissent le découvrir et l'enregistrer.
+- **Responsabilité(s)** : Modale à onglets permettant à l'auteur d'attacher un de ses packs d'icônes vectorielles ou d'émojis personnalisés à une publication afin de le partager avec la communauté.
 
 ### Props
 
 | Nom | Type | Défaut | Description |
 | :--- | :--- | :--- | :--- |
-| `isOpen` | `boolean` | `false` | Contrôle d'ouverture de la modale. |
-| `selectedAssetId` | `string \| null` | `null` | Identifiant du pack sélectionné. |
-| `onselect` | `(pack: AssetPackInfo) => void` | Requis | Callback lors du choix d'un pack. |
+| `isOpen` | `boolean` | Requis | État d'ouverture de la modale. |
+| `userOwnedIconSets` | `IconSet[]` | `[]` | Liste des packs d'icônes créés par l'utilisateur. |
+| `userOwnedEmojiSets` | `EmojiSet[]` | `[]` | Liste des collections d'émojis créées par l'utilisateur. |
+| `onSelectIconSet` | `(set: IconSet) => void` | Requis | Callback lors du choix d'un pack d'icônes. |
+| `onSelectEmojiSet` | `(set: EmojiSet) => void` | Requis | Callback lors du choix d'un pack d'émojis. |
+| `onClose` | `() => void` | Requis | Callback de fermeture de la modale. |
 
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
-- **APIs réseau** : Appel `GET /api/emoji-sets` et `GET /api/icon-sets` pour lister les packs du créateur.
+- **APIs réseau** : Aucune directe (les listes sont fournies en props par le contrôleur de page).

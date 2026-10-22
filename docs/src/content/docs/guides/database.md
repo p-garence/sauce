@@ -13,18 +13,18 @@ Les schémas sont organisés par domaine dans `src/lib/server/db/schema/` et ré
 
 | Fichier de schéma | Entités gérées |
 | :--- | :--- |
-| `posts.ts` | Publications, carrousels de diapositives, visibilité, compteurs de vues et likes |
-| `stories.ts` | Stories éphémères (24h), vues horodatées, likes |
-| `comments.ts` | Commentaires et réponses imbriquées, likes de commentaires |
-| `chat.ts` | Conversations directes et de groupe, participants, messages texte/médias/vocaux |
-| `groups.ts` | Groupes d'amis personnalisés et adhésions |
-| `follows.ts` | Abonnements, demandes d'abonnements, blocages d'utilisateurs |
-| `notifications.ts` | Notifications in-app, statuts de lecture, type d'événement |
-| `emojis.ts` | Packs d'émojis personnalisés, favoris, bibliothèques partagées |
-| `icons.ts` | Packs d'icônes vectorielles personnalisées, sélections d'interface |
-| `flux.ts` | Flux personnalisés (blended feeds), sources et abonnements RSS |
-| `instanceSettings.ts` | Configuration globale de l'instance (inscriptions, quotas, visibilité) |
-| `auth.schema.ts` | Tables gérées par Better-Auth (`user`, `session`, `account`, `verification`) |
+| `posts.ts` | Publications (`posts`), commentaires (`comments`), likes (`postLikes`, `commentLikes`), masquages (`hiddenPosts`), vues (`postViews`) |
+| `stories.ts` | Stories éphémères (`stories`), vues horodatées (`storyViews`), likes (`storyLikes`) |
+| `chats.ts` | Conversations (`chats`), participants et permissions (`chatParticipants`), messages (`messages`) |
+| `social.ts` | Abonnements (`follows`), blocages (`userBlocks`), alertes in-app (`notifications`), fédération (`instances`, `userInstanceConsents`) |
+| `groups.ts` | Groupes d'amis personnalisés (`userGroups`), adhésions (`userGroupMembers`), visibilité ciblée (`postGroupVisibility`) |
+| `feeds.ts` | Flux personnalisés (`userFeeds`), algorithmes et mixage blend (`algorithms`, `userAlgorithms`) |
+| `emojis.ts` | Packs d'émojis personnalisés (`emojiSets`), packs enregistrés (`userSavedEmojiSets`) |
+| `icons.ts` | Packs d'icônes vectorielles SVG (`iconSets`), packs enregistrés (`userSavedIconSets`) |
+| `tags.ts` | Répertoire des hashtags (`tags`), liaison aux publications (`postTags`) |
+| `push.ts` | Abonnements Web Push VAPID (`pushSubscriptions`) |
+| `instanceSettings.ts` | Configuration globale de l'instance (`instanceSettings`) |
+| `auth.ts` | Tables Better-Auth (`user`, `session`, `account`, `verification`) et clés d'invitation (`inviteKeys`) |
 
 ---
 

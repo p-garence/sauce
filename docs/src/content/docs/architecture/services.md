@@ -9,14 +9,18 @@ Toute la logique métier et les requêtes SQL du backend sont regroupées dans l
 
 ## Vue d'Ensemble des Services
 
-| Service | Emplacement | Responsabilités Principales |
+| Service / Module | Emplacement | Responsabilités Principales |
 | :--- | :--- | :--- |
+| **`posts/`** | `src/lib/server/posts/` | Requêtes de flux composites (`blend.ts`), tri SQL (`sorting.ts`), publication (`publish.ts`), recherche (`search.ts`) |
+| **`stories/`** | `src/lib/server/stories/` | Cycle de vie des stories (`crud.ts`), flux d'histoires (`feed.ts`), vues et likes (`interactions.ts`) |
+| **`chat/`** | `src/lib/server/chat/` | Gestion des salons et participants (`conversations.ts`), messages texte/vocaux/médias (`messages.ts`) |
+| **`media/`** | `src/lib/server/media/` | Contrôle d'accès sécurisé fail-close (`access.ts`), optimisation Sharp/FFmpeg (`process.ts`), purge (`cleanup.ts`) |
+| **`rss/`** | `src/lib/server/rss/` | Analyseur XML (`parser.ts`), fetcher protégé SSRF (`fetcher.ts`) et synchronisation périodique (`sync.ts`) |
+| **`permissions.ts`** | `src/lib/server/permissions.ts` | Règles transversales de confidentialité, assertCanSeePost, canAccessPostMedia, blocage global |
 | **`follows.ts`** | `src/lib/server/follows.ts` | Relations d'abonnements, validation de demandes, compteurs atomiques, amis en commun |
 | **`comments.ts`** | `src/lib/server/comments.ts` | Commentaires de publications, réponses hiérarchiques, pagination et likes |
-| **`posts.ts`** | `src/lib/server/posts.ts` | Requêtes de flux, visibilité fine (`canSeePost`), curseurs de pagination, publication |
-| **`chat.ts`** | `src/lib/server/chat.ts` | Discussions directes et de groupe, dédoublonnage strict, participants, messages |
-| **`notifications.ts`** | `src/lib/server/notifications.ts` | Envoi d'alertes temps réel et persistance des notifications |
-| **`media.ts`** | `src/lib/server/media.ts` | Traitement Sharp, compression, formats WebP et stockage sur disque |
+| **`flux.ts`** | `src/lib/server/flux.ts` | Configuration des flux personnalisés, parsing des formulaires et gestion des abonnements RSS |
+| **`notifications.ts`** | `src/lib/server/notifications.ts` | Envoi d'alertes temps réel (SSE), persistance et badge non-lu |
 | **`auth.ts`** | `src/lib/server/auth.ts` | Validation de sessions Better-Auth et guards d'API (`requireApiSession`) |
 
 ---

@@ -1,6 +1,6 @@
 ---
 title: Endpoints Publications
-description: Spécification des routes API dédiées à la gestion des posts, à la visibilité et aux interactions.
+description: Spécification des routes API dédiées à la gestion des posts, à la visibilité, au flux et aux interactions.
 ---
 
 ## 1. Consulter un post
@@ -10,9 +10,9 @@ description: Spécification des routes API dédiées à la gestion des posts, à
 - **Authentification** : Optionnelle
 
 ### Règles d'Accès
-Applique automatiquement la fonction `canSeePost` :
-- Si la requête est un utilisateur non connecté ou une instance externe : retourne le post uniquement si `visibility === "public"`.
-- Si connecté : accessible selon le cercle (auteur, réseau, abonnés acceptés ou groupe privé).
+Applique automatiquement la fonction `assertCanSeePost` :
+- Si la requête est un utilisateur anonyme : accessible uniquement si `visibility === "public"`.
+- Si connecté : accessible selon le cercle d'audience (auteur, abonnés acceptés ou groupe privé).
 
 ### Réponse (200 OK)
 
@@ -31,8 +31,7 @@ Applique automatiquement la fonction `canSeePost` :
       "id": "u_abc",
       "username": "david",
       "name": "David",
-      "avatar": "/uploads/david.webp",
-      "isFollowing": false
+      "avatar": "/uploads/david.webp"
     },
     "isLiked": false,
     "isHidden": false
@@ -57,7 +56,7 @@ Applique automatiquement la fonction `canSeePost` :
 }
 ```
 
-Valeurs possibles pour `visibility` : `"public"`, `"network"`, `"followers"`, `"group"`.
+Valeurs autorisées pour `visibility` : `"public"`, `"followers"`, `"group"`, `"private"`.
 
 ### Réponse (200 OK)
 
@@ -71,52 +70,22 @@ Valeurs possibles pour `visibility` : `"public"`, `"network"`, `"followers"`, `"
 
 ---
 
-## 2. Liker / Déliker un post
-
-- **Méthode** : `POST` / `DELETE`
-- **Chemin** : `/api/posts/[id]/like`
-- **Authentification** : Requise
-
-### Réponse (200 OK)
-
-```json
-{
-  "success": true
-}
-```
-
----
-
-## 3. Masquer / Afficher un post
+## 3. Liker ou Déliker une publication
 
 - **Méthode** : `POST`
-- **Chemin** : `/api/posts/[id]/hide`
+- **Chemin** : `/api/like`
 - **Authentification** : Requise
 
 ### Requête
 
 ```json
 {
-  "hide": true
+  "postId": "p_12345",
+  "action": "like"
 }
 ```
 
-### Réponse (200 OK)
-
-```json
-{
-  "success": true,
-  "hidden": true
-}
-```
-
----
-
-## 4. Supprimer un post
-
-- **Méthode** : `DELETE`
-- **Chemin** : `/api/posts/[id]`
-- **Authentification** : Requise (Auteur ou Admin)
+Valeurs autorisées pour `action` : `"like"` ou `"unlike"`.
 
 ### Réponse (200 OK)
 
@@ -125,3 +94,83 @@ Valeurs possibles pour `visibility` : `"public"`, `"network"`, `"followers"`, `"
   "success": true
 }
 ```
+
+---
+
+## 4. Obtenir les mentions "J'aime" d'un post
+
+- **Méthode** : `GET`
+- **Chemin** : `/api/posts/[id]/likes`
+- **Authentification** : Requise
+
+Retourne la liste des utilisateurs ayant aimé la publication, en excluant les personnes bloquées.
+
+### Réponse (200 OK)
+
+```json
+[
+  {
+    "id": "u_abc",
+    "username": "claire",
+    "name": "Claire",
+    "image": "/uploads/claire.webp",
+    "likedAt": "2026-10-10T15:05:00.000Z",
+    "isFollowing": true
+  }
+]
+```
+
+---
+
+## 5. Masquer ou Démasquer un post
+
+- **Méthode** : `POST`
+- **Chemin** : `/api/posts/hide`
+- **Authentification** : Requise
+
+### Requête
+
+```json
+{
+  "postId": "p_12345",
+  "action": "hide"
+}
+```
+
+Valeurs autorisées pour `action` : `"hide"` ou `"unhide"`.
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+## 6. Supprimer définitivement un post
+
+- **Méthode** : `DELETE`
+- **Chemin** : `/api/posts/[id]`
+- **Authentification** : Requise (Auteur ou Rôle Admin)
+
+Supprime l'entrée en base de données et nettoie les fichiers médias physiques associés s'ils ne sont plus référencés.
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true
+}
+```
+
+---
+
+## 7. Récupérer le flux de publications
+
+- **Méthode** : `GET`
+- **Chemin** : `/api/feed-posts?feedId={id}&cursor={cursor}&limit=10`
+- **Authentification** : Optionnelle
+
+Alimente le scroll infini des publications selon la configuration du flux actif.

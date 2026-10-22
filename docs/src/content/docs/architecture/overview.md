@@ -39,15 +39,36 @@ social_front/
 │   └── astro.config.mjs       # Configuration Starlight
 ├── src/
 │   ├── lib/
-│   │   ├── client/            # Logique & hooks réactifs côté client (useFeed, searchMemory, etc.)
-│   │   ├── components/        # Composants UI découpés & réutilisables (Modal, Post, LikeButton, etc.)
-│   │   │   └── settings/      # Composants dédiés aux pages de réglages
-│   │   ├── server/            # Services métier backend stricts (chat, follows, comments, posts, db)
-│   │   │   └── db/            # Schéma Drizzle SQL & initialisation du pool PostgreSQL
-│   │   ├── constants.ts       # Constantes partagées (pagination, tailles, seuils)
-│   │   └── types.ts           # Types TypeScript globaux (PostData, ChatMessage, UserGroup)
+│   │   ├── client/            # Logique réactive côté client (api.ts, feedMemory, emojiStore, mediaEditorState)
+│   │   ├── components/        # Composants UI modulaires découpés par domaine métier :
+│   │   │   ├── admin/         # Panneau d'administration modulaire (onglets, statistiques, modération)
+│   │   │   ├── chat/          # Messagerie instantanée, lecteur vocal et bulles de messages
+│   │   │   ├── comments/      # Volet de commentaires, compositeur et rendu hiérarchique
+│   │   │   ├── media-editor/  # Modale de retouche d'image, dessin canvas et styles typographiques
+│   │   │   ├── navigation/    # Menus de navigation, notifications en temps réel
+│   │   │   ├── post/          # Publication, carrousels de diapositives, en-têtes et éditeur
+│   │   │   ├── profile/       # En-tête de profil, onglets et bouton d'abonnement
+│   │   │   ├── settings/      # Panneaux de paramètres (stockage, flux, émojis, icônes, confidentialité)
+│   │   │   ├── stories/       # Lecteur immersif de stories et compositeur éphémère
+│   │   │   └── ui/            # Primitives transversales (Modal, SearchInput, Icon, EmojiButton)
+│   │   ├── server/            # Modules de logique métier backend stricts :
+│   │   │   ├── admin/         # Seeding et maintenance d'administration
+│   │   │   ├── chat/          # Gestion des conversations, messages et autorisations
+│   │   │   ├── customPacks/   # Helpers partagés pour les packs d'émojis et d'icônes
+│   │   │   ├── db/            # Schémas Drizzle SQL modularisés & pool PostgreSQL
+│   │   │   ├── media/         # Traitement d'upload Sharp/FFmpeg, contrôle d'accès et purge
+│   │   │   ├── posts/         # Flux composites (blend), tri SQL, publication et recherche
+│   │   │   ├── rss/           # Analyseur XML, fetcher sécurisé et synchronisation
+│   │   │   ├── stories/       # Cycle de vie des stories (crud, flux, interactions)
+│   │   │   ├── auth.ts        # Validation de sessions Better-Auth et guards d'API
+│   │   │   ├── comments.ts    # Service de commentaires et réponses hiérarchiques
+│   │   │   ├── follows.ts     # Abonnements, approbations et relations
+│   │   │   ├── permissions.ts # Contrôle d'accès fail-close et liste de blocage
+│   │   │   └── flux.ts        # Configuration des flux composites et parsing
+│   │   ├── constants.ts       # Constantes partagées (pagination, quotas, limites)
+│   │   └── types.ts           # Types TypeScript globaux
 │   └── routes/                # Pages SvelteKit et endpoints REST (/api/*)
-└── tests/                     # Tests End-to-End Playwright (chat, feed, settings, admin)
+└── tests/                     # Suites de tests automatisés Playwright (e2e) et Vitest (unitaires)
 ```
 
 ## Principes Directeurs
