@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
-
 	/**
 	 * @component AdminDocsTab
 	 * @domain Admin / Docs
@@ -21,7 +19,7 @@
 			</p>
 		</div>
 		<a
-			href={resolve('/wikidev')}
+			href="/wikidev"
 			target="_blank"
 			rel="noopener noreferrer"
 			class="btn btn-blue"

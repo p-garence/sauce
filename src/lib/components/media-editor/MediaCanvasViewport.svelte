@@ -214,6 +214,7 @@
 
 	.photo-stage {
 		position: absolute;
+		inset: 0;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -229,10 +230,14 @@
 	}
 
 	.photo-stage img {
-		max-width: none;
-		max-height: none;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		display: block;
+		transform-origin: center;
 		pointer-events: none;
 		user-select: none;
+		-webkit-user-select: none;
 	}
 
 	.crop-area video {
