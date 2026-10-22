@@ -158,6 +158,8 @@
 		display: flex;
 		overflow-x: auto;
 		scroll-snap-type: x mandatory;
+		overscroll-behavior-x: contain;
+		-webkit-overflow-scrolling: touch;
 		scrollbar-width: none;
 	}
 	.post-carousel::-webkit-scrollbar {
@@ -166,6 +168,7 @@
 	.carousel-item {
 		flex: 0 0 100%;
 		scroll-snap-align: center;
+		scroll-snap-stop: always;
 		max-height: 70vh;
 		aspect-ratio: 4/5;
 		display: flex;
