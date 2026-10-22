@@ -3,7 +3,8 @@ import { requireSession, generateInviteCode } from '$lib/server/auth';
 import { getBlockedUsersList, unblockUserGlobal } from '$lib/server/permissions';
 import { db } from '$lib/server/db';
 import { inviteKeys, user } from '$lib/server/db/schema';
-import { eq, count } from 'drizzle-orm';
+import { eq, count, and, ne, sql } from 'drizzle-orm';
+import { isValidUsername } from '$lib/utils/validation';
 import { getUserFeeds, createUserFeed, updateUserFeed, deleteUserFeed, parseFeedFormData } from '$lib/server/flux';
 import { createUserGroup, updateUserGroup, deleteUserGroup } from '$lib/server/groups';
 import { bulkUpdateVisibility, makePostsConnections, makePostsPrivate } from '$lib/server/posts';
@@ -43,6 +44,169 @@ export const load: PageServerLoad = async ({ parent }) => {
 };
 
 export const actions: Actions = {
+	updateUsername: async ({ request }) => {
+		const session = await requireSession(request);
+		const data = await request.formData();
+		const rawUsername = data.get('username')?.toString().trim();
+
+		if (!rawUsername) {
+			return fail(400, { usernameError: "Le nom d'utilisateur est obligatoire." });
+		}
+
+		if (!isValidUsername(rawUsername)) {
+			return fail(400, {
+				usernameError:
+					"Le pseudo doit comporter entre 3 et 30 caractères (lettres, chiffres et tirets bas uniquement)."
+			});
+		}
+
+		const [currentUser] = await db
+			.select()
+			.from(user)
+			.where(eq(user.id, session.user.id))
+			.limit(1);
+
+		if (!currentUser) return fail(404, { usernameError: 'Utilisateur introuvable.' });
+
+		if (rawUsername.toLowerCase() !== (currentUser.username || '').toLowerCase()) {
+			const [existingUsername] = await db
+				.select({ id: user.id })
+				.from(user)
+				.where(and(sql`LOWER(${user.username}) = LOWER(${rawUsername})`, ne(user.id, session.user.id)))
+				.limit(1);
+
+			if (existingUsername) {
+				return fail(400, { usernameError: "Ce nom d'utilisateur est déjà pris." });
+			}
+		}
+
+		await db
+			.update(user)
+			.set({
+				username: rawUsername,
+				updatedAt: new Date()
+			})
+			.where(eq(user.id, session.user.id));
+
+		return { usernameSuccess: true, usernameMessage: "Nom d'utilisateur mis à jour avec succès." };
+	},
+
+	updateEmail: async ({ request }) => {
+		const session = await requireSession(request);
+		const data = await request.formData();
+		const rawEmail = data.get('email')?.toString().trim().toLowerCase();
+
+		if (!rawEmail) {
+			return fail(400, { emailError: "L'adresse email est obligatoire." });
+		}
+
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(rawEmail)) {
+			return fail(400, { emailError: "L'adresse email n'est pas valide." });
+		}
+
+		const [currentUser] = await db
+			.select()
+			.from(user)
+			.where(eq(user.id, session.user.id))
+			.limit(1);
+
+		if (!currentUser) return fail(404, { emailError: 'Utilisateur introuvable.' });
+
+		if (rawEmail !== currentUser.email.toLowerCase()) {
+			const [existingEmail] = await db
+				.select({ id: user.id })
+				.from(user)
+				.where(and(sql`LOWER(${user.email}) = LOWER(${rawEmail})`, ne(user.id, session.user.id)))
+				.limit(1);
+
+			if (existingEmail) {
+				return fail(400, { emailError: "Cette adresse email est déjà associée à un autre compte." });
+			}
+		}
+
+		await db
+			.update(user)
+			.set({
+				email: rawEmail,
+				updatedAt: new Date()
+			})
+			.where(eq(user.id, session.user.id));
+
+		return { emailSuccess: true, emailMessage: 'Adresse email mise à jour avec succès.' };
+	},
+	updateAccountInfo: async ({ request }) => {
+		const session = await requireSession(request);
+		const data = await request.formData();
+		const rawUsername = data.get('username')?.toString().trim();
+		const rawEmail = data.get('email')?.toString().trim().toLowerCase();
+
+		if (!rawUsername) {
+			return fail(400, { accountError: "Le nom d'utilisateur (pseudo) est obligatoire." });
+		}
+		if (!rawEmail) {
+			return fail(400, { accountError: "L'adresse email est obligatoire." });
+		}
+
+		if (!isValidUsername(rawUsername)) {
+			return fail(400, {
+				accountError:
+					"Le pseudo doit comporter entre 3 et 30 caractères (lettres, chiffres et tirets bas uniquement)."
+			});
+		}
+
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(rawEmail)) {
+			return fail(400, { accountError: "L'adresse email n'est pas valide." });
+		}
+
+		const [currentUser] = await db
+			.select()
+			.from(user)
+			.where(eq(user.id, session.user.id))
+			.limit(1);
+
+		if (!currentUser) return fail(404, { accountError: 'Utilisateur introuvable.' });
+
+		// Vérification disponibilité du pseudo
+		if (rawUsername.toLowerCase() !== (currentUser.username || '').toLowerCase()) {
+			const [existingUsername] = await db
+				.select({ id: user.id })
+				.from(user)
+				.where(and(sql`LOWER(${user.username}) = LOWER(${rawUsername})`, ne(user.id, session.user.id)))
+				.limit(1);
+
+			if (existingUsername) {
+				return fail(400, { accountError: "Ce nom d'utilisateur est déjà utilisé par un autre compte." });
+			}
+		}
+
+		// Vérification disponibilité de l'email
+		if (rawEmail !== currentUser.email.toLowerCase()) {
+			const [existingEmail] = await db
+				.select({ id: user.id })
+				.from(user)
+				.where(and(sql`LOWER(${user.email}) = LOWER(${rawEmail})`, ne(user.id, session.user.id)))
+				.limit(1);
+
+			if (existingEmail) {
+				return fail(400, { accountError: "Cette adresse email est déjà associée à un autre compte." });
+			}
+		}
+
+		// Mise à jour directe sans vérification par mail
+		await db
+			.update(user)
+			.set({
+				username: rawUsername,
+				email: rawEmail,
+				updatedAt: new Date()
+			})
+			.where(eq(user.id, session.user.id));
+
+		return { accountSuccess: true, accountMessage: 'Vos identifiants ont été mis à jour avec succès.' };
+	},
+
 	generateKey: async ({ request }) => {
 		const session = await requireSession(request);
 

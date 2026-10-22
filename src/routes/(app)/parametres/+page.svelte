@@ -66,7 +66,7 @@
 
 	<main class="tab-content">
 		{#if activeTab === 'general'}
-			<SettingsGeneral user={data.user} />
+			<SettingsGeneral user={data.user} {form} />
 		{:else if activeTab === 'privacy'}
 			<SettingsPrivacy
 				user={data.user}

@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { isValidUuid, parseTagsInput, UUID_REGEX } from './validation';
+import {
+	isValidUuid,
+	parseTagsInput,
+	UUID_REGEX,
+	isValidUsername
+} from './validation';
 
 describe('validation utils', () => {
 	it('validates UUID correctly', () => {
@@ -16,5 +21,15 @@ describe('validation utils', () => {
 		expect(parseTagsInput(['tag1', '#tag2', ''])).toEqual(['tag1', 'tag2']);
 		expect(parseTagsInput(null)).toEqual([]);
 		expect(parseTagsInput('')).toEqual([]);
+	});
+
+	it('validates usernames correctly', () => {
+		expect(isValidUsername('alice')).toBe(true);
+		expect(isValidUsername('bob_123')).toBe(true);
+		expect(isValidUsername('login')).toBe(true); // Autorisé car profils isolés sous /profil/[username]
+		expect(isValidUsername('a_')).toBe(false); // Trop court (< 3)
+		expect(isValidUsername('alice with space')).toBe(false);
+		expect(isValidUsername('alice@domain')).toBe(false);
+		expect(isValidUsername('a'.repeat(31))).toBe(false); // Trop long (> 30)
 	});
 });

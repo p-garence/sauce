@@ -3,7 +3,35 @@ title: Paramètres & Personnalisation
 description: Fiches de référence des panneaux de gestion de compte, quotas médias, flux, groupes et assets.
 ---
 
-## 1. `SettingsMedia.svelte` & `StorageQuotaCard.svelte`
+## 1. `SettingsGeneral.svelte` & `SettingsRow.svelte`
+
+- **Fichiers** : `src/lib/components/settings/SettingsGeneral.svelte` & `src/lib/components/settings/ui/SettingsRow.svelte`
+- **Domaine** : Paramètres & Compte
+- **Responsabilité(s)** : Affichage protégé des identifiants (pseudo et e-mail du compte) sous forme de lignes informatives avec boutons d'édition dédiés, formulaires de mise à jour isolés (`?/updateUsername`, `?/updateEmail`), réglage des comportements de l'application (double-tap pour aimer), raccourci d'administration et déconnexion.
+
+### Props (`SettingsGeneral.svelte`)
+
+| Nom | Type | Défaut | Description |
+| :--- | :--- | :--- | :--- |
+| `user` | `User` | Requis | Données de l'utilisateur connecté (`username`, `email`, `doubleTap`, `role`). |
+| `form` | `FormResult` | `undefined` | Retours de soumission des actions SvelteKit (`usernameSuccess`, `emailSuccess`, etc.). |
+
+### Props (`SettingsRow.svelte`)
+
+| Nom | Type | Défaut | Description |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Requis | Libellé ou titre du paramètre. |
+| `value` | `string` | `undefined` | Valeur actuelle affichée. |
+| `description` | `string` | `undefined` | Description ou précision sous le titre. |
+| `action` | `Snippet` | `undefined` | Bouton d'action ou élément interactif affiché à droite. |
+
+### Dépendances
+- **APIs réseau** : `GET /api/users/check-username?username=...` pour la vérification de disponibilité en temps réel.
+- **Actions SvelteKit** : `?/updateUsername`, `?/updateEmail`, `?/updateAccountInfo` et `?/updateBehaviorToggles`.
+
+---
+
+## 2. `SettingsMedia.svelte` & `StorageQuotaCard.svelte`
 
 - **Fichier** : `src/lib/components/settings/SettingsMedia.svelte` & `src/lib/components/settings/media/StorageQuotaCard.svelte`
 - **Domaine** : Paramètres & Stockage

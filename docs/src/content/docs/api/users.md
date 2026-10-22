@@ -100,3 +100,39 @@ Valeurs autorisées pour `action` : `"block"` ou `"unblock"`.
   "action": "block"
 }
 ```
+
+---
+
+## 4. Vérifier la disponibilité d'un pseudo
+
+- **Méthode** : `GET`
+- **Chemin** : `/api/users/check-username?username=[pseudo]`
+- **Authentification** : Requise
+
+Vérifie en temps réel si un nom d'utilisateur est syntaxiquement valide (3 à 30 caractères alphanumériques ou underscore) et disponible en base de données (insensible à la casse).
+
+### Paramètres d'URL
+
+| Paramètre | Type | Requis | Description |
+| :--- | :--- | :--- | :--- |
+| `username` | `string` | Oui | Pseudo à tester. |
+
+### Réponse : Pseudo disponible (200 OK)
+
+```json
+{
+  "available": true
+}
+```
+
+*(Si le pseudo testé est le pseudo actuel de l'utilisateur connecté, la réponse inclut également `"isCurrent": true"`).*
+
+### Réponse : Pseudo indisponible ou invalide (200 OK)
+
+```json
+{
+  "available": false,
+  "reason": "Ce nom d'utilisateur est déjà pris."
+}
+```
+

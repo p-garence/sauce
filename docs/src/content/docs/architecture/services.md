@@ -21,6 +21,7 @@ Toute la logique métier et les requêtes SQL du backend sont regroupées dans l
 | **`comments.ts`** | `src/lib/server/comments.ts` | Commentaires de publications, réponses hiérarchiques, pagination et likes |
 | **`flux.ts`** | `src/lib/server/flux.ts` | Configuration des flux personnalisés, parsing des formulaires et gestion des abonnements RSS |
 | **`notifications.ts`** | `src/lib/server/notifications.ts` | Envoi d'alertes temps réel (SSE), persistance et badge non-lu |
+| **`email.ts`** | `src/lib/server/email.ts` | Service SMTP Nodemailer, fallback console dev, rate limiting mémoire et templates HTML |
 | **`auth.ts`** | `src/lib/server/auth.ts` | Validation de sessions Better-Auth et guards d'API (`requireApiSession`) |
 
 ---
@@ -111,3 +112,18 @@ export function canSeePost(viewerId: string): SQL {
   );
 }
 ```
+
+---
+
+## Service d'E-mails & Récupération de Mot de Passe
+
+Le module `src/lib/server/email.ts` gère l'envoi de messages transactionnels (récupération de mot de passe, alertes système) :
+
+* **Transporteur SMTP universel** : Compatible avec tout serveur SMTP externe (relais hébergeur OVH/Infomaniak, Resend, Brevo, Zaclys, etc.) via les variables `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `SMTP_FROM`.
+* **Mode Fallback Développeur** : En l'absence de variable `SMTP_HOST` (environnement local), les e-mails ne sont pas bloquants et le lien de réinitialisation s'imprime directement dans le terminal.
+* **Rate Limiting Mémoire** : Protection anti-spam limitant à 3 demandes par tranche de 15 minutes par adresse e-mail.
+* **Sécurité Better-Auth** :
+  * Génération de jetons cryptographiques à usage unique expirant en 15 minutes (stockés dans la table `verification`).
+  * Révocation automatique des autres sessions actives de l'utilisateur lors du changement de mot de passe (`revokeSessionsOnPasswordReset: true`).
+  * Construction du lien basée exclusivement sur la variable d'environnement fixe `env.ORIGIN` (neutralisation du *Password Reset Poisoning* via injection d'en-tête `Host`).
+

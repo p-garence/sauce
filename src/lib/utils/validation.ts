@@ -19,6 +19,18 @@ export function isValidUuid(id: unknown): id is string {
 }
 
 /**
+ * Expression régulière validant un nom d'utilisateur (3 à 30 caractères alphanumériques ou underscore).
+ */
+export const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,30}$/;
+
+/**
+ * Vérifie si la valeur fournie respecte le format d'un nom d'utilisateur.
+ */
+export function isValidUsername(username: unknown): username is string {
+	return typeof username === 'string' && USERNAME_REGEX.test(username);
+}
+
+/**
  * Parse et normalise une entrée de tags (tableau JSON ou liste séparée par des virgules/espaces).
  * Supprime les symboles `#` initiaux et les entrées vides.
  *
