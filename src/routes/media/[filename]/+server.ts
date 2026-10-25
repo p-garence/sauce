@@ -54,6 +54,7 @@ function isInlineSafeExtension(ext: string): boolean {
 	const lower = ext.toLowerCase();
 	return [
 		'.webp',
+		'.svg',
 		'.jpg',
 		'.jpeg',
 		'.png',

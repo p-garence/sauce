@@ -394,21 +394,22 @@
 	.emoji-btn {
 		width: 36px;
 		height: 36px;
-		border-radius: 6px;
-		border: 1px solid transparent;
+		border-radius: 50%;
+		border: none;
 		background: none;
-		padding: 3px;
+		padding: 4px;
 		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		transition: transform 0.1s, background-color 0.1s, border-color 0.1s;
+		transition:
+			transform 0.12s ease,
+			background-color 0.12s ease;
 	}
 
 	.emoji-btn:hover {
-		background: #f1f5f9;
-		border-color: #cbd5e1;
-		transform: scale(1.15);
+		background: rgba(14, 165, 233, 0.12);
+		transform: scale(1.2);
 		z-index: 2;
 	}
 

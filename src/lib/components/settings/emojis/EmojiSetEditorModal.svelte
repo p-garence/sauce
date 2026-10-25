@@ -346,11 +346,16 @@
 		flex-direction: column;
 		align-items: center;
 		padding: 8px;
-		background: #f8fafc;
-		border: 1px solid #e2e8f0;
+		background: transparent;
+		border: 1px solid #f1f5f9;
 		border-radius: 10px;
 		position: relative;
 		gap: 4px;
+		transition: background 0.15s ease;
+	}
+
+	.emoji-card:hover {
+		background: #f8fafc;
 	}
 
 	.emoji-preview-img {

@@ -13,19 +13,28 @@
 	import { resolve } from '$app/paths';
 	import type { EmojiItem } from '$lib/types';
 	import Icon from '$lib/components/ui/Icon.svelte';
+	import Emoji from '$lib/components/ui/Emoji.svelte';
 
 	interface Props {
 		/** Liste des emojis favoris de l'utilisateur */
 		favoriteEmojis?: EmojiItem[];
 		/** Alignement de la barre : côté gauche ou droite */
 		align?: 'left' | 'right';
+		/** Direction d'apparition : au-dessus ('up') ou en-dessous ('down') */
+		direction?: 'up' | 'down';
 		/** Callback quand un emoji est sélectionné */
 		onSelect: (emoji: EmojiItem) => void;
 		/** Callback pour fermer la barre */
 		onClose: () => void;
 	}
 
-	let { favoriteEmojis = [], align = 'left', onSelect, onClose }: Props = $props();
+	let {
+		favoriteEmojis = [],
+		align = 'left',
+		direction = 'up',
+		onSelect,
+		onClose
+	}: Props = $props();
 
 	function handleBackdropClick(e: MouseEvent) {
 		e.stopPropagation();
@@ -35,7 +44,7 @@
 
 <div class="reaction-bar-backdrop" onclick={handleBackdropClick} role="presentation"></div>
 
-<div class="reaction-bar {align}" role="toolbar" aria-label="Réactions rapides">
+<div class="reaction-bar {align} {direction}" role="toolbar" aria-label="Réactions rapides">
 	{#if favoriteEmojis.length > 0}
 		<div class="emojis-list">
 			{#each favoriteEmojis as emoji (emoji.id)}
@@ -49,7 +58,7 @@
 					}}
 					title={emoji.name}
 				>
-					<img src={emoji.url} alt={emoji.name} class="emoji-img" />
+					<Emoji src={emoji.url} name={emoji.name} size={30} class="emoji-img" />
 				</button>
 			{/each}
 		</div>
@@ -85,7 +94,6 @@
 
 	.reaction-bar {
 		position: absolute;
-		top: -46px;
 		z-index: 50;
 		display: inline-flex;
 		align-items: center;
@@ -97,22 +105,54 @@
 		border: 1px solid rgba(0, 0, 0, 0.1);
 		border-radius: 9999px;
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
-		animation: popIn 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 		user-select: none;
+		width: max-content;
+		min-width: max-content;
+		max-width: calc(100vw - 32px);
+		white-space: nowrap;
+	}
+
+	/* Direction vers le HAUT (au-dessus du menu d'action / du message) */
+	.reaction-bar.up {
+		top: auto;
+		bottom: 100%;
+		margin-bottom: 6px;
+		animation: popInUp 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	}
+
+	/* Direction vers le BAS (en dessous du menu d'action / du message) */
+	.reaction-bar.down {
+		top: 100%;
+		bottom: auto;
+		margin-top: 6px;
+		animation: popInDown 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 	}
 
 	.reaction-bar.left {
 		left: 0;
+		right: auto;
 	}
 
 	.reaction-bar.right {
 		right: 0;
+		left: auto;
 	}
 
-	@keyframes popIn {
+	@keyframes popInUp {
 		from {
 			opacity: 0;
 			transform: scale(0.8) translateY(6px);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1) translateY(0);
+		}
+	}
+
+	@keyframes popInDown {
+		from {
+			opacity: 0;
+			transform: scale(0.8) translateY(-6px);
 		}
 		to {
 			opacity: 1;
@@ -124,23 +164,27 @@
 		display: flex;
 		align-items: center;
 		gap: 4px;
+		flex-shrink: 0;
 	}
 
 	.emoji-btn {
 		background: none;
 		border: none;
-		padding: 4px;
+		padding: 3px;
 		border-radius: 50%;
 		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		flex-shrink: 0;
+		width: 36px;
+		height: 36px;
 		transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 	}
 
 	.emoji-btn:hover,
 	.emoji-btn:focus-visible {
-		transform: scale(1.35) translateY(-3px);
+		transform: scale(1.3) translateY(-3px);
 	}
 
 	.emoji-btn:active {
@@ -148,9 +192,6 @@
 	}
 
 	.emoji-img {
-		width: 26px;
-		height: 26px;
-		object-fit: contain;
 		pointer-events: none;
 	}
 
@@ -158,14 +199,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 26px;
-		height: 26px;
+		width: 30px;
+		height: 30px;
 		border-radius: 50%;
 		background: #f3f4f6;
 		color: #4b5563;
 		text-decoration: none;
 		transition: all 0.15s ease;
 		margin-left: 2px;
+		flex-shrink: 0;
 	}
 
 	.add-favorites-btn:hover {

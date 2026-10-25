@@ -25,6 +25,7 @@
 	import VoiceMessagePlayer from '$lib/components/chat/VoiceMessagePlayer.svelte';
 	import MessageReactionBar from '$lib/components/chat/MessageReactionBar.svelte';
 	import MessageReactionsModal from '$lib/components/chat/MessageReactionsModal.svelte';
+	import Emoji from '$lib/components/ui/Emoji.svelte';
 
 	export type ChatMessage = Message & {
 		sender?: { name: string | null; username: string | null; image: string | null } | null;
@@ -78,7 +79,9 @@
 		onOpenStoryModal
 	}: Props = $props();
 
+	let messageElementRef = $state<HTMLDivElement | null>(null);
 	let showReactionBar = $state(false);
+	let reactionBarDirection = $state<'up' | 'down'>('up');
 	let showReactionsModal = $state(false);
 	let longPressTimer: ReturnType<typeof setTimeout> | null = null;
 	let pointerStartPos = { x: 0, y: 0 };
@@ -110,6 +113,16 @@
 
 		longPressTimer = setTimeout(() => {
 			isLongPressTriggered = true;
+			if (menuDirection === 'up') {
+				reactionBarDirection = 'up';
+			} else if (messageElementRef) {
+				const rect = messageElementRef.getBoundingClientRect();
+				const spaceBelow = window.innerHeight - rect.bottom;
+				const spaceAbove = rect.top;
+				reactionBarDirection = spaceBelow < 150 && spaceAbove > spaceBelow ? 'up' : 'down';
+			} else {
+				reactionBarDirection = 'up';
+			}
 			showReactionBar = true;
 			if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
 				try {
@@ -198,10 +211,12 @@
 </script>
 
 <div
+	bind:this={messageElementRef}
 	class="message {isMe ? 'sent' : 'received'} {isMentioned ? 'mentioned' : ''} {isDeleted
 		? 'deleted'
 		: ''} {isEditing ? 'editing' : ''}"
 	class:has-reactions={totalReactionsCount > 0}
+	class:reaction-bar-active={showReactionBar}
 	role="group"
 	aria-label="Message de {isMe ? 'vous' : message.sender?.name || message.sender?.username || 'utilisateur'}"
 	onpointerdown={handlePointerDown}
@@ -209,14 +224,6 @@
 	onpointerup={handlePointerUp}
 	onpointercancel={handlePointerUp}
 >
-	{#if showReactionBar}
-		<MessageReactionBar
-			favoriteEmojis={favoriteEmojisList}
-			align={isMe ? 'right' : 'left'}
-			onSelect={(emoji) => onToggleReaction?.(message, emoji)}
-			onClose={() => (showReactionBar = false)}
-		/>
-	{/if}
 	{#if !isMe && chatType === 'group'}
 		<span class="group-sender">{message.sender?.name || message.sender?.username}</span>
 	{/if}
@@ -389,7 +396,7 @@
 		>
 			<span class="reactions-icons">
 				{#each message.reactions.slice(0, 3) as reaction (reaction.emojiId)}
-					<img src={reaction.emojiUrl} alt={reaction.emojiName} class="reaction-badge-img" />
+					<Emoji src={reaction.emojiUrl} name={reaction.emojiName} size={17} class="reaction-badge-img" />
 				{/each}
 			</span>
 			{#if totalReactionsCount > 1}
@@ -416,7 +423,22 @@
 		</time>
 		{#if actions.length > 0 && !isEditing}
 			<div class="message-action-menu">
-				<ActionMenu {actions} direction={menuDirection} />
+				<ActionMenu
+					{actions}
+					direction={menuDirection}
+					onActionSelected={(action, dir) => {
+						reactionBarDirection = dir;
+					}}
+				/>
+				{#if showReactionBar}
+					<MessageReactionBar
+						favoriteEmojis={favoriteEmojisList}
+						align={isMe ? 'right' : 'left'}
+						direction={reactionBarDirection}
+						onSelect={(emoji) => onToggleReaction?.(message, emoji)}
+						onClose={() => (showReactionBar = false)}
+					/>
+				{/if}
 			</div>
 		{/if}
 	</div>
@@ -440,6 +462,10 @@
 		border-radius: 18px;
 		word-wrap: break-word;
 		touch-action: pan-y;
+	}
+
+	.message.reaction-bar-active {
+		z-index: 60;
 	}
 
 	.message.has-reactions {
@@ -502,11 +528,6 @@
 		gap: 2px;
 	}
 
-	.reaction-badge-img {
-		width: 17px;
-		height: 17px;
-		object-fit: contain;
-	}
 
 	.reactions-badge-count {
 		font-size: 0.75rem;
@@ -923,6 +944,7 @@
 		display: inline-flex;
 		align-items: center;
 		margin-left: 2px;
+		position: relative;
 	}
 
 	.message-action-menu :global(.btn-more) {

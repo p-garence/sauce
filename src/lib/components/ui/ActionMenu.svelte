@@ -7,13 +7,17 @@
 	import type { MenuAction } from '$lib/types';
 	import Icon from '$lib/components/ui/Icon.svelte';
 
-	let {
-		actions,
-		direction = 'auto'
-	}: {
+	interface Props {
 		actions: MenuAction[];
 		direction?: 'auto' | 'up' | 'down';
-	} = $props();
+		onActionSelected?: (action: MenuAction, direction: 'up' | 'down') => void;
+	}
+
+	let {
+		actions,
+		direction = 'auto',
+		onActionSelected
+	}: Props = $props();
 
 	let isOpen = $state(false);
 	let openUpwards = $state(false);
@@ -67,7 +71,9 @@
 	function handleAction(e: MouseEvent, action: MenuAction) {
 		e.stopPropagation();
 		e.preventDefault();
+		const effectiveDirection: 'up' | 'down' = openUpwards ? 'up' : 'down';
 		closeMenu();
+		onActionSelected?.(action, effectiveDirection);
 		action.onClick();
 	}
 </script>

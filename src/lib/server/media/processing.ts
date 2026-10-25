@@ -147,6 +147,14 @@ export async function saveUploadedFile(file: File): Promise<CarouselItem> {
 			poster: `/media/${posterFilename}`
 		};
 	} else {
+		const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
+		if (isSvg) {
+			const filename = `${id}.svg`;
+			const filePath = path.join(UPLOAD_DIR, filename);
+			await fs.writeFile(filePath, buffer);
+			return { type: 'image', content: `/media/${filename}` };
+		}
+
 		// TRAITEMENT IMAGE (Sharp)
 		const filename = `${id}.webp`;
 		const filePath = path.join(UPLOAD_DIR, filename);
@@ -211,6 +219,20 @@ export async function saveChatFile(file: File): Promise<SavedMediaFile> {
 			size: s.size
 		};
 	} else if (isImage) {
+		const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
+		if (isSvg) {
+			const finalFilename = `${id}.svg`;
+			const filePath = path.join(UPLOAD_DIR, finalFilename);
+			await fs.writeFile(filePath, buffer);
+			const s = await fs.stat(filePath);
+			return {
+				type: 'image',
+				content: `/media/${finalFilename}`,
+				name: file.name,
+				size: s.size
+			};
+		}
+
 		const finalFilename = `${id}.webp`;
 		const filePath = path.join(UPLOAD_DIR, finalFilename);
 

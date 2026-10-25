@@ -443,8 +443,8 @@
 	}
 
 	.picker-item-btn {
-		background: #ffffff;
-		border: 1px solid #e2e8f0;
+		background: transparent;
+		border: 1px solid transparent;
 		border-radius: 10px;
 		padding: 8px;
 		display: flex;
@@ -458,8 +458,7 @@
 	}
 
 	.picker-item-btn:hover {
-		border-color: #0ea5e9;
-		background: #f0f9ff;
+		background: #f1f5f9;
 		transform: translateY(-1px);
 	}
 

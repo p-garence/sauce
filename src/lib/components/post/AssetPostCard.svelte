@@ -331,15 +331,11 @@
 	}
 
 	.asset-preview-item {
-		width: 38px;
-		height: 38px;
-		border-radius: 8px;
-		background: #ffffff;
-		border: 1px solid #e2e8f0;
+		width: 32px;
+		height: 32px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 4px;
 	}
 
 	.asset-preview-img {

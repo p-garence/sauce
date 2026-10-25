@@ -10,7 +10,7 @@
  * @returns `true` si l'URL est conforme et sécurisée
  */
 export function isValidAssetUrl(url: unknown): url is string {
-	if (typeof url !== 'string' || url.length === 0 || url.length > 65536) return false;
+	if (typeof url !== 'string' || url.length === 0 || url.length > 250000) return false;
 	if (/["'<>\\\s]/.test(url)) return false;
 	return (
 		/^(?:\/[a-zA-Z0-9_-]+)*\/media\/[a-zA-Z0-9._-]+(\?[a-zA-Z0-9._~%&=-]*)?$/.test(url) ||

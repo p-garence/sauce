@@ -325,11 +325,7 @@
 	.picker-thumb {
 		width: 24px;
 		height: 24px;
-		border-radius: 4px;
-		background: #ffffff;
-		border: 1px solid #cbd5e1;
 		object-fit: contain;
-		padding: 2px;
 	}
 
 	.btn-select-pack {

@@ -275,12 +275,8 @@
 	}
 
 	.attached-preview-thumb {
-		width: 32px;
-		height: 32px;
-		border-radius: 6px;
-		background: #ffffff;
-		border: 1px solid #e2e8f0;
-		padding: 3px;
+		width: 28px;
+		height: 28px;
 		display: flex;
 		align-items: center;
 		justify-content: center;

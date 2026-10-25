@@ -6,6 +6,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import Icon from '$lib/components/ui/Icon.svelte';
+	import Emoji from '$lib/components/ui/Emoji.svelte';
 	import type { EmojiItem, MessageReactionGroup, MessageReactionUser } from '$lib/types';
 
 	interface Props {
@@ -113,7 +114,7 @@
 							class:active={selectedEmojiId === g.emojiId}
 							onclick={() => (selectedEmojiId = g.emojiId)}
 						>
-							<img src={g.emojiUrl} alt={g.emojiName} class="tab-emoji-img" />
+							<Emoji src={g.emojiUrl} name={g.emojiName} size={16} class="tab-emoji-img" />
 							<span class="tab-count">{g.count}</span>
 						</button>
 					{/each}
@@ -150,7 +151,7 @@
 								</a>
 
 								<div class="reaction-tag-box">
-									<img src={u.emojiUrl} alt={u.emojiName} class="user-reaction-emoji" />
+									<Emoji src={u.emojiUrl} name={u.emojiName} size={24} class="user-reaction-emoji" />
 									{#if u.id === currentUserId}
 										<button
 											type="button"
@@ -190,7 +191,7 @@
 									title={emoji.name}
 									onclick={() => onToggleReaction?.(emoji)}
 								>
-									<img src={emoji.url} alt={emoji.name} class="quick-emoji-img" />
+									<Emoji src={emoji.url} name={emoji.name} size={24} class="quick-emoji-img" />
 								</button>
 							{/each}
 						</div>
@@ -330,11 +331,6 @@
 		color: #ffffff;
 	}
 
-	.tab-emoji-img {
-		width: 16px;
-		height: 16px;
-		object-fit: contain;
-	}
 
 	.tab-count {
 		font-size: 0.75rem;
@@ -436,11 +432,6 @@
 		flex-shrink: 0;
 	}
 
-	.user-reaction-emoji {
-		width: 24px;
-		height: 24px;
-		object-fit: contain;
-	}
 
 	.btn-remove-reaction {
 		background: #fee2e2;
@@ -488,9 +479,9 @@
 	.quick-emoji-btn {
 		width: 32px;
 		height: 32px;
-		border-radius: 8px;
-		border: 1px solid #e2e8f0;
-		background: #ffffff;
+		border-radius: 50%;
+		border: none;
+		background: transparent;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -500,22 +491,15 @@
 	}
 
 	.quick-emoji-btn:hover {
-		transform: scale(1.15);
-		border-color: #0ea5e9;
-		background: #f0f9ff;
+		transform: scale(1.25);
+		background: rgba(14, 165, 233, 0.12);
 	}
 
 	.quick-emoji-btn.active {
-		border-color: #0ea5e9;
-		background: #e0f2fe;
-		box-shadow: 0 0 0 1px #0ea5e9;
+		background: rgba(14, 165, 233, 0.2);
+		transform: scale(1.15);
 	}
 
-	.quick-emoji-img {
-		width: 20px;
-		height: 20px;
-		object-fit: contain;
-	}
 
 	.settings-emoji-link {
 		color: #0ea5e9;

@@ -7,6 +7,7 @@
 	import { resolve } from '$app/paths';
 	import { mentionPermissions } from '$lib/client/mentionPermissions.svelte';
 	import { emojiStore } from '$lib/client/emojiStore.svelte';
+	import Emoji from '$lib/components/ui/Emoji.svelte';
 
 	let {
 		content = '',
@@ -126,12 +127,10 @@
 				</span>
 			{/if}
 		{:else if token.type === 'emoji'}
-			<img
+			<Emoji
 				src={token.url}
-				alt=":{token.name}:"
-				title=":{token.name}:"
+				name={token.name}
 				class="inline-chat-emoji"
-				loading="lazy"
 			/>
 		{:else}
 			{token.value}
@@ -145,14 +144,11 @@
 		word-break: break-word;
 		white-space: pre-wrap;
 	}
-	.inline-chat-emoji {
-		display: inline-block;
+	:global(.inline-chat-emoji) {
 		width: 1.35em;
 		height: 1.35em;
 		vertical-align: -0.25em;
-		object-fit: contain;
 		margin: 0 0.1em;
-		border-radius: 2px;
 	}
 	.mention-link {
 		color: var(--primary, #0ea5e9);

@@ -231,10 +231,6 @@
 		width: 28px;
 		height: 28px;
 		object-fit: contain;
-		border-radius: 4px;
-		background: #f8fafc;
-		border: 1px solid #e2e8f0;
-		padding: 2px;
 	}
 
 	.more-indicator {
