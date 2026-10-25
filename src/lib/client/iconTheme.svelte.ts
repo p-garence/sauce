@@ -30,7 +30,8 @@ class IconThemeState {
 			}
 
 			try {
-				const savedCustom = localStorage.getItem('custom_icons_data');
+				const savedCustom =
+					localStorage.getItem('custom_icons_data') || localStorage.getItem('custom_icons_draft');
 				if (savedCustom) {
 					this.customIcons = JSON.parse(savedCustom);
 				}
@@ -58,7 +59,9 @@ class IconThemeState {
 		this.customIcons = { ...this.customIcons, [id]: dataUrl };
 		if (browser) {
 			try {
-				localStorage.setItem('custom_icons_data', JSON.stringify(this.customIcons));
+				const serialized = JSON.stringify(this.customIcons);
+				localStorage.setItem('custom_icons_data', serialized);
+				localStorage.setItem('custom_icons_draft', serialized);
 			} catch (e) {
 				console.error('Error saving custom icon to localStorage', e);
 				alert('Stockage local saturé ou erreur lors de l’enregistrement de l’icône.');
@@ -71,7 +74,9 @@ class IconThemeState {
 		delete next[id];
 		this.customIcons = next;
 		if (browser) {
-			localStorage.setItem('custom_icons_data', JSON.stringify(this.customIcons));
+			const serialized = JSON.stringify(this.customIcons);
+			localStorage.setItem('custom_icons_data', serialized);
+			localStorage.setItem('custom_icons_draft', serialized);
 		}
 	}
 
@@ -79,6 +84,7 @@ class IconThemeState {
 		this.customIcons = {};
 		if (browser) {
 			localStorage.removeItem('custom_icons_data');
+			localStorage.removeItem('custom_icons_draft');
 		}
 	}
 
@@ -106,21 +112,12 @@ class IconThemeState {
 	}
 
 	revertToDefault() {
-		if (
-			!this.activeIconSetId &&
-			this.pack === 'lucide' &&
-			Object.keys(this.customIcons).length === 0
-		) {
-			return;
-		}
 		this.activeIconSetId = null;
 		this.activeIconSetName = null;
-		this.customIcons = {};
 		this.setPack('lucide');
 		if (browser) {
 			localStorage.removeItem('active_icon_set_id');
 			localStorage.removeItem('active_icon_set_name');
-			localStorage.removeItem('custom_icons_data');
 		}
 	}
 }

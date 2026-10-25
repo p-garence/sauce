@@ -140,6 +140,9 @@ export async function createEmojiSet(
 	const trimmedName = sanitizePackName(data.name, "Le nom de la collection d'emojis est requis.");
 
 	const cleanEmojis = sanitizeEmojiList(data.emojis);
+	if (cleanEmojis.length === 0) {
+		throw new Error("La collection d'émojis doit contenir au moins un émoji valide.");
+	}
 
 	const defaultFavs =
 		data.favoriteEmojiIds && data.favoriteEmojiIds.length > 0
@@ -156,6 +159,24 @@ export async function createEmojiSet(
 			favoriteEmojiIds: defaultFavs
 		})
 		.returning();
+
+	// Activer automatiquement la nouvelle collection dans les collections actives de l'utilisateur
+	const currentUser = await db.query.user.findFirst({
+		where: eq(userTable.id, userId),
+		columns: { activeEmojiSetId: true, activeEmojiSetIds: true }
+	});
+	if (currentUser) {
+		const existingActive = (currentUser.activeEmojiSetIds as string[]) || [];
+		if (!existingActive.includes(created.id)) {
+			await db
+				.update(userTable)
+				.set({
+					activeEmojiSetIds: [...existingActive, created.id],
+					activeEmojiSetId: currentUser.activeEmojiSetId || created.id
+				})
+				.where(eq(userTable.id, userId));
+		}
+	}
 
 	return created;
 }
@@ -188,7 +209,11 @@ export async function updateEmojiSet(
 		updatePayload.description = data.description?.trim() || null;
 	}
 	if (data.emojis !== undefined) {
-		updatePayload.emojis = sanitizeEmojiList(data.emojis);
+		const cleanEmojis = sanitizeEmojiList(data.emojis);
+		if (cleanEmojis.length === 0) {
+			throw new Error("La collection d'émojis doit contenir au moins un émoji valide.");
+		}
+		updatePayload.emojis = cleanEmojis;
 	}
 	if (data.favoriteEmojiIds !== undefined) {
 		updatePayload.favoriteEmojiIds = data.favoriteEmojiIds.slice(0, 6);

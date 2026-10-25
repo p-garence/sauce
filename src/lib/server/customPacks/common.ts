@@ -13,9 +13,9 @@ export function isValidAssetUrl(url: unknown): url is string {
 	if (typeof url !== 'string' || url.length === 0 || url.length > 65536) return false;
 	if (/["'<>\\\s]/.test(url)) return false;
 	return (
-		/^\/media\/[a-zA-Z0-9._-]+$/.test(url) ||
+		/^(?:\/[a-zA-Z0-9_-]+)*\/media\/[a-zA-Z0-9._-]+(\?[a-zA-Z0-9._~%&=-]*)?$/.test(url) ||
 		/^https?:\/\/[^\s"'<>]+$/.test(url) ||
-		/^data:image\/(png|jpeg|webp|gif);base64,[a-zA-Z0-9+/=]+$/.test(url)
+		/^data:image\/(png|jpeg|webp|gif);base64,[a-zA-Z0-9+/=]+$/i.test(url)
 	);
 }
 

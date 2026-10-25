@@ -254,7 +254,21 @@
 			throw new Error(data.error || 'Erreur lors de la sauvegarde du pack.');
 		}
 
+		// Basculer immédiatement sur l'onglet "Mes packs" pour voir le pack créé
+		libraryTab = 'owned';
 		resetForm();
+
+		// Activer immédiatement le pack sauvegardé pour l'utilisateur
+		if (data && data.id) {
+			activeServerSetId = data.id;
+			iconTheme.applyServerIconSet({
+				id: data.id,
+				name: data.name,
+				icons: data.icons || currentCustomMap,
+				fallback: data.fallback
+			});
+		}
+
 		await loadLibrary();
 	}
 

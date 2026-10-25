@@ -92,7 +92,7 @@
 
 	{#if previews.length > 0}
 		<div class="pack-mini-preview">
-			{#each previews.slice(0, 10) as previewUrl (previewUrl)}
+			{#each previews.slice(0, 10) as previewUrl, idx (`${previewUrl}_${idx}`)}
 				<img src={previewUrl} alt="Aperçu" class="mini-asset-img" />
 			{/each}
 			{#if itemCount > 10}

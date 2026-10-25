@@ -146,6 +146,7 @@
 		}
 
 		editingSet = null;
+		libraryTab = 'owned';
 		await loadLibrary();
 		emojiStore.loadActiveEmojis();
 	}

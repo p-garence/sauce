@@ -16,10 +16,12 @@
 			if (serverSet) {
 				iconTheme.applyServerIconSet(serverSet);
 			} else if (data.sessionUser && !userActiveId) {
-				if (defaultBuiltin === 'original' || defaultBuiltin === 'lucide') {
-					iconTheme.setPack(defaultBuiltin);
-				} else {
-					iconTheme.revertToDefault();
+				if (iconTheme.pack !== 'sauce') {
+					if (defaultBuiltin === 'original' || defaultBuiltin === 'lucide') {
+						iconTheme.setPack(defaultBuiltin);
+					} else {
+						iconTheme.revertToDefault();
+					}
 				}
 			}
 		});

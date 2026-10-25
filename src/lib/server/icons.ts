@@ -111,16 +111,27 @@ export async function createIconSet(
 ) {
 	const trimmedName = sanitizePackName(data.name, "Le nom du set d'icônes est requis.");
 
+	const sanitizedIcons = sanitizeIconsMap(data.icons);
+	if (Object.keys(sanitizedIcons).length === 0) {
+		throw new Error("Le set d'icônes doit contenir au moins une icône personnalisée valide.");
+	}
+
 	const [created] = await db
 		.insert(iconSets)
 		.values({
 			ownerId: userId,
 			name: trimmedName,
 			description: data.description?.trim() || null,
-			icons: sanitizeIconsMap(data.icons),
+			icons: sanitizedIcons,
 			fallback: data.fallback === 'original' ? 'original' : 'lucide'
 		})
 		.returning();
+
+	// Activer automatiquement le pack créé chez l'utilisateur
+	await db
+		.update(userTable)
+		.set({ activeIconSetId: created.id })
+		.where(eq(userTable.id, userId));
 
 	return created;
 }
@@ -155,7 +166,11 @@ export async function updateIconSet(
 		updatePayload.description = data.description?.trim() || null;
 	}
 	if (data.icons !== undefined) {
-		updatePayload.icons = sanitizeIconsMap(data.icons);
+		const sanitized = sanitizeIconsMap(data.icons);
+		if (Object.keys(sanitized).length === 0) {
+			throw new Error("Le set d'icônes doit contenir au moins une icône personnalisée valide.");
+		}
+		updatePayload.icons = sanitized;
 	}
 	if (data.fallback !== undefined) {
 		updatePayload.fallback = data.fallback === 'original' ? 'original' : 'lucide';
