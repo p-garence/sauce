@@ -157,7 +157,7 @@
 					id="emoji_set_name"
 					type="text"
 					class="text-input"
-					placeholder="Ex: Chats"
+					placeholder="Ma super collection d'emoji"
 					maxlength="50"
 					bind:value={setName}
 				/>
@@ -169,7 +169,7 @@
 					id="emoji_set_desc"
 					type="text"
 					class="text-input"
-					placeholder="Des emojis de chats"
+					placeholder="Des emojis mids"
 					bind:value={setDescription}
 				/>
 			</div>

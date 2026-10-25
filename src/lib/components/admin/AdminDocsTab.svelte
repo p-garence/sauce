@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+
 	/**
 	 * @component AdminDocsTab
 	 * @domain Admin / Docs
@@ -7,7 +9,6 @@
 	 * - Proposer un lien direct vers la documentation Astro Starlight locale
 	 * - Résumer les points d'architecture clés et commandes CLI utiles pour l'administrateur
 	 */
-	import { resolve } from '$app/paths';
 </script>
 
 <section class="tab-section docs-section">

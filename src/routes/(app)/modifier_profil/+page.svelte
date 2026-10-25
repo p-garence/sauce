@@ -230,13 +230,7 @@
 							<Icon name="status.visibility" size={14} />
 						</label>
 					</div>
-					<input
-						id="genre"
-						name="genre"
-						type="text"
-						placeholder="Ex: elle"
-						value={data.profile.genre}
-					/>
+					<input id="genre" name="genre" type="text" placeholder="" value={data.profile.genre} />
 				</div>
 			</div>
 

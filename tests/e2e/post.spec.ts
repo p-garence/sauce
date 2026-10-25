@@ -31,6 +31,7 @@ test.describe.serial('Création de Posts et Affichage Individuel', () => {
 		await page.fill('input#name', 'Auteur Testeur');
 		await page.locator('button:has-text("Suivant")').click();
 		await page.locator('button:has-text("Suivant")').click();
+		await page.locator('button:has-text("Suivant")').click();
 		await page.locator('button:has-text("Terminer")').click();
 
 		await page.waitForURL(/.*\/flux/);

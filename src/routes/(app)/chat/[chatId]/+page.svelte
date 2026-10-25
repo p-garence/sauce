@@ -20,7 +20,7 @@
 		apiToggleChatMessageReaction
 	} from '$lib/client/api';
 	import type { PageData } from './$types';
-	import type { MenuAction, Message, StoryBundle, ChatMessage } from '$lib/types';
+	import type { MenuAction, StoryBundle, ChatMessage } from '$lib/types';
 	import type { StoryReplyData } from '$lib/stories';
 	import StoryViewerModal from '$lib/components/stories/StoryViewerModal.svelte';
 	import ChatHeader from '$lib/components/chat/ChatHeader.svelte';

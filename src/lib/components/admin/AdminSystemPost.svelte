@@ -355,7 +355,7 @@
 						id="notif-message-input"
 						type="text"
 						class="notif-input"
-						placeholder="Ex : 🚀 Nouvelle mise à jour majeure disponible ! Cliquez pour en savoir plus."
+						placeholder=" Nouvelle mise à jour majeure disponible ! Cliquez pour en savoir plus."
 						bind:value={notificationMessage}
 						bind:this={notifInputElement}
 						onkeydown={(e) => notifMentionRef?.handleKeydown(e)}

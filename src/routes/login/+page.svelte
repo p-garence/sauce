@@ -224,7 +224,7 @@
 
 				<div class="input-group">
 					<label for="inviteKey">Clé d'invitation (Obligatoire)</label>
-					<input id="inviteKey" name="inviteKey" type="text" placeholder="Ex: INV-XXXXX" required />
+					<input id="inviteKey" name="inviteKey" type="text" placeholder="INV-XXXXX" required />
 				</div>
 				<div class="input-group">
 					<label for="username">Nom d'utilisateur</label>
@@ -232,7 +232,7 @@
 						id="username"
 						name="username"
 						type="text"
-						placeholder="Ex: alice"
+						placeholder="pseudo"
 						autocomplete="username"
 						required
 					/>
@@ -243,7 +243,7 @@
 						id="email"
 						name="email"
 						type="email"
-						placeholder="Ex: alice@domaine.com"
+						placeholder="exemple@domaine.com"
 						autocomplete="email"
 						required
 					/>

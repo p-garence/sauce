@@ -57,6 +57,10 @@ setup("Test de l'Admin-setup, Onboarding et génération des clés", async ({ pa
 		await expect(page.locator('h2')).toContainText('Confidentialité');
 		await page.locator('button:has-text("Suivant")').click();
 
+		// Étape Gérer vos flux
+		await expect(page.locator('h2')).toContainText('flux');
+		await page.locator('button:has-text("Suivant")').click();
+
 		// Étape Finalisation
 		await expect(page.locator('h2')).toContainText('Tout est prêt');
 		await page.locator('button:has-text("Terminer")').click();

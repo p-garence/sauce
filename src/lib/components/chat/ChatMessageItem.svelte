@@ -16,7 +16,7 @@
 	import { formatBytes } from '$lib/utils/format';
 	import { formatFullDate, formatDateISO } from '$lib/dates';
 	import { parseStoryReply, type StoryReplyData } from '$lib/stories';
-	import type { EmojiItem, MenuAction, Message, ChatMessage } from '$lib/types';
+	import type { EmojiItem, MenuAction, ChatMessage } from '$lib/types';
 	import RichContent from '$lib/components/ui/RichContent.svelte';
 	import RichTextInput from '$lib/components/ui/RichTextInput.svelte';
 	import EmojiButton from '$lib/components/ui/EmojiButton.svelte';

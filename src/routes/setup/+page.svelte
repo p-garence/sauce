@@ -2,12 +2,15 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import SettingsToggle from '$lib/components/settings/ui/SettingsToggle.svelte';
+	import FeedItemCard from '$lib/components/settings/feeds/FeedItemCard.svelte';
+	import FeedConfigForm from '$lib/components/settings/feeds/FeedConfigForm.svelte';
 	import { mediaEditor } from '$lib/client/mediaEditorState.svelte';
 	import { resolve } from '$app/paths';
 
 	let { data, form } = $props();
 	let user = $derived(data.sessionUser);
 
+	const TOTAL_STEPS = 4;
 	let step = $state(1);
 	let isLoadingForm = $state(false);
 
@@ -32,6 +35,9 @@
 	let showFollowers = $state(user.profileVisibility?.showFollowers ?? true);
 	// svelte-ignore state_referenced_locally
 	let showFollowing = $state(user.profileVisibility?.showFollowing ?? true);
+
+	// Étape 3 : Gérer vos flux
+	let editingFeedId = $state<string | null>(null);
 
 	// --- LOGIQUE AVATAR (Comme dans modifier_profil) ---
 	function handleFileChange(event: Event) {
@@ -68,7 +74,7 @@
 
 	// --- NAVIGATION ---
 	function nextStep() {
-		if (step < 3) step++;
+		if (step < TOTAL_STEPS) step++;
 	}
 	function prevStep() {
 		if (step > 1) step--;
@@ -76,143 +82,211 @@
 </script>
 
 <div class="setup-layout">
-	<div class="setup-card">
+	<div class="setup-card" class:step-feeds={step === 3}>
 		<div class="progress-bar">
-			<div class="progress-fill" style="width: {(step / 3) * 100}%"></div>
+			<div class="progress-fill" style="width: {(step / TOTAL_STEPS) * 100}%"></div>
 		</div>
 
 		{#if form?.error}
 			<div class="alert-box error">{form.error}</div>
 		{/if}
 
-		<form
-			method="POST"
-			action="?/completeSetup"
-			use:enhance={() => {
-				isLoadingForm = true;
-				return async ({ update, result }) => {
-					isLoadingForm = false;
-					if (result.type === 'success') {
-						await goto(resolve('/flux'));
-					} else {
-						await update({ reset: false });
-					}
-				};
-			}}
-		>
-			<!-- Champs cachés pour envoyer TOUTES les données indépendamment de l'étape affichée -->
-			<input type="hidden" name="name" value={name} />
-			<input type="hidden" name="bio" value={bio} />
-			<input type="hidden" name="avatarUrl" value={finalAvatarUrl || ''} />
-			<input type="hidden" name="requireFollowRequest" value={String(requireFollowRequest)} />
-			<input type="hidden" name="requireMessageApproval" value={String(requireMessageApproval)} />
-			<input type="hidden" name="showFollowers" value={String(showFollowers)} />
-			<input type="hidden" name="showFollowing" value={String(showFollowing)} />
+		<!-- ============================== -->
+		<!-- ÉTAPE 1 : PROFIL               -->
+		<!-- ============================== -->
+		{#if step === 1}
+			<div class="step-content">
+				<h2 class="title">Personnalisez votre profil</h2>
 
-			<!-- ============================== -->
-			<!-- ÉTAPE 1 : PROFIL               -->
-			<!-- ============================== -->
-			{#if step === 1}
-				<div class="step-content">
-					<h2 class="title">Personnalisez votre profil</h2>
-
-					<div class="avatar-section">
-						<div class="avatar-wrapper">
-							{#if isUploading}
-								<div class="avatar-placeholder loader">...</div>
-							{:else if avatarPreview}
-								<img src={avatarPreview} alt="Aperçu" class="avatar-img" />
-							{:else}
-								<div class="avatar-placeholder">
-									{(user.username || '?').charAt(0).toUpperCase()}
-								</div>
-							{/if}
-						</div>
-						<button
-							type="button"
-							class="btn-text"
-							onclick={() => fileInput?.click()}
-							disabled={isUploading}
-						>
-							Choisir une photo
-						</button>
-						<input
-							type="file"
-							accept="image/jpeg, image/png, image/webp"
-							bind:this={fileInput}
-							onchange={handleFileChange}
-							hidden
-						/>
-					</div>
-
-					<!-- 👇 MISE À JOUR DU CHAMP NOM -->
-					<div class="form-group">
-						<label for="name">Nom affiché <span class="required">*</span></label>
-						<input
-							id="name"
-							type="text"
-							bind:value={name}
-							placeholder="Votre nom"
-							minlength="3"
-							required
-						/>
-
-						<!-- Petit message d'aide en direct -->
-						{#if name.trim().length > 0 && name.trim().length < 3}
-							<span class="input-hint error">3 caractères minimum requis.</span>
+				<div class="avatar-section">
+					<div class="avatar-wrapper">
+						{#if isUploading}
+							<div class="avatar-placeholder loader">...</div>
+						{:else if avatarPreview}
+							<img src={avatarPreview} alt="Aperçu" class="avatar-img" />
+						{:else}
+							<div class="avatar-placeholder">
+								{(user.username || '?').charAt(0).toUpperCase()}
+							</div>
 						{/if}
 					</div>
-
-					<div class="form-group">
-						<label for="bio">Biographie</label>
-						<textarea id="bio" bind:value={bio} placeholder="Quelques mots sur vous..." rows="2"
-						></textarea>
-					</div>
-
-					<div class="actions end">
-						<!-- 👇 BOUTON DÉSACTIVÉ SI < 3 -->
-						<button
-							type="button"
-							class="btn-primary"
-							onclick={nextStep}
-							disabled={name.trim().length < 3}
-						>
-							Suivant
-						</button>
-					</div>
+					<button
+						type="button"
+						class="btn-text"
+						onclick={() => fileInput?.click()}
+						disabled={isUploading}
+					>
+						Choisir une photo
+					</button>
+					<input
+						type="file"
+						accept="image/jpeg, image/png, image/webp"
+						bind:this={fileInput}
+						onchange={handleFileChange}
+						hidden
+					/>
 				</div>
-			{/if}
 
-			<!-- ============================== -->
-			<!-- ÉTAPE 2 : CONFIDENTIALITÉ      -->
-			<!-- ============================== -->
-			{#if step === 2}
-				<div class="step-content">
-					<h2 class="title">Confidentialité</h2>
-					<p class="subtitle">Ces paramètres restent modifiables à tout moment.</p>
+				<div class="form-group">
+					<label for="name">Nom affiché <span class="required">*</span></label>
+					<input
+						id="name"
+						type="text"
+						bind:value={name}
+						placeholder="Votre nom"
+						minlength="3"
+						required
+					/>
 
-					<div class="privacy-list">
-						<SettingsToggle title="Approuver les abonnés" bind:checked={requireFollowRequest} />
-						<SettingsToggle title="Approuver les messages" bind:checked={requireMessageApproval} />
-						<SettingsToggle title="Montrer mes abonnés" bind:checked={showFollowers} />
-						<SettingsToggle title="Montrer mes abonnements" bind:checked={showFollowing} />
-					</div>
+					{#if name.trim().length > 0 && name.trim().length < 3}
+						<span class="input-hint error">3 caractères minimum requis.</span>
+					{/if}
+				</div>
 
+				<div class="form-group">
+					<label for="bio">Biographie</label>
+					<textarea id="bio" bind:value={bio} placeholder="Quelques mots sur vous..." rows="2"
+					></textarea>
+				</div>
+
+				<div class="actions end">
+					<button
+						type="button"
+						class="btn-primary"
+						onclick={nextStep}
+						disabled={name.trim().length < 3}
+					>
+						Suivant
+					</button>
+				</div>
+			</div>
+		{/if}
+
+		<!-- ============================== -->
+		<!-- ÉTAPE 2 : CONFIDENTIALITÉ      -->
+		<!-- ============================== -->
+		{#if step === 2}
+			<div class="step-content">
+				<h2 class="title">Confidentialité</h2>
+				<p class="subtitle">Ces paramètres restent modifiables à tout moment.</p>
+
+				<div class="privacy-list">
+					<SettingsToggle title="Approuver les abonnés" bind:checked={requireFollowRequest} />
+					<SettingsToggle title="Approuver les messages" bind:checked={requireMessageApproval} />
+					<SettingsToggle title="Montrer mes abonnés" bind:checked={showFollowers} />
+					<SettingsToggle title="Montrer mes abonnements" bind:checked={showFollowing} />
+				</div>
+
+				<div class="actions space-between">
+					<button type="button" class="btn-secondary" onclick={prevStep}>Retour</button>
+					<button type="button" class="btn-primary" onclick={nextStep}>Suivant</button>
+				</div>
+			</div>
+		{/if}
+
+		<!-- ============================== -->
+		<!-- ÉTAPE 3 : GÉRER VOS FLUX       -->
+		<!-- ============================== -->
+		{#if step === 3}
+			<div class="step-content">
+				<h2 class="title">Gérer vos flux</h2>
+				<p class="subtitle">
+					Ici, aucun algorithme ne décide à votre place. Vous personnalisez vos propres flux :
+					choisissez les sources, les tags thématiques ou les critères de tri selon vos envies.
+				</p>
+
+				{#if form?.feedError}
+					<div class="alert-box error">{form.feedError}</div>
+				{/if}
+
+				<div class="feeds-container">
+					{#if editingFeedId === 'new'}
+						<div class="feed-form-wrapper">
+							<h3 class="form-title">Nouveau flux</h3>
+							<FeedConfigForm
+								feed={null}
+								feeds={data.feeds}
+								groups={data.groups}
+								trendingTags={data.trendingTags}
+								onCancel={() => (editingFeedId = null)}
+								onSuccess={() => (editingFeedId = null)}
+							/>
+						</div>
+					{:else if editingFeedId}
+						{@const currentEditingFeed = data.feeds.find((f) => f.id === editingFeedId)}
+						{#if currentEditingFeed}
+							<div class="feed-form-wrapper">
+								<h3 class="form-title">Modifier le flux</h3>
+								<FeedConfigForm
+									feed={currentEditingFeed}
+									feeds={data.feeds}
+									groups={data.groups}
+									trendingTags={data.trendingTags}
+									onCancel={() => (editingFeedId = null)}
+									onSuccess={() => (editingFeedId = null)}
+								/>
+							</div>
+						{/if}
+					{:else}
+						<div class="feeds-list">
+							{#each data.feeds as feed (feed.id)}
+								<FeedItemCard
+									{feed}
+									feeds={data.feeds}
+									groups={data.groups}
+									canDelete={data.feeds.length > 1}
+									onEdit={() => (editingFeedId = feed.id)}
+								/>
+							{/each}
+						</div>
+
+						<button type="button" class="btn-add-feed" onclick={() => (editingFeedId = 'new')}>
+							+ Créer un nouveau flux
+						</button>
+					{/if}
+				</div>
+
+				{#if !editingFeedId}
 					<div class="actions space-between">
 						<button type="button" class="btn-secondary" onclick={prevStep}>Retour</button>
 						<button type="button" class="btn-primary" onclick={nextStep}>Suivant</button>
 					</div>
-				</div>
-			{/if}
+				{/if}
+			</div>
+		{/if}
 
-			<!-- ============================== -->
-			<!-- ÉTAPE 3 : FINALISATION         -->
-			<!-- ============================== -->
-			{#if step === 3}
+		<!-- ============================== -->
+		<!-- ÉTAPE 4 : FINALISATION         -->
+		<!-- ============================== -->
+		{#if step === 4}
+			<form
+				method="POST"
+				action="?/completeSetup"
+				use:enhance={() => {
+					isLoadingForm = true;
+					return async ({ update, result }) => {
+						isLoadingForm = false;
+						if (result.type === 'success') {
+							await goto(resolve('/flux'));
+						} else {
+							await update({ reset: false });
+						}
+					};
+				}}
+			>
+				<input type="hidden" name="name" value={name} />
+				<input type="hidden" name="bio" value={bio} />
+				<input type="hidden" name="avatarUrl" value={finalAvatarUrl || ''} />
+				<input type="hidden" name="requireFollowRequest" value={String(requireFollowRequest)} />
+				<input type="hidden" name="requireMessageApproval" value={String(requireMessageApproval)} />
+				<input type="hidden" name="showFollowers" value={String(showFollowers)} />
+				<input type="hidden" name="showFollowing" value={String(showFollowing)} />
+
 				<div class="step-content center-content">
 					<h2 class="title">Tout est prêt.</h2>
 					<p class="subtitle">
-						Votre compte est configuré. Vous pouvez maintenant rejoindre votre réseau social.
+						Votre compte et vos flux sont configurés. Vous pouvez maintenant rejoindre votre réseau
+						social.
 					</p>
 
 					<div class="actions space-between" style="width: 100%; margin-top: 40px;">
@@ -222,8 +296,8 @@
 						</button>
 					</div>
 				</div>
-			{/if}
-		</form>
+			</form>
+		{/if}
 	</div>
 </div>
 
@@ -242,11 +316,16 @@
 	.setup-card {
 		background: #ffffff;
 		width: 100%;
-		max-width: 420px;
+		max-width: 440px;
 		border-radius: 12px;
 		border: 1px solid #e5e7eb;
 		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 		overflow: hidden;
+		transition: max-width 0.25s ease;
+	}
+
+	.setup-card.step-feeds {
+		max-width: 580px;
 	}
 
 	.progress-bar {
@@ -279,6 +358,7 @@
 		margin: 0 0 24px 0;
 		font-size: 0.9rem;
 		color: #6b7280;
+		line-height: 1.45;
 	}
 
 	/* Avatar */
@@ -363,8 +443,49 @@
 	.privacy-list {
 		display: flex;
 		flex-direction: column;
-		gap: 8px; /* Plus compact */
+		gap: 8px;
 		margin-bottom: 24px;
+	}
+
+	/* Gestion des flux */
+	.feeds-container {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		margin-bottom: 24px;
+	}
+	.feeds-list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+	.btn-add-feed {
+		width: 100%;
+		padding: 12px;
+		background: #f0f9ff;
+		color: #0284c7;
+		border: 1.5px dashed #bae6fd;
+		border-radius: 8px;
+		font-weight: 600;
+		font-size: 0.9rem;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+	.btn-add-feed:hover {
+		background: #e0f2fe;
+		border-color: #7dd3fc;
+	}
+	.feed-form-wrapper {
+		background: #ffffff;
+		border: 1px solid #e2e8f0;
+		border-radius: 10px;
+		padding: 16px;
+	}
+	.form-title {
+		margin: 0 0 16px 0;
+		font-size: 1.05rem;
+		font-weight: 600;
+		color: #0f172a;
 	}
 
 	/* Actions */
@@ -426,7 +547,7 @@
 	.alert-box {
 		padding: 12px;
 		border-radius: 6px;
-		margin: 16px;
+		margin-bottom: 16px;
 		font-size: 0.85rem;
 		text-align: center;
 		border: 1px solid transparent;

@@ -72,7 +72,11 @@ test.describe('Authentification et Inscription Utilisateur', () => {
 		await page.locator('label:has-text("Approuver les abonnés")').click();
 		await page.locator('button:has-text("Suivant")').click();
 
-		// Étape 3 (Finalisation)
+		// Étape 3 (Gérer vos flux)
+		await expect(page.locator('h2')).toContainText('flux');
+		await page.locator('button:has-text("Suivant")').click();
+
+		// Étape 4 (Finalisation)
 		await expect(page.locator('h2')).toContainText('Tout est prêt');
 		await page.locator('button:has-text("Terminer")').click();
 

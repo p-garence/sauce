@@ -68,7 +68,11 @@ export async function registerNewUser(
 	}
 	await page.locator('button:has-text("Suivant")').click();
 
-	// Étape 3 : Finalisation
+	// Étape 3 : Gérer vos flux
+	await page.waitForSelector('h2:has-text("flux")');
+	await page.locator('button:has-text("Suivant")').click();
+
+	// Étape 4 : Finalisation
 	await page.waitForSelector('h2:has-text("Tout est prêt")');
 	await page.locator('button:has-text("Terminer")').click();
 

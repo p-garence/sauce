@@ -205,7 +205,7 @@
 			type="text"
 			name="name"
 			value={feed?.name || ''}
-			placeholder={isEditing ? undefined : 'Ex: Mes abonnements'}
+			placeholder={isEditing ? undefined : 'Mes abonnements'}
 			required
 			maxlength="50"
 		/>
@@ -441,7 +441,7 @@
 						id={isEditing ? `tag_input_${feed?.id}` : 'new_tag_input'}
 						type="text"
 						class="tag-input"
-						placeholder="Ex: photo, tech, art..."
+						placeholder=""
 						bind:value={tagInput}
 						onkeydown={handleTagKeydown}
 					/>
