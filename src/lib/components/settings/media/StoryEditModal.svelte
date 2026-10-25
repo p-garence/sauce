@@ -38,12 +38,7 @@
 		) => void;
 	}
 
-	let {
-		story,
-		userGroups,
-		onClose,
-		onSaved
-	}: Props = $props();
+	let { story, userGroups, onClose, onSaved }: Props = $props();
 
 	let editStoryVisComposite = $state(
 		untrack(() =>
@@ -161,12 +156,7 @@
 		<div class="story-edit-body">
 			<div class="story-mini-summary">
 				{#if story.mediaType === 'video'}
-					<video
-						src={story.mediaUrl}
-						class="mini-thumb"
-						preload="metadata"
-						muted
-						playsinline
+					<video src={story.mediaUrl} class="mini-thumb" preload="metadata" muted playsinline
 					></video>
 				{:else}
 					<img src={story.mediaUrl} alt="Aperçu" class="mini-thumb" />
@@ -308,12 +298,7 @@
 		</div>
 
 		<footer class="story-edit-footer">
-			<button
-				type="button"
-				class="btn-modal-cancel"
-				onclick={onClose}
-				disabled={isSavingStory}
-			>
+			<button type="button" class="btn-modal-cancel" onclick={onClose} disabled={isSavingStory}>
 				Annuler
 			</button>
 			<button

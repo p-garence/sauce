@@ -61,13 +61,7 @@
 		>
 			<label>
 				Nom du groupe
-				<input
-					type="text"
-					name="name"
-					value={chat.name || ''}
-					required
-					disabled={isSubmitting}
-				/>
+				<input type="text" name="name" value={chat.name || ''} required disabled={isSubmitting} />
 			</label>
 			<label>
 				Description

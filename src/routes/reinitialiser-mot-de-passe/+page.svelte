@@ -51,7 +51,8 @@
 
 			if (err) {
 				if (err.code === 'INVALID_TOKEN' || err.message?.toLowerCase().includes('token')) {
-					error = 'Ce lien de réinitialisation est invalide ou a expiré. Veuillez refaire une demande.';
+					error =
+						'Ce lien de réinitialisation est invalide ou a expiré. Veuillez refaire une demande.';
 				} else {
 					error = err.message || 'Une erreur est survenue lors de la mise à jour.';
 				}
@@ -77,23 +78,22 @@
 
 		{#if !token}
 			<div class="error-box">
-				Ce lien de réinitialisation est incomplet (jeton manquant). Veuillez formuler une nouvelle demande depuis la page de connexion.
+				Ce lien de réinitialisation est incomplet (jeton manquant). Veuillez formuler une nouvelle
+				demande depuis la page de connexion.
 			</div>
 			<div class="action-footer">
 				<a href={resolve('/login')} class="submit-btn text-center">Faire une demande</a>
 			</div>
 		{:else if success}
 			<div class="info-box">
-				✓ Votre mot de passe a été mis à jour avec succès !<br>
+				✓ Votre mot de passe a été mis à jour avec succès !<br />
 				Redirection vers la page de connexion en cours...
 			</div>
 			<div class="action-footer">
 				<a href={resolve('/login')} class="submit-btn text-center">Se connecter immédiatement</a>
 			</div>
 		{:else}
-			<p class="desc-text">
-				Définissez votre nouveau mot de passe (au moins 8 caractères).
-			</p>
+			<p class="desc-text">Définissez votre nouveau mot de passe (au moins 8 caractères).</p>
 
 			{#if error}
 				<div class="error-box">{error}</div>

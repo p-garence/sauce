@@ -1,7 +1,7 @@
 /**
  * @module EmailService
  * @description Service d'envoi d'e-mails pour l'instance auto-hébergée (SMTP via Nodemailer).
- * 
+ *
  * Responsabilités :
  * - Gestion du transporteur SMTP paramétrable via variables d'environnement.
  * - Mode fallback pour le développement local : affichage visible dans le terminal si aucun SMTP n'est configuré.
@@ -33,14 +33,17 @@ interface RateLimitEntry {
 const rateLimits = new Map<string, RateLimitEntry>();
 
 // Nettoyage régulier du cache de rate-limiting (toutes les 30 minutes)
-setInterval(() => {
-	const now = Date.now();
-	for (const [key, entry] of rateLimits.entries()) {
-		if (now - entry.firstRequest > 30 * 60 * 1000) {
-			rateLimits.delete(key);
+setInterval(
+	() => {
+		const now = Date.now();
+		for (const [key, entry] of rateLimits.entries()) {
+			if (now - entry.firstRequest > 30 * 60 * 1000) {
+				rateLimits.delete(key);
+			}
 		}
-	}
-}, 30 * 60 * 1000).unref();
+	},
+	30 * 60 * 1000
+).unref();
 
 /**
  * Vérifie si le rate-limit pour un e-mail est respecté.
@@ -209,7 +212,7 @@ export async function sendPasswordResetEmail({
 		console.log(`   Destinataire : ${to}`);
 		console.log(`   Nom          : ${name || '(non renseigné)'}`);
 		console.log(`   Lien direct  : ${resetUrl}`);
-		console.log('   (Configurez SMTP_HOST dans votre .env pour activer l\'envoi réel)');
+		console.log("   (Configurez SMTP_HOST dans votre .env pour activer l'envoi réel)");
 		console.log('━'.repeat(72) + '\n');
 		return true;
 	}
@@ -229,7 +232,7 @@ export async function sendPasswordResetEmail({
 
 		return true;
 	} catch (err) {
-		console.error('[EMAIL ERROR] Échec de l\'envoi de l\'e-mail de réinitialisation:', err);
+		console.error("[EMAIL ERROR] Échec de l'envoi de l'e-mail de réinitialisation:", err);
 		return false;
 	}
 }

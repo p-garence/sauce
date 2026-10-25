@@ -26,12 +26,7 @@
 		onClose: () => void;
 	}
 
-	let {
-		align = 'right',
-		placement = 'top',
-		onSelect,
-		onClose
-	}: Props = $props();
+	let { align = 'right', placement = 'top', onSelect, onClose }: Props = $props();
 
 	let activeEmojiSets = $state<EmojiSet[]>([]);
 	let allEmojis = $state<EmojiItem[]>([]);
@@ -125,7 +120,9 @@
 	{:else if activeEmojiSets.length === 0}
 		<div class="picker-empty">
 			<p>Aucun pack d'émojis actif.</p>
-			<a href={resolve('/parametres?tab=emojis')} class="btn-manage">Activer un pack dans les Paramètres</a>
+			<a href={resolve('/parametres?tab=emojis')} class="btn-manage"
+				>Activer un pack dans les Paramètres</a
+			>
 		</div>
 	{:else}
 		<!-- 1. BARRE DE FAVORIS PROPRE À L'UTILISATEUR -->
@@ -216,7 +213,9 @@
 		background: #ffffff;
 		border: 1px solid #e2e8f0;
 		border-radius: 12px;
-		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 10px 25px -5px rgba(0, 0, 0, 0.15),
+			0 8px 10px -6px rgba(0, 0, 0, 0.1);
 		display: flex;
 		flex-direction: column;
 		z-index: 1000;

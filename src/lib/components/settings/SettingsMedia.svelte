@@ -39,11 +39,7 @@
 		userGroups?: UserGroup[];
 	}
 
-	let {
-		mediaUsage,
-		currentUser,
-		userGroups
-	}: Props = $props();
+	let { mediaUsage, currentUser, userGroups }: Props = $props();
 
 	const groupsList = $derived(userGroups || (page.data?.userGroups as UserGroup[]) || []);
 
@@ -288,18 +284,9 @@
 	}
 </script>
 
-<StorageQuotaCard
-	{currentUsedBytes}
-	{quotaBytes}
-	{usedPercentage}
-	{progressColor}
-/>
+<StorageQuotaCard {currentUsedBytes} {quotaBytes} {usedPercentage} {progressColor} />
 
-<PostsMediaCard
-	posts={activePosts}
-	{deletingId}
-	onDelete={handleDeletePost}
-/>
+<PostsMediaCard posts={activePosts} {deletingId} onDelete={handleDeletePost} />
 
 <StoriesMediaCard
 	stories={activeStories}
@@ -316,10 +303,7 @@
 	onDeleteChatFile={handleDeleteChatFile}
 />
 
-<CustomAssetsMediaCard
-	iconSets={usage.iconSets}
-	emojiSets={usage.emojiSets}
-/>
+<CustomAssetsMediaCard iconSets={usage.iconSets} emojiSets={usage.emojiSets} />
 
 {#if editingStory}
 	<StoryEditModal

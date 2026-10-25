@@ -105,39 +105,21 @@
 		</div>
 
 		<!-- Zones tactiles transparentes gauche (reculer) / droite (avancer) -->
-		<button
-			type="button"
-			class="tap-zone tap-left"
-			onclick={onPrev}
-			aria-label="Story précédente"
+		<button type="button" class="tap-zone tap-left" onclick={onPrev} aria-label="Story précédente"
 		></button>
 
-		<button
-			type="button"
-			class="tap-zone tap-right"
-			onclick={onNext}
-			aria-label="Story suivante"
+		<button type="button" class="tap-zone tap-right" onclick={onNext} aria-label="Story suivante"
 		></button>
 	{/if}
 
 	<!-- Boutons flèches visibles sur Desktop -->
 	{#if showPrevBtn}
-		<button
-			type="button"
-			class="nav-btn nav-prev"
-			onclick={onPrev}
-			aria-label="Story précédente"
-		>
+		<button type="button" class="nav-btn nav-prev" onclick={onPrev} aria-label="Story précédente">
 			<Icon name="media.prev" size={24} color="white" />
 		</button>
 	{/if}
 
-	<button
-		type="button"
-		class="nav-btn nav-next"
-		onclick={onNext}
-		aria-label="Story suivante"
-	>
+	<button type="button" class="nav-btn nav-next" onclick={onNext} aria-label="Story suivante">
 		<Icon name="media.next" size={24} color="white" />
 	</button>
 

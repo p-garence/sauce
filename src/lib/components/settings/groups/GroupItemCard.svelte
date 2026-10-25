@@ -28,12 +28,7 @@
 		onCancelEdit: () => void;
 	}
 
-	let {
-		group,
-		isEditing,
-		onStartEdit,
-		onCancelEdit
-	}: Props = $props();
+	let { group, isEditing, onStartEdit, onCancelEdit }: Props = $props();
 
 	const GROUP_ICON_OPTIONS: { id: IconId | ''; label: string }[] = [
 		{ id: '', label: 'Aucune' },
@@ -132,25 +127,16 @@
 			</div>
 
 			<div class="edit-actions">
-				<button
-					type="submit"
-					class="btn-save-edit"
-					disabled={isSubmitting || !editName.trim()}
-				>
+				<button type="submit" class="btn-save-edit" disabled={isSubmitting || !editName.trim()}>
 					Enregistrer
 				</button>
-				<button type="button" class="btn-cancel-edit" onclick={onCancelEdit}>
-					Annuler
-				</button>
+				<button type="button" class="btn-cancel-edit" onclick={onCancelEdit}> Annuler </button>
 			</div>
 		</form>
 	{:else}
 		<!-- VUE CARTE -->
 		<div class="group-info">
-			<div
-				class="group-badge"
-				style="background-color: {group.color}20; color: {group.color};"
-			>
+			<div class="group-badge" style="background-color: {group.color}20; color: {group.color};">
 				{#if group.icon && group.icon !== 'star'}
 					<Icon name={group.icon as IconId} size={22} color={group.color} />
 				{:else}
@@ -191,9 +177,7 @@
 					class="btn-delete"
 					onclick={(e) => {
 						if (
-							!confirm(
-								`Supprimer le groupe "${group.name}" ? Les posts liés redeviendront privés.`
-							)
+							!confirm(`Supprimer le groupe "${group.name}" ? Les posts liés redeviendront privés.`)
 						)
 							e.preventDefault();
 					}}

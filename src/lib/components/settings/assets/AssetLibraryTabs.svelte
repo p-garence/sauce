@@ -24,13 +24,7 @@
 		onTabChange: (tab: 'owned' | 'saved') => void;
 	}
 
-	let {
-		activeTab,
-		ownedCount,
-		savedCount,
-		itemLabel = 'Packs',
-		onTabChange
-	}: Props = $props();
+	let { activeTab, ownedCount, savedCount, itemLabel = 'Packs', onTabChange }: Props = $props();
 </script>
 
 <div class="asset-tabs-bar">

@@ -21,13 +21,6 @@ export {
 	assertCanSendChatMessage
 } from './conversations';
 
-export {
-	sendChatMessage,
-	updateChatMessage,
-	deleteChatMessage
-} from './messages';
+export { sendChatMessage, updateChatMessage, deleteChatMessage } from './messages';
 
-export {
-	formatMessageReactions,
-	toggleMessageReaction
-} from './reactions';
+export { formatMessageReactions, toggleMessageReaction } from './reactions';

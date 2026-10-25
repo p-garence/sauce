@@ -82,7 +82,8 @@
 			{/if}
 		</div>
 		<span class="pack-meta">
-			{itemCount} {itemLabel}{itemCount > 1 ? 's' : ''}
+			{itemCount}
+			{itemLabel}{itemCount > 1 ? 's' : ''}
 		</span>
 	</div>
 
@@ -103,36 +104,23 @@
 
 	<div class="pack-actions">
 		{#if isActive && onDeactivate}
-			<button type="button" class="btn-pack-secondary" onclick={onDeactivate}>
-				Désactiver
-			</button>
+			<button type="button" class="btn-pack-secondary" onclick={onDeactivate}> Désactiver </button>
 		{:else if !isActive && onActivate}
-			<button type="button" class="btn-pack-primary" onclick={onActivate}>
-				Activer
-			</button>
+			<button type="button" class="btn-pack-primary" onclick={onActivate}> Activer </button>
 		{/if}
 
 		{#if isOwned && onEdit}
-			<button
-				type="button"
-				class="btn-pack-edit"
-				class:editing={isEditing}
-				onclick={onEdit}
-			>
+			<button type="button" class="btn-pack-edit" class:editing={isEditing} onclick={onEdit}>
 				{isEditing ? 'Édition en cours' : 'Éditer'}
 			</button>
 		{/if}
 
 		{#if isOwned && onPublish}
-			<button type="button" class="btn-pack-publish" onclick={onPublish}>
-				Publier
-			</button>
+			<button type="button" class="btn-pack-publish" onclick={onPublish}> Publier </button>
 		{/if}
 
 		{#if isOwned && onDelete}
-			<button type="button" class="btn-pack-delete" onclick={onDelete}>
-				Supprimer
-			</button>
+			<button type="button" class="btn-pack-delete" onclick={onDelete}> Supprimer </button>
 		{/if}
 
 		{#if !isOwned && onRemoveSaved}
@@ -152,7 +140,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
-		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+		transition:
+			border-color 0.15s ease,
+			box-shadow 0.15s ease;
 	}
 
 	.pack-card.is-active {

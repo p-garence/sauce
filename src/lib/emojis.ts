@@ -15,4 +15,3 @@ export function cleanEmojiToken(value: string, maxLength = 30): string {
 		.replace(/^_+|_+$/g, '')
 		.slice(0, maxLength);
 }
-

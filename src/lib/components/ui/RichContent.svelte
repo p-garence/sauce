@@ -44,8 +44,9 @@
 				if (leadingSpace) result.push({ type: 'text', value: leadingSpace });
 
 				const username = trimmed.slice(1);
-				const isMe =
-					Boolean(currentUsername && username.toLowerCase() === currentUsername.toLowerCase());
+				const isMe = Boolean(
+					currentUsername && username.toLowerCase() === currentUsername.toLowerCase()
+				);
 				result.push({ type: 'mention', username, isMe });
 			} else if (trimmed.startsWith('#') && trimmed.length > 1) {
 				const leadingSpace = part.startsWith(' ') ? ' ' : '';
@@ -127,11 +128,7 @@
 				</span>
 			{/if}
 		{:else if token.type === 'emoji'}
-			<Emoji
-				src={token.url}
-				name={token.name}
-				class="inline-chat-emoji"
-			/>
+			<Emoji src={token.url} name={token.name} class="inline-chat-emoji" />
 		{:else}
 			{token.value}
 		{/if}

@@ -29,7 +29,13 @@ export const notificationTypeEnum = pgEnum('notification_type', [
 	'mention'
 ]);
 export const followStatusEnum = pgEnum('follow_status', ['pending', 'accepted']);
-export const feedSourceEnum = pgEnum('feed_source', ['public', 'following', 'groups', 'blend', 'rss']);
+export const feedSourceEnum = pgEnum('feed_source', [
+	'public',
+	'following',
+	'groups',
+	'blend',
+	'rss'
+]);
 export const chatTypeEnum = pgEnum('chat_type', ['direct', 'group']);
 export const chatParticipantStatusEnum = pgEnum('chat_participant_status', [
 	'pending',

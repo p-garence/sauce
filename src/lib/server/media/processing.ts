@@ -193,9 +193,7 @@ export async function saveChatFile(file: File): Promise<SavedMediaFile> {
 	const buffer = Buffer.from(await file.arrayBuffer());
 	const isVideo = file.type.startsWith('video');
 	const isImage = file.type.startsWith('image');
-	const isAudio =
-		file.type.startsWith('audio') ||
-		/\.(webm|ogg|wav|mp3|m4a|aac)$/i.test(file.name);
+	const isAudio = file.type.startsWith('audio') || /\.(webm|ogg|wav|mp3|m4a|aac)$/i.test(file.name);
 	const id = crypto.randomUUID();
 
 	if (isVideo) {

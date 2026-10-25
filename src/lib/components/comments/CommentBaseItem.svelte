@@ -121,7 +121,13 @@
 	}
 
 	async function handleDelete() {
-		if (!confirm(isReply ? 'Voulez-vous vraiment supprimer cette réponse ?' : 'Voulez-vous vraiment supprimer ce commentaire ?')) {
+		if (
+			!confirm(
+				isReply
+					? 'Voulez-vous vraiment supprimer cette réponse ?'
+					: 'Voulez-vous vraiment supprimer ce commentaire ?'
+			)
+		) {
 			return;
 		}
 		isDeleting = true;
@@ -175,7 +181,11 @@
 			<div class="avatar-placeholder deleted">?</div>
 		</div>
 	{:else}
-		<a href={resolve(`/profil/${comment.author?.username || ''}`)} class="avatar" class:small={isReply}>
+		<a
+			href={resolve(`/profil/${comment.author?.username || ''}`)}
+			class="avatar"
+			class:small={isReply}
+		>
 			{#if comment.author?.image}
 				<img src={comment.author.image} alt={comment.author.username} />
 			{:else}
@@ -198,7 +208,9 @@
 			<div class="author-meta">
 				<FormattedDate date={comment.createdAt} class="time" />
 				{#if isEdited}
-					<span class="edited-badge" title={formatFullDate(comment.updatedAt, { withTime: true })}>(modifié)</span>
+					<span class="edited-badge" title={formatFullDate(comment.updatedAt, { withTime: true })}
+						>(modifié)</span
+					>
 				{/if}
 				{#if commentActions.length > 0 && !isEditing}
 					<div class="action-menu-container">
@@ -248,9 +260,7 @@
 
 			{#if onReply}
 				<div class="comment-actions">
-					<button class="action-text-btn" onclick={onReply}>
-						Répondre
-					</button>
+					<button class="action-text-btn" onclick={onReply}> Répondre </button>
 				</div>
 			{/if}
 		{:else}
@@ -258,9 +268,7 @@
 
 			<div class="comment-actions">
 				{#if onReply}
-					<button class="action-text-btn" onclick={onReply}>
-						Répondre
-					</button>
+					<button class="action-text-btn" onclick={onReply}> Répondre </button>
 				{/if}
 
 				<button

@@ -57,7 +57,9 @@
 					class="trending-tag-chip"
 					class:selected={isSelected}
 					onclick={() => onTagClick(tag.name)}
-					title="{isSelected ? 'Retirer' : 'Ajouter'} #{tag.name}{tag.count !== undefined ? ` (${tag.count} post${tag.count > 1 ? 's' : ''})` : ''}"
+					title="{isSelected ? 'Retirer' : 'Ajouter'} #{tag.name}{tag.count !== undefined
+						? ` (${tag.count} post${tag.count > 1 ? 's' : ''})`
+						: ''}"
 				>
 					#{tag.name}
 					{#if tag.count !== undefined}

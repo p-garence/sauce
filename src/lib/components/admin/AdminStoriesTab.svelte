@@ -182,7 +182,9 @@
 							{:else if isExpired && story.isArchived}
 								<div class="archived-content-notice">
 									<span class="badge badge-archived">Archive utilisateur</span>
-									<span class="sub-text italic">Story archivée (non consultable par l'administrateur)</span>
+									<span class="sub-text italic"
+										>Story archivée (non consultable par l'administrateur)</span
+									>
 								</div>
 							{:else if isExpired}
 								<div class="expired-content-notice">
@@ -215,7 +217,9 @@
 							{/if}
 						</td>
 						<td>
-							<span class="sub-text">{story.viewsCount ?? 0} vues • {story.likesCount ?? 0} j'aime</span>
+							<span class="sub-text"
+								>{story.viewsCount ?? 0} vues • {story.likesCount ?? 0} j'aime</span
+							>
 						</td>
 						<td>
 							<FormattedDate date={story.createdAt} class="sub-text" />
@@ -252,11 +256,7 @@
 
 	<div class="pagination-footer">
 		{#if storiesCursor}
-			<button
-				class="btn btn-load-more"
-				onclick={loadMoreStories}
-				disabled={isLoadingMoreStories}
-			>
+			<button class="btn btn-load-more" onclick={loadMoreStories} disabled={isLoadingMoreStories}>
 				{isLoadingMoreStories
 					? 'Chargement en cours...'
 					: `Afficher plus de stories (${storiesList.length} sur ${totalStories})`}

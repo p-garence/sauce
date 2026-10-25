@@ -38,7 +38,13 @@ export function isPrivateIp(ip: string): boolean {
 	if (lower.startsWith('fc') || lower.startsWith('fd')) return true;
 
 	// IPv6 Link-local (fe80::/10)
-	if (lower.startsWith('fe8') || lower.startsWith('fe9') || lower.startsWith('fea') || lower.startsWith('feb')) return true;
+	if (
+		lower.startsWith('fe8') ||
+		lower.startsWith('fe9') ||
+		lower.startsWith('fea') ||
+		lower.startsWith('feb')
+	)
+		return true;
 
 	// IPv4-mapped IPv6 (ex: ::ffff:127.0.0.1)
 	if (lower.startsWith('::ffff:')) {
@@ -78,7 +84,9 @@ export async function validateHostForSsrf(hostname: string): Promise<void> {
 		const records = await dns.lookup(lower, { all: true });
 		for (const record of records) {
 			if (isPrivateIp(record.address)) {
-				throw new Error(`L'hôte ${hostname} résout vers une adresse IP privée interdite (${record.address})`);
+				throw new Error(
+					`L'hôte ${hostname} résout vers une adresse IP privée interdite (${record.address})`
+				);
 			}
 		}
 	} catch (err: unknown) {

@@ -203,7 +203,9 @@
 
 		try {
 			// Requête directe sans curseur : force la génération d'une NOUVELLE seed côté serveur pour les flux aléatoires et le rafraîchissement des flux RSS
-			const res = await fetch(`/api/feed-posts?feedId=${selectedFeed}&limit=${POSTS_PER_SCROLL}&refresh=true`);
+			const res = await fetch(
+				`/api/feed-posts?feedId=${selectedFeed}&limit=${POSTS_PER_SCROLL}&refresh=true`
+			);
 			if (res.ok) {
 				const json = (await res.json()) as { posts: SerializedPost[]; nextCursor: string | null };
 				const formattedPosts = json.posts.map((p) => ({

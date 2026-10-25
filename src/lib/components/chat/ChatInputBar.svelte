@@ -61,8 +61,8 @@
 	let isVoiceSelected = $derived(
 		Boolean(
 			selectedFile &&
-				(selectedFile.type.startsWith('audio') ||
-					/\.(webm|ogg|wav|mp3|m4a|aac)$/i.test(selectedFile.name))
+			(selectedFile.type.startsWith('audio') ||
+				/\.(webm|ogg|wav|mp3|m4a|aac)$/i.test(selectedFile.name))
 		)
 	);
 
@@ -255,7 +255,7 @@
 			type="button"
 			class="toolbar-tool-btn mic-btn"
 			class:recording-active={isRecording}
-			title={isRecording ? "Arrêter l'enregistrement" : "Enregistrer un message vocal"}
+			title={isRecording ? "Arrêter l'enregistrement" : 'Enregistrer un message vocal'}
 			onclick={onToggleVoiceRecording}
 			disabled={isSubmitting}
 			aria-label="Enregistrer un message vocal"

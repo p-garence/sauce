@@ -72,7 +72,11 @@
 		if (debounceTimeout) clearTimeout(debounceTimeout);
 
 		if (!val) {
-			usernameStatus = { checking: false, available: false, message: 'Le pseudo ne peut pas être vide.' };
+			usernameStatus = {
+				checking: false,
+				available: false,
+				message: 'Le pseudo ne peut pas être vide.'
+			};
 			return;
 		}
 
@@ -92,7 +96,11 @@
 		}
 
 		if (!/^[a-zA-Z0-9_]+$/.test(val)) {
-			usernameStatus = { checking: false, available: false, message: 'Lettres, chiffres et _ uniquement.' };
+			usernameStatus = {
+				checking: false,
+				available: false,
+				message: 'Lettres, chiffres et _ uniquement.'
+			};
 			return;
 		}
 
@@ -105,7 +113,11 @@
 				if (data.available) {
 					usernameStatus = { checking: false, available: true, message: '✓ Pseudo disponible' };
 				} else {
-					usernameStatus = { checking: false, available: false, message: data.reason || '✗ Pseudo indisponible' };
+					usernameStatus = {
+						checking: false,
+						available: false,
+						message: data.reason || '✗ Pseudo indisponible'
+					};
 				}
 			} catch {
 				usernameStatus = { checking: false, available: null, message: '' };
@@ -116,9 +128,7 @@
 	// Comportement
 	let serverDoubleTap = $derived(user.doubleTap ?? false);
 	let optDoubleTap = $state<boolean | null>(null);
-	let doubleTap = $derived(
-		optDoubleTap !== null ? optDoubleTap : serverDoubleTap
-	);
+	let doubleTap = $derived(optDoubleTap !== null ? optDoubleTap : serverDoubleTap);
 
 	let formRef = $state<HTMLFormElement | undefined>();
 
@@ -134,20 +144,17 @@
 </script>
 
 <SettingsCard title="Comportement de l'app" description="Comportements spécifiques">
-		<SettingsToggle
-			title="Activer la double touche pour aimer"
-			checked={doubleTap}
-			onchange={(e: Event) => {
-				optDoubleTap = (e.target as HTMLInputElement).checked;
-				handleChange();
-			}}
-		/>
-	</SettingsCard>
+	<SettingsToggle
+		title="Activer la double touche pour aimer"
+		checked={doubleTap}
+		onchange={(e: Event) => {
+			optDoubleTap = (e.target as HTMLInputElement).checked;
+			handleChange();
+		}}
+	/>
+</SettingsCard>
 
-<SettingsCard
-	title="Compte"
-	description="Modifier son pseudo ou adresse de connexion"
->
+<SettingsCard title="Compte" description="Modifier son pseudo ou adresse de connexion">
 	{#if form?.usernameSuccess}
 		<div class="feedback-banner success">
 			✓ {form.usernameMessage || "Nom d'utilisateur mis à jour."}
@@ -230,7 +237,8 @@
 					placeholder="nouveau_pseudo"
 					class="text-input"
 					class:input-error={usernameStatus.available === false}
-					class:input-success={usernameStatus.available === true && usernameInput.toLowerCase() !== initialUsername.toLowerCase()}
+					class:input-success={usernameStatus.available === true &&
+						usernameInput.toLowerCase() !== initialUsername.toLowerCase()}
 					required
 					autocomplete="off"
 				/>
@@ -250,7 +258,11 @@
 					<button
 						type="submit"
 						class="save-btn"
-						disabled={isSubmittingUsername || !usernameInput.trim() || usernameInput.trim() === initialUsername || usernameStatus.available === false || usernameStatus.checking}
+						disabled={isSubmittingUsername ||
+							!usernameInput.trim() ||
+							usernameInput.trim() === initialUsername ||
+							usernameStatus.available === false ||
+							usernameStatus.checking}
 					>
 						{isSubmittingUsername ? 'Enregistrement...' : 'Enregistrer'}
 					</button>
@@ -312,7 +324,9 @@
 					required
 					autocomplete="email"
 				/>
-				<span class="field-hint">Cette adresse sera immédiatement effective pour vos prochaines connexions.</span>
+				<span class="field-hint"
+					>Cette adresse sera immédiatement effective pour vos prochaines connexions.</span
+				>
 
 				<div class="edit-actions">
 					<button
@@ -328,7 +342,9 @@
 					<button
 						type="submit"
 						class="save-btn"
-						disabled={isSubmittingEmail || !emailInput.trim() || emailInput.trim().toLowerCase() === initialEmail.toLowerCase()}
+						disabled={isSubmittingEmail ||
+							!emailInput.trim() ||
+							emailInput.trim().toLowerCase() === initialEmail.toLowerCase()}
 					>
 						{isSubmittingEmail ? 'Enregistrement...' : 'Enregistrer'}
 					</button>
@@ -359,9 +375,7 @@
 			optDoubleTap = null;
 		};
 	}}
->
-	
-</form>
+></form>
 
 {#if user?.role === 'admin'}
 	<SettingsCard
@@ -444,7 +458,9 @@
 		font-size: 0.95rem;
 		background: white;
 		box-sizing: border-box;
-		transition: border-color 0.2s, box-shadow 0.2s;
+		transition:
+			border-color 0.2s,
+			box-shadow 0.2s;
 	}
 	.text-input:focus {
 		outline: none;

@@ -26,12 +26,7 @@
 		progressColor: string;
 	}
 
-	let {
-		currentUsedBytes,
-		quotaBytes,
-		usedPercentage,
-		progressColor
-	}: Props = $props();
+	let { currentUsedBytes, quotaBytes, usedPercentage, progressColor }: Props = $props();
 
 	// Stockage sur l'appareil (navigateur / cache)
 	let deviceStorage = $state<{ usage: number; quota: number; remaining: number } | null>(null);

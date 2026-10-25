@@ -6,7 +6,11 @@
 import { db } from '$lib/server/db';
 import { userFeeds, user as userTable } from '$lib/server/db/schema';
 import { eq, count, and } from 'drizzle-orm';
-import { DEFAULT_FEED_CONFIG, VALID_FEED_SORT_MODES, VALID_FEED_TIME_WINDOWS } from '$lib/constants';
+import {
+	DEFAULT_FEED_CONFIG,
+	VALID_FEED_SORT_MODES,
+	VALID_FEED_TIME_WINDOWS
+} from '$lib/constants';
 import type { FeedSortMode, FeedTimeWindow } from '$lib/types';
 import { parseTagsInput } from '$lib/utils/validation';
 
@@ -40,11 +44,7 @@ export interface FeedConfigInput {
 export function parseFeedFormData(data: FormData): FeedConfigInput {
 	const name = (data.get('name') as string)?.trim() || '';
 	const source = ((data.get('source') as string) || 'public') as
-		| 'public'
-		| 'following'
-		| 'groups'
-		| 'blend'
-		| 'rss';
+		'public' | 'following' | 'groups' | 'blend' | 'rss';
 
 	const groupIds = data
 		.getAll('groupIds')
@@ -56,9 +56,7 @@ export function parseFeedFormData(data: FormData): FeedConfigInput {
 		.filter(Boolean);
 
 	const contentTypeFilterMode = ((data.get('contentTypeFilterMode') as string) || 'all') as
-		| 'all'
-		| 'include'
-		| 'exclude';
+		'all' | 'include' | 'exclude';
 	const contentTypes = data
 		.getAll('contentTypes')
 		.map((t) => String(t))
@@ -72,9 +70,7 @@ export function parseFeedFormData(data: FormData): FeedConfigInput {
 		.filter(Boolean);
 
 	const tagFilterMode = ((data.get('tagFilterMode') as string) || 'all') as
-		| 'all'
-		| 'include'
-		| 'exclude';
+		'all' | 'include' | 'exclude';
 
 	const includeTags = parseTagsInput(data.get('includeTags'));
 
@@ -183,13 +179,16 @@ export async function createUserFeed(userId: string, input: FeedConfigInput) {
 			.map((u) => u.trim())
 			.filter((u) => u.startsWith('http://') || u.startsWith('https://'));
 		if (cleanUrls.length === 0) {
-			throw new Error('Veuillez ajouter au moins une URL de flux RSS valide (http:// ou https://).');
+			throw new Error(
+				'Veuillez ajouter au moins une URL de flux RSS valide (http:// ou https://).'
+			);
 		}
 	}
 
 	const rawRatio = input.blendRatio ?? 50;
 	const blendRatio = Math.max(5, Math.min(95, rawRatio));
-	const rssUrls = input.source === 'rss' ? (input.rssUrls || []).map((u) => u.trim()).filter(Boolean) : [];
+	const rssUrls =
+		input.source === 'rss' ? (input.rssUrls || []).map((u) => u.trim()).filter(Boolean) : [];
 
 	const [created] = await db
 		.insert(userFeeds)
@@ -201,7 +200,8 @@ export async function createUserFeed(userId: string, input: FeedConfigInput) {
 			excludedGroupIds: input.source === 'rss' ? [] : input.excludedGroupIds || [],
 			contentTypeFilterMode: input.source === 'rss' ? 'all' : input.contentTypeFilterMode || 'all',
 			contentTypes: input.source === 'rss' ? [] : input.contentTypes || [],
-			carouselContentTypeFilterMode: input.source === 'rss' ? 'all' : input.carouselContentTypeFilterMode || 'all',
+			carouselContentTypeFilterMode:
+				input.source === 'rss' ? 'all' : input.carouselContentTypeFilterMode || 'all',
 			carouselContentTypes: input.source === 'rss' ? [] : input.carouselContentTypes || [],
 			tagFilterMode: input.source === 'rss' ? 'all' : input.tagFilterMode || 'all',
 			includeTags: input.source === 'rss' ? [] : input.includeTags || [],
@@ -245,13 +245,16 @@ export async function updateUserFeed(userId: string, feedId: string, input: Feed
 			.map((u) => u.trim())
 			.filter((u) => u.startsWith('http://') || u.startsWith('https://'));
 		if (cleanUrls.length === 0) {
-			throw new Error('Veuillez ajouter au moins une URL de flux RSS valide (http:// ou https://).');
+			throw new Error(
+				'Veuillez ajouter au moins une URL de flux RSS valide (http:// ou https://).'
+			);
 		}
 	}
 
 	const rawRatio = input.blendRatio ?? 50;
 	const blendRatio = Math.max(5, Math.min(95, rawRatio));
-	const rssUrls = input.source === 'rss' ? (input.rssUrls || []).map((u) => u.trim()).filter(Boolean) : [];
+	const rssUrls =
+		input.source === 'rss' ? (input.rssUrls || []).map((u) => u.trim()).filter(Boolean) : [];
 
 	const [updated] = await db
 		.update(userFeeds)
@@ -262,7 +265,8 @@ export async function updateUserFeed(userId: string, feedId: string, input: Feed
 			excludedGroupIds: input.source === 'rss' ? [] : input.excludedGroupIds || [],
 			contentTypeFilterMode: input.source === 'rss' ? 'all' : input.contentTypeFilterMode || 'all',
 			contentTypes: input.source === 'rss' ? [] : input.contentTypes || [],
-			carouselContentTypeFilterMode: input.source === 'rss' ? 'all' : input.carouselContentTypeFilterMode || 'all',
+			carouselContentTypeFilterMode:
+				input.source === 'rss' ? 'all' : input.carouselContentTypeFilterMode || 'all',
 			carouselContentTypes: input.source === 'rss' ? [] : input.carouselContentTypes || [],
 			tagFilterMode: input.source === 'rss' ? 'all' : input.tagFilterMode || 'all',
 			includeTags: input.source === 'rss' ? [] : input.includeTags || [],

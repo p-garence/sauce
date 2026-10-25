@@ -34,13 +34,7 @@
 		onUpdated?: (updatedComment: CommentData) => void;
 	}
 
-	let {
-		comment = $bindable(),
-		postId,
-		onReply,
-		onDeleted,
-		onUpdated
-	}: Props = $props();
+	let { comment = $bindable(), postId, onReply, onDeleted, onUpdated }: Props = $props();
 
 	const LIMIT = COMMENTS_PER_LOAD;
 
@@ -108,7 +102,7 @@
 </script>
 
 <CommentBaseItem
-	bind:comment={comment}
+	bind:comment
 	isReply={false}
 	onReply={() => onReply(comment.id, comment.author?.username || '', false)}
 	onDeleted={(id, softDeleted) => onDeleted?.(id, 1, comment.parentId, softDeleted)}

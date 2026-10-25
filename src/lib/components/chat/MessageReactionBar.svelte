@@ -104,7 +104,9 @@
 		-webkit-backdrop-filter: blur(12px);
 		border: 1px solid rgba(0, 0, 0, 0.1);
 		border-radius: 9999px;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+		box-shadow:
+			0 4px 16px rgba(0, 0, 0, 0.12),
+			0 1px 4px rgba(0, 0, 0, 0.06);
 		user-select: none;
 		width: max-content;
 		min-width: max-content;

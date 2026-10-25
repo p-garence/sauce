@@ -151,7 +151,12 @@
 								</a>
 
 								<div class="reaction-tag-box">
-									<Emoji src={u.emojiUrl} name={u.emojiName} size={24} class="user-reaction-emoji" />
+									<Emoji
+										src={u.emojiUrl}
+										name={u.emojiName}
+										size={24}
+										class="user-reaction-emoji"
+									/>
 									{#if u.id === currentUserId}
 										<button
 											type="button"
@@ -331,7 +336,6 @@
 		color: #ffffff;
 	}
 
-
 	.tab-count {
 		font-size: 0.75rem;
 		opacity: 0.85;
@@ -432,7 +436,6 @@
 		flex-shrink: 0;
 	}
 
-
 	.btn-remove-reaction {
 		background: #fee2e2;
 		color: #dc2626;
@@ -499,7 +502,6 @@
 		background: rgba(14, 165, 233, 0.2);
 		transform: scale(1.15);
 	}
-
 
 	.settings-emoji-link {
 		color: #0ea5e9;

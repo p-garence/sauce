@@ -26,13 +26,7 @@
 		onAddText?: () => void;
 	}
 
-	let {
-		items,
-		currentIndex = $bindable(0),
-		onMove,
-		onAddMedia,
-		onAddText
-	}: Props = $props();
+	let { items, currentIndex = $bindable(0), onMove, onAddMedia, onAddText }: Props = $props();
 
 	function handleMove(index: number, direction: 'left' | 'right') {
 		if (onMove) {

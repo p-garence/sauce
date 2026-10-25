@@ -143,7 +143,7 @@
 {#if !enabled}
 	{@render children?.()}
 {:else}
-<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="double-tap-detector {className}"
 		{style}

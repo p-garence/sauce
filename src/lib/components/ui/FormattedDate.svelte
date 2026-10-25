@@ -54,7 +54,9 @@
 </script>
 
 {#if formattedText}
-	<time datetime={isoString} title={fullTooltip} class="formatted-date {className}">{formattedText}</time>
+	<time datetime={isoString} title={fullTooltip} class="formatted-date {className}"
+		>{formattedText}</time
+	>
 {/if}
 
 <style>

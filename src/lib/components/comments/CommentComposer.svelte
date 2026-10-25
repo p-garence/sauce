@@ -30,12 +30,7 @@
 		onCancelReply?: () => void;
 	}
 
-	let {
-		postId,
-		replyTo = $bindable(null),
-		onCommentSubmitted,
-		onCancelReply
-	}: Props = $props();
+	let { postId, replyTo = $bindable(null), onCommentSubmitted, onCancelReply }: Props = $props();
 
 	let commentInputElement = $state<HTMLElement | null>(null);
 	let mentionSuggestionsRef: MentionSuggestions | undefined = $state();
@@ -187,7 +182,12 @@
 	{#if replyTo}
 		<div class="reply-indicator">
 			<span>En réponse à <strong>@{replyTo.username}</strong></span>
-			<button type="button" class="cancel-reply" onclick={cancelReply} aria-label="Annuler la réponse">
+			<button
+				type="button"
+				class="cancel-reply"
+				onclick={cancelReply}
+				aria-label="Annuler la réponse"
+			>
 				✕
 			</button>
 		</div>
@@ -230,18 +230,9 @@
 				></div>
 			</div>
 
-			<EmojiButton
-				onSelect={insertEmoji}
-				disabled={isSubmitting}
-				variant="inline"
-				align="right"
-			/>
+			<EmojiButton onSelect={insertEmoji} disabled={isSubmitting} variant="inline" align="right" />
 
-			<button
-				type="submit"
-				class="btn-submit"
-				disabled={isSubmitting || newComment.trim() === ''}
-			>
+			<button type="submit" class="btn-submit" disabled={isSubmitting || newComment.trim() === ''}>
 				Publier
 			</button>
 		</form>

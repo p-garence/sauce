@@ -47,14 +47,10 @@
 		<div class="interactions-drawer" role="dialog" aria-modal="true" tabindex="-1">
 			<header class="drawer-header">
 				<h3 class="drawer-title">
-					<Icon name="action.like" size={16} color="#ef4444" /> J’aime ({likes?.length ?? likesCount})
+					<Icon name="action.like" size={16} color="#ef4444" /> J’aime ({likes?.length ??
+						likesCount})
 				</h3>
-				<button
-					type="button"
-					class="btn-close-drawer"
-					onclick={onClose}
-					aria-label="Fermer"
-				>
+				<button type="button" class="btn-close-drawer" onclick={onClose} aria-label="Fermer">
 					<Icon name="action.close" size={18} color="white" />
 				</button>
 			</header>

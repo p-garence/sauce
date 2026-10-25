@@ -4,11 +4,7 @@
  */
 
 import { db, client } from '$lib/server/db';
-import {
-	messages,
-	chatParticipants,
-	messageReactions
-} from '$lib/server/db/schema';
+import { messages, chatParticipants, messageReactions } from '$lib/server/db/schema';
 import { eq, and, asc } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import type { MessageReactionGroup, MessageReactionUser } from '$lib/types';

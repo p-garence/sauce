@@ -68,7 +68,10 @@
 		const isStory = notifItem.content?.includes('story');
 		const names = notifItem.actors.map((a) => a.name || a.username || "Quelqu'un");
 		const firstName =
-			names[0] || notifItem.singleNotif.actor?.name || notifItem.singleNotif.actor?.username || "Quelqu'un";
+			names[0] ||
+			notifItem.singleNotif.actor?.name ||
+			notifItem.singleNotif.actor?.username ||
+			"Quelqu'un";
 
 		switch (notifItem.type) {
 			case 'like': {
@@ -221,6 +224,7 @@
 		<FormattedDate date={item.createdAt} class="time" />
 	</div>
 </a>
+
 <!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 <style>

@@ -27,12 +27,7 @@
 		form?: { success?: boolean; message?: string } | null;
 	}
 
-	let {
-		feeds,
-		groups = [],
-		trendingTags = [],
-		form
-	}: Props = $props();
+	let { feeds, groups = [], trendingTags = [], form }: Props = $props();
 
 	let editingFeedId = $state<string | null>(null);
 </script>

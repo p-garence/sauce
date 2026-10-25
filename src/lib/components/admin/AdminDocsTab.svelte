@@ -14,16 +14,11 @@
 		<div>
 			<h2>Documentation du Projet</h2>
 			<p class="action-desc">
-				Documentation technique interactive générée avec Astro Starlight (27 pages, recherche
-				plein texte intégrée).
+				Documentation technique interactive générée avec Astro Starlight (27 pages, recherche plein
+				texte intégrée).
 			</p>
 		</div>
-		<a
-			href="/wikidev"
-			target="_blank"
-			rel="noopener noreferrer"
-			class="btn btn-blue"
-		>
+		<a href="/wikidev" target="_blank" rel="noopener noreferrer" class="btn btn-blue">
 			Ouvrir le Wiki Dev (/wikidev) ↗
 		</a>
 	</div>
@@ -40,16 +35,16 @@
 		<div class="doc-card">
 			<h3>Médias & Quotas de Stockage</h3>
 			<p>
-				Quota par utilisateur (2 Go par défaut) modifiable depuis l'onglet Utilisateurs.
-				Compression automatique WebP / H.264 et scanner d'orphelins.
+				Quota par utilisateur (2 Go par défaut) modifiable depuis l'onglet Utilisateurs. Compression
+				automatique WebP / H.264 et scanner d'orphelins.
 			</p>
 		</div>
 
 		<div class="doc-card">
 			<h3>Flux & State Memory</h3>
 			<p>
-				Curseur de pagination opaque en Base64, conservation réactive du scroll et de
-				l'historique lors de la navigation entre profils et onglets.
+				Curseur de pagination opaque en Base64, conservation réactive du scroll et de l'historique
+				lors de la navigation entre profils et onglets.
 			</p>
 		</div>
 

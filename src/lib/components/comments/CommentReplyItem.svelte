@@ -23,12 +23,7 @@
 		onUpdated?: (updatedReply: CommentData) => void;
 	}
 
-	let {
-		reply = $bindable(),
-		onReply,
-		onDeleted,
-		onUpdated
-	}: Props = $props();
+	let { reply = $bindable(), onReply, onDeleted, onUpdated }: Props = $props();
 </script>
 
 <CommentBaseItem

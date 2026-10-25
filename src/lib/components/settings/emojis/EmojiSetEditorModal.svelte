@@ -33,11 +33,7 @@
 		onCancel: () => void;
 	}
 
-	let {
-		editingSet = null,
-		onSave,
-		onCancel
-	}: Props = $props();
+	let { editingSet = null, onSave, onCancel }: Props = $props();
 
 	let setName = $state(untrack(() => editingSet?.name || ''));
 	let setDescription = $state(untrack(() => editingSet?.description || ''));
@@ -137,10 +133,10 @@
 </script>
 
 <div class="editor-scroll-anchor">
-	<SettingsCard title={editingSet ? `Modifier : ${editingSet.name}` : "Créer une collection d'emojis"}>
-		<p class="editor-desc">
-			Ajoutez vos images pour concevoir un pack d'emojis personnalisé.
-		</p>
+	<SettingsCard
+		title={editingSet ? `Modifier : ${editingSet.name}` : "Créer une collection d'emojis"}
+	>
+		<p class="editor-desc">Ajoutez vos images pour concevoir un pack d'emojis personnalisé.</p>
 
 		{#if saveErrorMessage}
 			<div class="alert-error">{saveErrorMessage}</div>

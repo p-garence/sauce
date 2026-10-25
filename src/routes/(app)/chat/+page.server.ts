@@ -66,24 +66,30 @@ export const load: PageServerLoad = async ({ parent }) => {
 				} else {
 					const parsed = parseStoryReply(displayMessage.content);
 					if (parsed.story) {
-					lastMessageText = `📷 Réponse à une story : ${parsed.text}`;
-				} else if (displayMessage.mediaUrl) {
-					if (displayMessage.mediaType === 'image') {
-						lastMessageText = displayMessage.content ? `📷 ${displayMessage.content}` : '📷 Photo';
-					} else if (displayMessage.mediaType === 'video') {
-						lastMessageText = displayMessage.content ? `🎥 ${displayMessage.content}` : '🎥 Vidéo';
-					} else if (displayMessage.mediaType === 'audio') {
-						lastMessageText = displayMessage.content ? `🎤 ${displayMessage.content}` : '🎤 Message vocal';
+						lastMessageText = `📷 Réponse à une story : ${parsed.text}`;
+					} else if (displayMessage.mediaUrl) {
+						if (displayMessage.mediaType === 'image') {
+							lastMessageText = displayMessage.content
+								? `📷 ${displayMessage.content}`
+								: '📷 Photo';
+						} else if (displayMessage.mediaType === 'video') {
+							lastMessageText = displayMessage.content
+								? `🎥 ${displayMessage.content}`
+								: '🎥 Vidéo';
+						} else if (displayMessage.mediaType === 'audio') {
+							lastMessageText = displayMessage.content
+								? `🎤 ${displayMessage.content}`
+								: '🎤 Message vocal';
+						} else {
+							lastMessageText = displayMessage.content
+								? `📎 ${displayMessage.content}`
+								: `📎 ${displayMessage.mediaName || 'Fichier'}`;
+						}
 					} else {
-						lastMessageText = displayMessage.content
-							? `📎 ${displayMessage.content}`
-							: `📎 ${displayMessage.mediaName || 'Fichier'}`;
+						lastMessageText = displayMessage.content;
 					}
-				} else {
-					lastMessageText = displayMessage.content;
 				}
 			}
-		}
 
 			return {
 				id: chat.id,

@@ -53,11 +53,7 @@
 
 	<nav class="tabs-nav">
 		{#each tabs as tab (tab.id)}
-			<button
-				class="tab-btn"
-				class:active={activeTab === tab.id}
-				onclick={() => selectTab(tab.id)}
-			>
+			<button class="tab-btn" class:active={activeTab === tab.id} onclick={() => selectTab(tab.id)}>
 				<span class="tab-icon"><Icon name={tab.iconId} size={18} /></span>
 				{tab.label}
 			</button>

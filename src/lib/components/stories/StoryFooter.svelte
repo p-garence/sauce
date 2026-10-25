@@ -113,12 +113,7 @@
 						class="story-emoji-btn"
 					/>
 					{#if replyText.trim()}
-						<button
-							type="button"
-							class="btn-send"
-							onclick={onSendReply}
-							disabled={isSendingReply}
-						>
+						<button type="button" class="btn-send" onclick={onSendReply} disabled={isSendingReply}>
 							Envoyer
 						</button>
 					{/if}

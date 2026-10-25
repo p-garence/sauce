@@ -162,7 +162,9 @@
 						<div class="picker-collection-group">
 							<div class="picker-group-header">
 								<span class="picker-group-title">{col.name}</span>
-								<span class="picker-group-badge">{col.isOwned ? 'Ma collection' : 'Sauvegardée'}</span>
+								<span class="picker-group-badge"
+									>{col.isOwned ? 'Ma collection' : 'Sauvegardée'}</span
+								>
 								<span class="picker-group-count">({col.emojis.length})</span>
 							</div>
 

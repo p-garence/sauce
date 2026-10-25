@@ -57,7 +57,7 @@ export async function getComments(options: CommentFetchOptions) {
 					sql`${comments.content} != '[deleted]'`,
 					sql`EXISTS (SELECT 1 FROM ${comments} c2 WHERE c2.parent_id = ${comments.id})`
 				)
-		  )
+			)
 		: and(
 				eq(comments.postId, postId),
 				isNull(comments.parentId),
@@ -65,16 +65,13 @@ export async function getComments(options: CommentFetchOptions) {
 					sql`${comments.content} != '[deleted]'`,
 					sql`EXISTS (SELECT 1 FROM ${comments} c2 WHERE c2.parent_id = ${comments.id})`
 				)
-		  );
+			);
 
 	const whereCondition = viewerId
 		? and(
 				baseWhere,
-				or(
-					sql`${comments.content} = '[deleted]'`,
-					notBlockedSql(viewerId, comments.authorId)
-				)
-		  )
+				or(sql`${comments.content} = '[deleted]'`, notBlockedSql(viewerId, comments.authorId))
+			)
 		: baseWhere;
 
 	const fetchedComments = await db.query.comments.findMany({
@@ -384,7 +381,7 @@ export async function deleteComment(params: {
 	}
 
 	if (existing.authorId !== userId && !isAdmin) {
-		throw error(403, 'Vous n\'êtes pas autorisé à supprimer ce commentaire.');
+		throw error(403, "Vous n'êtes pas autorisé à supprimer ce commentaire.");
 	}
 
 	const result = await db.transaction(async (tx) => {
@@ -460,4 +457,3 @@ export async function deleteComment(params: {
 		postId: existing.postId
 	};
 }
-

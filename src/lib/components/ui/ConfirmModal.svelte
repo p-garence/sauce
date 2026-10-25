@@ -67,12 +67,7 @@
 			<button type="button" class="btn-cancel" onclick={handleCancel} disabled={loading}>
 				{cancelLabel}
 			</button>
-			<button
-				type="button"
-				class="btn-confirm {variant}"
-				onclick={onconfirm}
-				disabled={loading}
-			>
+			<button type="button" class="btn-confirm {variant}" onclick={onconfirm} disabled={loading}>
 				{loading ? 'Chargement...' : confirmLabel}
 			</button>
 		</div>
@@ -118,7 +113,9 @@
 		font-size: 0.88rem;
 		color: #ffffff;
 		cursor: pointer;
-		transition: opacity 0.15s, transform 0.1s;
+		transition:
+			opacity 0.15s,
+			transform 0.1s;
 	}
 
 	.btn-confirm.danger {

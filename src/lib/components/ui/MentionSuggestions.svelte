@@ -36,9 +36,7 @@
 	let activeNodeCaretOffset = 0;
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-	function isStandardInput(
-		el: HTMLElement | null
-	): el is HTMLInputElement | HTMLTextAreaElement {
+	function isStandardInput(el: HTMLElement | null): el is HTMLInputElement | HTMLTextAreaElement {
 		return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
 	}
 

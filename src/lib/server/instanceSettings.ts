@@ -69,7 +69,10 @@ export async function getInstanceSettings(): Promise<InstanceSettingsData> {
 			defaultIconSet: (row.defaultIconSet as unknown as IconSet) || null
 		};
 	} catch (e) {
-		console.warn('Instance settings table not ready or queried without migration, using defaults:', e);
+		console.warn(
+			'Instance settings table not ready or queried without migration, using defaults:',
+			e
+		);
 		return DEFAULT_SETTINGS;
 	}
 }

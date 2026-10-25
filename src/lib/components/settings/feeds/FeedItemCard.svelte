@@ -29,13 +29,7 @@
 		onEdit: () => void;
 	}
 
-	let {
-		feed,
-		feeds,
-		groups = [],
-		canDelete,
-		onEdit
-	}: Props = $props();
+	let { feed, feeds, groups = [], canDelete, onEdit }: Props = $props();
 
 	const AVAILABLE_CONTENT_TYPES = [
 		{ id: 'text', label: 'Texte' },
@@ -83,9 +77,7 @@
 					.filter((g) => feed.groupIds?.includes(g.id))
 					.map((g) => g.name)}
 				<span class="badge badge-group">
-					Groupes ({selectedGroupNames.length > 0
-						? selectedGroupNames.join(', ')
-						: 'Aucun groupe'})
+					Groupes ({selectedGroupNames.length > 0 ? selectedGroupNames.join(', ') : 'Aucun groupe'})
 				</span>
 			{:else if feed.source === 'blend'}
 				<span class="badge badge-blend">
@@ -100,10 +92,7 @@
 			{/if}
 
 			{#if feed.source !== 'blend' && feed.source !== 'rss' && (feed.tagFilterMode ? feed.tagFilterMode !== 'all' : true) && feed.includeTags && feed.includeTags.length > 0}
-				<span
-					class="badge badge-tag"
-					class:badge-excluded={feed.tagFilterMode === 'exclude'}
-				>
+				<span class="badge badge-tag" class:badge-excluded={feed.tagFilterMode === 'exclude'}>
 					{feed.tagFilterMode === 'exclude' ? 'Sans tags :' : 'Tags :'}
 					{feed.includeTags.map((t) => `#${t}`).join(' ')}
 				</span>

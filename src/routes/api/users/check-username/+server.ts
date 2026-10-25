@@ -11,13 +11,17 @@ export const GET: RequestHandler = async ({ url, request }) => {
 	const requestedUsername = (url.searchParams.get('username') || '').trim();
 
 	if (!requestedUsername) {
-		return json({ available: false, reason: 'Veuillez saisir un nom d\'utilisateur.' }, { status: 400 });
+		return json(
+			{ available: false, reason: "Veuillez saisir un nom d'utilisateur." },
+			{ status: 400 }
+		);
 	}
 
 	if (!isValidUsername(requestedUsername)) {
 		return json({
 			available: false,
-			reason: 'Le pseudo doit comporter entre 3 et 30 caractères (lettres, chiffres et tirets bas uniquement).'
+			reason:
+				'Le pseudo doit comporter entre 3 et 30 caractères (lettres, chiffres et tirets bas uniquement).'
 		});
 	}
 
@@ -35,7 +39,7 @@ export const GET: RequestHandler = async ({ url, request }) => {
 			.limit(1);
 
 		if (existing && existing.id !== session.user.id) {
-			return json({ available: false, reason: 'Ce nom d\'utilisateur est déjà pris.' });
+			return json({ available: false, reason: "Ce nom d'utilisateur est déjà pris." });
 		}
 
 		return json({ available: true });

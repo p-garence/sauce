@@ -212,9 +212,7 @@ function parseRss2(xml: string, fallbackUrl: string): ParsedRssFeed {
 
 		const itemTitle = extractTagContent(itemXml, 'title') || 'Sans titre';
 		let rawItemLink =
-			extractTagContent(itemXml, 'link') ||
-			extractAttribute(itemXml, 'link', 'href') ||
-			'';
+			extractTagContent(itemXml, 'link') || extractAttribute(itemXml, 'link', 'href') || '';
 
 		if (!rawItemLink) {
 			const guid = extractTagContent(itemXml, 'guid');
@@ -244,7 +242,8 @@ function parseRss2(xml: string, fallbackUrl: string): ParsedRssFeed {
 		const summary = sanitizeToPlainText(rawContent);
 
 		const imageUrl = extractImageUrl(itemXml, siteUrl || safeFallback);
-		const author = extractTagContent(itemXml, 'dc:creator') || extractTagContent(itemXml, 'author') || null;
+		const author =
+			extractTagContent(itemXml, 'dc:creator') || extractTagContent(itemXml, 'author') || null;
 
 		items.push({
 			guid,
@@ -284,9 +283,7 @@ function parseAtom(xml: string, fallbackUrl: string): ParsedRssFeed {
 
 		const itemTitle = extractTagContent(entryXml, 'title') || 'Sans titre';
 		let rawItemLink =
-			extractAttribute(entryXml, 'link', 'href') ||
-			extractTagContent(entryXml, 'link') ||
-			'';
+			extractAttribute(entryXml, 'link', 'href') || extractTagContent(entryXml, 'link') || '';
 
 		if (!rawItemLink) {
 			const id = extractTagContent(entryXml, 'id');
@@ -299,7 +296,8 @@ function parseAtom(xml: string, fallbackUrl: string): ParsedRssFeed {
 
 		const id = extractTagContent(entryXml, 'id') || itemLink || `${itemTitle}_${items.length}`;
 
-		const dateStr = extractTagContent(entryXml, 'published') || extractTagContent(entryXml, 'updated');
+		const dateStr =
+			extractTagContent(entryXml, 'published') || extractTagContent(entryXml, 'updated');
 		let publishedAt = new Date();
 		if (dateStr) {
 			const parsed = new Date(dateStr);
@@ -309,9 +307,7 @@ function parseAtom(xml: string, fallbackUrl: string): ParsedRssFeed {
 		}
 
 		const rawContent =
-			extractTagContent(entryXml, 'summary') ||
-			extractTagContent(entryXml, 'content') ||
-			'';
+			extractTagContent(entryXml, 'summary') || extractTagContent(entryXml, 'content') || '';
 		const summary = sanitizeToPlainText(rawContent);
 
 		const imageUrl = extractImageUrl(entryXml, feedLink || safeFallback);

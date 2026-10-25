@@ -13,11 +13,7 @@
 		onActionSelected?: (action: MenuAction, direction: 'up' | 'down') => void;
 	}
 
-	let {
-		actions,
-		direction = 'auto',
-		onActionSelected
-	}: Props = $props();
+	let { actions, direction = 'auto', onActionSelected }: Props = $props();
 
 	let isOpen = $state(false);
 	let openUpwards = $state(false);
@@ -49,9 +45,7 @@
 				} else {
 					const estimatedMenuHeight = 180;
 					openUpwards =
-						spaceBelow < estimatedMenuHeight &&
-						spaceAbove > spaceBelow &&
-						spaceAbove >= 140;
+						spaceBelow < estimatedMenuHeight && spaceAbove > spaceBelow && spaceAbove >= 140;
 				}
 
 				const availableSpace = openUpwards ? spaceAbove : spaceBelow;
@@ -79,12 +73,7 @@
 </script>
 
 <div class="menu-wrapper">
-	<button
-		bind:this={buttonRef}
-		class="btn-more"
-		onclick={toggleMenu}
-		aria-label="Plus d'options"
-	>
+	<button bind:this={buttonRef} class="btn-more" onclick={toggleMenu} aria-label="Plus d'options">
 		<Icon name="action.menu" size={18} />
 	</button>
 

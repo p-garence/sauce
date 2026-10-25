@@ -32,12 +32,7 @@
 		onReset: (iconId: IconId) => void;
 	}
 
-	let {
-		icon,
-		onClose,
-		onFileSelected,
-		onReset
-	}: Props = $props();
+	let { icon, onClose, onFileSelected, onReset }: Props = $props();
 
 	let fileInputRef = $state<HTMLInputElement | null>(null);
 	let isUploading = $state(false);
@@ -103,11 +98,7 @@
 				{/if}
 
 				{#if iconTheme.getCustomIcon(icon.id)}
-					<button
-						type="button"
-						class="btn-action-secondary"
-						onclick={() => onReset(icon.id)}
-					>
+					<button type="button" class="btn-action-secondary" onclick={() => onReset(icon.id)}>
 						Rétablir le défaut
 					</button>
 				{/if}

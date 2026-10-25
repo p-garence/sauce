@@ -149,7 +149,10 @@
 					class="disabled-input"
 				/>
 				<span class="field-hint" style="font-size: 0.8rem; color: #71717a; margin-top: 4px;">
-					Pour modifier votre pseudo, rendez-vous dans <a href={resolve('/parametres?tab=general')} style="color: #2563eb; text-decoration: underline;">Paramètres &gt; Général</a>.
+					Pour modifier votre pseudo, rendez-vous dans <a
+						href={resolve('/parametres?tab=general')}
+						style="color: #2563eb; text-decoration: underline;">Paramètres &gt; Général</a
+					>.
 				</span>
 			</div>
 

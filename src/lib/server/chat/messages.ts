@@ -4,11 +4,7 @@
  */
 
 import { db, client } from '$lib/server/db';
-import {
-	chatParticipants,
-	user as userTable,
-	messages
-} from '$lib/server/db/schema';
+import { chatParticipants, user as userTable, messages } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import { notifyMentions } from '$lib/server/mentions';
@@ -148,11 +144,7 @@ export async function sendChatMessage(
  * @param content Nouveau texte
  * @returns Le message mis à jour
  */
-export async function updateChatMessage(
-	messageId: string,
-	userId: string,
-	content: string
-) {
+export async function updateChatMessage(messageId: string, userId: string, content: string) {
 	const msg = await db.query.messages.findFirst({
 		where: eq(messages.id, messageId)
 	});

@@ -92,13 +92,9 @@
 		return (page.data?.userFavoriteEmojis as EmojiItem[]) || [];
 	});
 
-	let totalReactionsCount = $derived(
-		message.reactions?.reduce((sum, r) => sum + r.count, 0) || 0
-	);
+	let totalReactionsCount = $derived(message.reactions?.reduce((sum, r) => sum + r.count, 0) || 0);
 
-	let hasUserReactedAny = $derived(
-		Boolean(message.reactions?.some((r) => r.hasReacted))
-	);
+	let hasUserReactedAny = $derived(Boolean(message.reactions?.some((r) => r.hasReacted)));
 
 	function handlePointerDown(e: PointerEvent) {
 		if (isDeleted || isEditing) return;
@@ -106,7 +102,8 @@
 		// Sur PC (souris), l'ouverture se fait via le menu ...
 		if (e.pointerType === 'mouse') return;
 		const target = e.target as HTMLElement;
-		if (target.closest('button, a, input, textarea, audio, video, .message-reactions-badge')) return;
+		if (target.closest('button, a, input, textarea, audio, video, .message-reactions-badge'))
+			return;
 
 		pointerStartPos = { x: e.clientX, y: e.clientY };
 		isLongPressTriggered = false;
@@ -173,9 +170,9 @@
 	let isMentioned = $derived(
 		Boolean(
 			!isDeleted &&
-				currentUsername &&
-				message.content &&
-				message.content.toLowerCase().includes('@' + currentUsername.toLowerCase())
+			currentUsername &&
+			message.content &&
+			message.content.toLowerCase().includes('@' + currentUsername.toLowerCase())
 		)
 	);
 
@@ -218,7 +215,9 @@
 	class:has-reactions={totalReactionsCount > 0}
 	class:reaction-bar-active={showReactionBar}
 	role="group"
-	aria-label="Message de {isMe ? 'vous' : message.sender?.name || message.sender?.username || 'utilisateur'}"
+	aria-label="Message de {isMe
+		? 'vous'
+		: message.sender?.name || message.sender?.username || 'utilisateur'}"
 	onpointerdown={handlePointerDown}
 	onpointermove={handlePointerMove}
 	onpointerup={handlePointerUp}
@@ -396,7 +395,12 @@
 		>
 			<span class="reactions-icons">
 				{#each message.reactions.slice(0, 3) as reaction (reaction.emojiId)}
-					<Emoji src={reaction.emojiUrl} name={reaction.emojiName} size={17} class="reaction-badge-img" />
+					<Emoji
+						src={reaction.emojiUrl}
+						name={reaction.emojiName}
+						size={17}
+						class="reaction-badge-img"
+					/>
 				{/each}
 			</span>
 			{#if totalReactionsCount > 1}
@@ -527,7 +531,6 @@
 		align-items: center;
 		gap: 2px;
 	}
-
 
 	.reactions-badge-count {
 		font-size: 0.75rem;
@@ -952,7 +955,9 @@
 		height: 20px;
 		font-size: 0.85rem;
 		border-radius: 50%;
-		transition: opacity 0.15s, background 0.15s;
+		transition:
+			opacity 0.15s,
+			background 0.15s;
 	}
 
 	.message.sent .message-action-menu :global(.btn-more) {

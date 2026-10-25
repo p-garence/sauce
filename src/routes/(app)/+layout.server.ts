@@ -1,11 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
-import {
-	userGroups,
-	user as userTable,
-	userGroupMembers,
-	iconSets
-} from '$lib/server/db/schema';
+import { userGroups, user as userTable, userGroupMembers, iconSets } from '$lib/server/db/schema';
 import { getUserActiveEmojiData } from '$lib/server/emojis';
 import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { LayoutServerLoad } from './$types';

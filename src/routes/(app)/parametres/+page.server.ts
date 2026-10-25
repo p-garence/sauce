@@ -5,7 +5,13 @@ import { db } from '$lib/server/db';
 import { inviteKeys, user } from '$lib/server/db/schema';
 import { eq, count, and, ne, sql } from 'drizzle-orm';
 import { isValidUsername } from '$lib/utils/validation';
-import { getUserFeeds, createUserFeed, updateUserFeed, deleteUserFeed, parseFeedFormData } from '$lib/server/flux';
+import {
+	getUserFeeds,
+	createUserFeed,
+	updateUserFeed,
+	deleteUserFeed,
+	parseFeedFormData
+} from '$lib/server/flux';
 import { createUserGroup, updateUserGroup, deleteUserGroup } from '$lib/server/groups';
 import { bulkUpdateVisibility, makePostsConnections, makePostsPrivate } from '$lib/server/posts';
 import { getUserMediaUsage } from '$lib/server/media';
@@ -56,15 +62,11 @@ export const actions: Actions = {
 		if (!isValidUsername(rawUsername)) {
 			return fail(400, {
 				usernameError:
-					"Le pseudo doit comporter entre 3 et 30 caractères (lettres, chiffres et tirets bas uniquement)."
+					'Le pseudo doit comporter entre 3 et 30 caractères (lettres, chiffres et tirets bas uniquement).'
 			});
 		}
 
-		const [currentUser] = await db
-			.select()
-			.from(user)
-			.where(eq(user.id, session.user.id))
-			.limit(1);
+		const [currentUser] = await db.select().from(user).where(eq(user.id, session.user.id)).limit(1);
 
 		if (!currentUser) return fail(404, { usernameError: 'Utilisateur introuvable.' });
 
@@ -72,7 +74,9 @@ export const actions: Actions = {
 			const [existingUsername] = await db
 				.select({ id: user.id })
 				.from(user)
-				.where(and(sql`LOWER(${user.username}) = LOWER(${rawUsername})`, ne(user.id, session.user.id)))
+				.where(
+					and(sql`LOWER(${user.username}) = LOWER(${rawUsername})`, ne(user.id, session.user.id))
+				)
 				.limit(1);
 
 			if (existingUsername) {
@@ -105,11 +109,7 @@ export const actions: Actions = {
 			return fail(400, { emailError: "L'adresse email n'est pas valide." });
 		}
 
-		const [currentUser] = await db
-			.select()
-			.from(user)
-			.where(eq(user.id, session.user.id))
-			.limit(1);
+		const [currentUser] = await db.select().from(user).where(eq(user.id, session.user.id)).limit(1);
 
 		if (!currentUser) return fail(404, { emailError: 'Utilisateur introuvable.' });
 
@@ -121,7 +121,9 @@ export const actions: Actions = {
 				.limit(1);
 
 			if (existingEmail) {
-				return fail(400, { emailError: "Cette adresse email est déjà associée à un autre compte." });
+				return fail(400, {
+					emailError: 'Cette adresse email est déjà associée à un autre compte.'
+				});
 			}
 		}
 
@@ -151,7 +153,7 @@ export const actions: Actions = {
 		if (!isValidUsername(rawUsername)) {
 			return fail(400, {
 				accountError:
-					"Le pseudo doit comporter entre 3 et 30 caractères (lettres, chiffres et tirets bas uniquement)."
+					'Le pseudo doit comporter entre 3 et 30 caractères (lettres, chiffres et tirets bas uniquement).'
 			});
 		}
 
@@ -160,11 +162,7 @@ export const actions: Actions = {
 			return fail(400, { accountError: "L'adresse email n'est pas valide." });
 		}
 
-		const [currentUser] = await db
-			.select()
-			.from(user)
-			.where(eq(user.id, session.user.id))
-			.limit(1);
+		const [currentUser] = await db.select().from(user).where(eq(user.id, session.user.id)).limit(1);
 
 		if (!currentUser) return fail(404, { accountError: 'Utilisateur introuvable.' });
 
@@ -173,11 +171,15 @@ export const actions: Actions = {
 			const [existingUsername] = await db
 				.select({ id: user.id })
 				.from(user)
-				.where(and(sql`LOWER(${user.username}) = LOWER(${rawUsername})`, ne(user.id, session.user.id)))
+				.where(
+					and(sql`LOWER(${user.username}) = LOWER(${rawUsername})`, ne(user.id, session.user.id))
+				)
 				.limit(1);
 
 			if (existingUsername) {
-				return fail(400, { accountError: "Ce nom d'utilisateur est déjà utilisé par un autre compte." });
+				return fail(400, {
+					accountError: "Ce nom d'utilisateur est déjà utilisé par un autre compte."
+				});
 			}
 		}
 
@@ -190,7 +192,9 @@ export const actions: Actions = {
 				.limit(1);
 
 			if (existingEmail) {
-				return fail(400, { accountError: "Cette adresse email est déjà associée à un autre compte." });
+				return fail(400, {
+					accountError: 'Cette adresse email est déjà associée à un autre compte.'
+				});
 			}
 		}
 
@@ -204,7 +208,10 @@ export const actions: Actions = {
 			})
 			.where(eq(user.id, session.user.id));
 
-		return { accountSuccess: true, accountMessage: 'Vos identifiants ont été mis à jour avec succès.' };
+		return {
+			accountSuccess: true,
+			accountMessage: 'Vos identifiants ont été mis à jour avec succès.'
+		};
 	},
 
 	generateKey: async ({ request }) => {

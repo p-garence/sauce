@@ -25,14 +25,7 @@
 	let { data }: Props = $props();
 
 	type AdminTab =
-		| 'users'
-		| 'posts'
-		| 'stories'
-		| 'system-post'
-		| 'appearance'
-		| 'actions'
-		| 'media'
-		| 'docs';
+		'users' | 'posts' | 'stories' | 'system-post' | 'appearance' | 'actions' | 'media' | 'docs';
 
 	let activeTab = $state<AdminTab>('users');
 </script>

@@ -42,10 +42,7 @@
 
 	function textToHtml(raw: string): string {
 		if (!raw) return '';
-		const escaped = raw
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;');
+		const escaped = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 		return escaped
 			.replace(/:([a-zA-Z0-9_-]{2,50}):/g, (match, key) => {
@@ -81,7 +78,10 @@
 		}
 
 		// Si l'éditeur racine ne contient rien ou qu'un simple <br> vide
-		if (isRoot && (children.length === 0 || (children.length === 1 && children[0].nodeName === 'BR'))) {
+		if (
+			isRoot &&
+			(children.length === 0 || (children.length === 1 && children[0].nodeName === 'BR'))
+		) {
 			return '';
 		}
 
@@ -155,7 +155,10 @@
 						const textNode = range.startContainer as Text;
 						if (range.startOffset === 0) {
 							const prev = textNode.previousSibling;
-							if (prev instanceof HTMLImageElement && prev.classList.contains('inline-input-emoji')) {
+							if (
+								prev instanceof HTMLImageElement &&
+								prev.classList.contains('inline-input-emoji')
+							) {
 								targetEmoji = prev;
 							}
 						} else if (
@@ -163,7 +166,10 @@
 							(textNode.textContent === '\u00A0' || textNode.textContent === ' ')
 						) {
 							const prev = textNode.previousSibling;
-							if (prev instanceof HTMLImageElement && prev.classList.contains('inline-input-emoji')) {
+							if (
+								prev instanceof HTMLImageElement &&
+								prev.classList.contains('inline-input-emoji')
+							) {
 								targetEmoji = prev;
 								textNode.remove();
 							}
@@ -186,7 +192,10 @@
 						const textNode = range.startContainer as Text;
 						if (range.startOffset === (textNode.textContent?.length || 0)) {
 							const next = textNode.nextSibling;
-							if (next instanceof HTMLImageElement && next.classList.contains('inline-input-emoji')) {
+							if (
+								next instanceof HTMLImageElement &&
+								next.classList.contains('inline-input-emoji')
+							) {
 								targetEmoji = next;
 							}
 						}
@@ -259,7 +268,10 @@
 		if (typeof window !== 'undefined') {
 			const sel = window.getSelection();
 			if (sel) {
-				if (sel.rangeCount > 0 && editorElement.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+				if (
+					sel.rangeCount > 0 &&
+					editorElement.contains(sel.getRangeAt(0).commonAncestorContainer)
+				) {
 					return;
 				}
 				const range = document.createRange();

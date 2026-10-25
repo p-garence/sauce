@@ -28,12 +28,7 @@
 		onEditMedia?: () => void;
 	}
 
-	let {
-		item,
-		isSimpleText = false,
-		onRemove,
-		onEditMedia
-	}: Props = $props();
+	let { item, isSimpleText = false, onRemove, onEditMedia }: Props = $props();
 
 	let richInputRef = $state<RichTextInput | null>(null);
 	let mentionRef: MentionSuggestions | undefined = $state();
@@ -70,12 +65,7 @@
 		</div>
 
 		{#if !(isSimpleText && !item.text) && onRemove}
-			<button
-				type="button"
-				class="btn-remove"
-				onclick={onRemove}
-				aria-label="Supprimer ce panneau"
-			>
+			<button type="button" class="btn-remove" onclick={onRemove} aria-label="Supprimer ce panneau">
 				<Icon name="action.close" size={16} />
 			</button>
 		{/if}

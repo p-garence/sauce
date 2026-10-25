@@ -190,11 +190,7 @@
 
 	<div class="pagination-footer">
 		{#if postsCursor}
-			<button
-				class="btn btn-load-more"
-				onclick={loadMorePosts}
-				disabled={isLoadingMorePosts}
-			>
+			<button class="btn btn-load-more" onclick={loadMorePosts} disabled={isLoadingMorePosts}>
 				{isLoadingMorePosts
 					? 'Chargement en cours...'
 					: `Afficher plus de publications (${postsList.length} sur ${totalPosts})`}

@@ -180,7 +180,9 @@
 {:else if isHidden}
 	<div class="hidden-post">
 		<p>Post masqué.</p>
-		<button type="button" onclick={() => togglePostHide(post, false)} class="btn-undo">Annuler</button>
+		<button type="button" onclick={() => togglePostHide(post, false)} class="btn-undo"
+			>Annuler</button
+		>
 	</div>
 {:else if isRssPost}
 	<RssPostCard {post} />
@@ -222,10 +224,7 @@
 			</div>
 		{:else if post.mediaUrls && post.mediaUrls.length > 0}
 			{#if isDoubleTapEnabled}
-				<DoubleTapDetector
-					showHeartFeedback={!post.isLiked}
-					onDoubleTap={handleDoubleTapLike}
-				>
+				<DoubleTapDetector showHeartFeedback={!post.isLiked} onDoubleTap={handleDoubleTapLike}>
 					<PostCarousel mediaUrls={post.mediaUrls} />
 				</DoubleTapDetector>
 			{:else}

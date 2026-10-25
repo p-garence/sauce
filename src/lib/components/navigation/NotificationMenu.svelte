@@ -185,12 +185,7 @@
 				{/each}
 
 				{#if groupedNotifs.length > 0}
-					<button
-						type="button"
-						class="load-more-btn"
-						onclick={loadMore}
-						disabled={isLoadingMore}
-					>
+					<button type="button" class="load-more-btn" onclick={loadMore} disabled={isLoadingMore}>
 						{isLoadingMore ? 'Chargement...' : 'Charger les notifications précédentes'}
 					</button>
 				{/if}

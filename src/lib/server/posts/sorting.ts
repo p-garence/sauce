@@ -114,10 +114,7 @@ export function buildSortStrategy(
 		const hashSql = randomHashSql(randomSeed);
 		if (lastHash) {
 			conditions.push(
-				or(
-					gt(hashSql, lastHash),
-					and(eq(hashSql, lastHash), gt(posts.id, cursor?.lastId || ''))
-				)!
+				or(gt(hashSql, lastHash), and(eq(hashSql, lastHash), gt(posts.id, cursor?.lastId || '')))!
 			);
 		}
 		orderByClause = [asc(hashSql), asc(posts.id)];
@@ -183,10 +180,7 @@ export function buildNextCursor(
 	}
 
 	if (sortMode === 'random') {
-		const postHash = crypto
-			.createHash('md5')
-			.update(`${lastPost.id}:${randomSeed}`)
-			.digest('hex');
+		const postHash = crypto.createHash('md5').update(`${lastPost.id}:${randomSeed}`).digest('hex');
 		return {
 			type: 'random',
 			lastValue: JSON.stringify({ seed: randomSeed, lastHash: postHash }),

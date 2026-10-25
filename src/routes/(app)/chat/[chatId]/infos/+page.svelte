@@ -26,11 +26,7 @@
 	<PageHeader title="Infos du groupe" back_location={`/chat/${data.chat.id}`} />
 
 	<div class="content">
-		<ChatGroupMetaCard
-			chat={data.chat}
-			isAdmin={data.isAdmin}
-			isMuted={data.isMuted}
-		/>
+		<ChatGroupMetaCard chat={data.chat} isAdmin={data.isAdmin} isMuted={data.isMuted} />
 
 		<ChatGroupMembersList
 			chatId={data.chat.id}

@@ -72,7 +72,9 @@
 	function initialItems(): EditorCarouselItem[] {
 		const media = data.post.mediaUrls as DbCarouselItem[];
 		if (!media || media.length === 0) {
-			return [{ id: generateId(), type: 'text', text: '', url: '', isUploading: false, align: 'left' }];
+			return [
+				{ id: generateId(), type: 'text', text: '', url: '', isUploading: false, align: 'left' }
+			];
 		}
 		return media.map((item) => ({
 			id: generateId(),

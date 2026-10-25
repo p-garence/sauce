@@ -27,11 +27,7 @@
 		onDeleteChatFile: (messageId: string) => Promise<void> | void;
 	}
 
-	let {
-		chatFiles,
-		deletingMessageId,
-		onDeleteChatFile
-	}: Props = $props();
+	let { chatFiles, deletingMessageId, onDeleteChatFile }: Props = $props();
 
 	let chatFileFilter = $state<'all' | 'image' | 'video' | 'file' | 'audio'>('all');
 	let chatFileSortBy = $state<'date_desc' | 'date_asc' | 'size_desc' | 'size_asc'>('date_desc');

@@ -512,10 +512,7 @@
 				? `transform: translateY(${stageTranslateY}px);`
 				: ''}"
 		>
-			<StoryProgressBar
-				stories={currentBundle.stories}
-				currentIndex={storyIndex}
-			/>
+			<StoryProgressBar stories={currentBundle.stories} currentIndex={storyIndex} />
 
 			<StoryHeader
 				author={currentBundle.author}
@@ -557,12 +554,7 @@
 					if (videoElement) videoElement.pause();
 				}}
 				onInputBlur={() => {
-					if (
-						videoElement &&
-						!replyText.trim() &&
-						!showSettingsDrawer &&
-						!showInteractionsDrawer
-					) {
+					if (videoElement && !replyText.trim() && !showSettingsDrawer && !showInteractionsDrawer) {
 						videoElement.play().catch(() => {});
 					}
 				}}

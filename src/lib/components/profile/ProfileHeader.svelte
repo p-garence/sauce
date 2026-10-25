@@ -115,10 +115,7 @@
 						onToggle={onFollowToggle}
 					/>
 					{#if profile.username !== 'serveur'}
-						<a
-							href={resolve(`/api/chat/direct/${profile.username}`)}
-							class="btn-action message"
-						>
+						<a href={resolve(`/api/chat/direct/${profile.username}`)} class="btn-action message">
 							Message
 						</a>
 					{/if}

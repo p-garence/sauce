@@ -376,11 +376,11 @@ export async function getFilteredPosts(
 		conditions.push(notSeen(userId));
 	}
 
-	const { conditions: sortConditions, orderByClause, randomSeed } = buildSortStrategy(
-		sortMode,
-		cursor,
-		timeWindow
-	);
+	const {
+		conditions: sortConditions,
+		orderByClause,
+		randomSeed
+	} = buildSortStrategy(sortMode, cursor, timeWindow);
 	conditions.push(...sortConditions);
 
 	const where = and(...conditions);

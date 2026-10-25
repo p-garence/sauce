@@ -59,12 +59,7 @@
 		>
 			<div class="modal-header">
 				<h3 class="modal-title">Joindre un pack</h3>
-				<button
-					type="button"
-					class="btn-close-modal"
-					onclick={onClose}
-					aria-label="Fermer"
-				>
+				<button type="button" class="btn-close-modal" onclick={onClose} aria-label="Fermer">
 					<Icon name="action.close" size={18} />
 				</button>
 			</div>
@@ -104,7 +99,9 @@
 								<div class="picker-item-card">
 									<div class="picker-item-info">
 										<strong class="picker-item-name">{set.name}</strong>
-										<span class="picker-item-meta">{iconsCount} icône{iconsCount > 1 ? 's' : ''}</span>
+										<span class="picker-item-meta"
+											>{iconsCount} icône{iconsCount > 1 ? 's' : ''}</span
+										>
 										{#if set.description}
 											<p class="picker-item-desc">{set.description}</p>
 										{/if}
@@ -138,7 +135,9 @@
 								<div class="picker-item-card">
 									<div class="picker-item-info">
 										<strong class="picker-item-name">{set.name}</strong>
-										<span class="picker-item-meta">{emList.length} emoji{emList.length > 1 ? 's' : ''}</span>
+										<span class="picker-item-meta"
+											>{emList.length} emoji{emList.length > 1 ? 's' : ''}</span
+										>
 										{#if set.description}
 											<p class="picker-item-desc">{set.description}</p>
 										{/if}

@@ -37,12 +37,7 @@
 		currentUserId: string;
 	}
 
-	let {
-		chatId,
-		participants,
-		isAdmin = false,
-		currentUserId
-	}: Props = $props();
+	let { chatId, participants, isAdmin = false, currentUserId }: Props = $props();
 
 	let errorMessage = $state('');
 

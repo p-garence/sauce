@@ -81,7 +81,9 @@
 				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={getPostUrl(post.id)} class="grid-item">
 					{#if isPureText && firstMedia}
-						<div class="grid-text-preview"><p><RichContent content={firstMedia.content} clickable={false} /></p></div>
+						<div class="grid-text-preview">
+							<p><RichContent content={firstMedia.content} clickable={false} /></p>
+						</div>
 					{:else if firstMedia}
 						{#if isFirstVideo}
 							{#if videoPoster && !failedPosters[post.id]}
@@ -99,7 +101,12 @@
 							<img src={firstMedia.content} alt="Aperçu du post" loading="lazy" decoding="async" />
 						{:else}
 							<div class="grid-text-preview">
-								<p><RichContent content={firstMedia.content?.substring(0, 30) + '...'} clickable={false} /></p>
+								<p>
+									<RichContent
+										content={firstMedia.content?.substring(0, 30) + '...'}
+										clickable={false}
+									/>
+								</p>
 							</div>
 						{/if}
 
@@ -114,7 +121,9 @@
 							</span>
 						{/if}
 					{:else if post.content}
-						<div class="grid-text-preview"><p><RichContent content={post.content} clickable={false} /></p></div>
+						<div class="grid-text-preview">
+							<p><RichContent content={post.content} clickable={false} /></p>
+						</div>
 					{:else}
 						<div class="grid-text-preview"><p></p></div>
 					{/if}

@@ -24,10 +24,7 @@
 		emojiSets?: UserMediaEmojiSetItem[];
 	}
 
-	let {
-		iconSets = [],
-		emojiSets = []
-	}: Props = $props();
+	let { iconSets = [], emojiSets = [] }: Props = $props();
 </script>
 
 <SettingsCard
@@ -78,7 +75,8 @@
 						<div class="asset-row">
 							<div class="asset-row-info">
 								<span class="asset-name">{set.name}</span>
-								<span class="asset-meta">{set.emojiCount} emoji{set.emojiCount > 1 ? 's' : ''}</span>
+								<span class="asset-meta">{set.emojiCount} emoji{set.emojiCount > 1 ? 's' : ''}</span
+								>
 							</div>
 							<span class="asset-size">{formatBytes(set.totalSizeBytes)}</span>
 						</div>

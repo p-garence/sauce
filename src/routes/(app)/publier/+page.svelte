@@ -166,7 +166,10 @@
 	}
 
 	function addTextPanel() {
-		items = [...items, { id: generateId(), type: 'text', text: '', url: '', file: null, align: 'center' }];
+		items = [
+			...items,
+			{ id: generateId(), type: 'text', text: '', url: '', file: null, align: 'center' }
+		];
 		currentIndex = items.length - 1;
 	}
 

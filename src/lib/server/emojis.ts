@@ -596,7 +596,7 @@ export async function publishEmojiSet(userId: string, emojiSetId: string, conten
 		});
 		if (!savedRel) {
 			throw new Error(
-				"Vous devez avoir ajouté cette collection à votre bibliothèque pour pouvoir la partager."
+				'Vous devez avoir ajouté cette collection à votre bibliothèque pour pouvoir la partager.'
 			);
 		}
 	}
@@ -641,10 +641,7 @@ export async function toggleInstanceDefaultEmojiSetForUser(userId: string, emoji
 		disabled = [...disabled, emojiSetId];
 	}
 
-	await db
-		.update(userTable)
-		.set({ disabledEmojiSetIds: disabled })
-		.where(eq(userTable.id, userId));
+	await db.update(userTable).set({ disabledEmojiSetIds: disabled }).where(eq(userTable.id, userId));
 
 	return {
 		disabledEmojiSetIds: disabled,
@@ -683,9 +680,7 @@ export async function getUserActiveEmojiData(userId: string) {
 	}
 
 	// Combiner les identifiants actifs sans doublons
-	const allActiveIds = Array.from(
-		new Set([...activeDefaultSets.map((s) => s.id), ...activeIds])
-	);
+	const allActiveIds = Array.from(new Set([...activeDefaultSets.map((s) => s.id), ...activeIds]));
 
 	const sets =
 		allActiveIds.length > 0

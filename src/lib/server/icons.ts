@@ -128,10 +128,7 @@ export async function createIconSet(
 		.returning();
 
 	// Activer automatiquement le pack créé chez l'utilisateur
-	await db
-		.update(userTable)
-		.set({ activeIconSetId: created.id })
-		.where(eq(userTable.id, userId));
+	await db.update(userTable).set({ activeIconSetId: created.id }).where(eq(userTable.id, userId));
 
 	return created;
 }
@@ -294,7 +291,7 @@ export async function toggleSaveIconSet(userId: string, iconSetId: string) {
 		return { saved: false };
 	} else {
 		if (set.isDeletedByOwner) {
-			throw new Error("Ce set a été supprimé par son créateur et ne peut plus être ajouté.");
+			throw new Error('Ce set a été supprimé par son créateur et ne peut plus être ajouté.');
 		}
 		if (!set.isPublished && !set.isInstanceDefault && set.ownerId !== userId) {
 			throw new Error("Ce set d'icônes est privé et ne peut pas être ajouté à votre bibliothèque.");

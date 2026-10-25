@@ -21,7 +21,9 @@ export function extractDomain(urlStr: string): string {
  * Génère une URL de favicon fiable pour un domaine donné.
  */
 export function getFaviconForDomain(domainOrUrl: string): string {
-	const domain = extractDomain(domainOrUrl.startsWith('http') ? domainOrUrl : `https://${domainOrUrl}`);
+	const domain = extractDomain(
+		domainOrUrl.startsWith('http') ? domainOrUrl : `https://${domainOrUrl}`
+	);
 	return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
 }
 
@@ -74,7 +76,9 @@ export async function getRssFeedPosts(
 	cursor?: CursorData | null,
 	forceRefresh = false
 ): Promise<{ posts: PostData[]; nextCursor: CursorData | null }> {
-	const rssUrls = (feedConfig.rssUrls || []).filter((u) => typeof u === 'string' && u.trim().length > 0);
+	const rssUrls = (feedConfig.rssUrls || []).filter(
+		(u) => typeof u === 'string' && u.trim().length > 0
+	);
 
 	if (rssUrls.length === 0) {
 		return { posts: [], nextCursor: null };
@@ -142,7 +146,11 @@ export async function getRssFeedPosts(
 
 	// Transformation en PostData compatible avec InfiniteFeed et Post.svelte
 	const posts: PostData[] = pageItems.map((item) => {
-		const postId = `rss_${crypto.createHash('md5').update(item.guid || item.link).digest('hex').slice(0, 16)}`;
+		const postId = `rss_${crypto
+			.createHash('md5')
+			.update(item.guid || item.link)
+			.digest('hex')
+			.slice(0, 16)}`;
 
 		return {
 			id: postId,

@@ -37,14 +37,7 @@
 		onSuccess: () => void;
 	}
 
-	let {
-		feed = null,
-		feeds,
-		groups = [],
-		trendingTags = [],
-		onCancel,
-		onSuccess
-	}: Props = $props();
+	let { feed = null, feeds, groups = [], trendingTags = [], onCancel, onSuccess }: Props = $props();
 
 	const isEditing = $derived(!!feed?.id);
 
@@ -53,7 +46,9 @@
 	// Initialisation des états selon le mode
 	let currentSource = $state<FeedSource>(untrack(() => feed?.source || 'public'));
 	let currentSortMode = $state<FeedSortMode>(untrack(() => feed?.sortMode || 'chrono'));
-	let currentTags = $state<string[]>(untrack(() => (feed?.includeTags ? [...feed.includeTags] : [])));
+	let currentTags = $state<string[]>(
+		untrack(() => (feed?.includeTags ? [...feed.includeTags] : []))
+	);
 	let tagInput = $state('');
 
 	const AVAILABLE_CONTENT_TYPES = [
@@ -87,7 +82,8 @@
 	let currentTagFilterMode = $state<'all' | 'include' | 'exclude'>(
 		untrack(
 			() =>
-				feed?.tagFilterMode || (feed?.includeTags && feed.includeTags.length > 0 ? 'include' : 'all')
+				feed?.tagFilterMode ||
+				(feed?.includeTags && feed.includeTags.length > 0 ? 'include' : 'all')
 		)
 	);
 
@@ -249,7 +245,8 @@
 								checked={feed?.groupIds?.includes(group.id)}
 							/>
 							{#if group.icon && group.icon !== 'star'}
-								<span class="group-icon-custom"><Icon name={group.icon as IconId} size={16} /></span>
+								<span class="group-icon-custom"><Icon name={group.icon as IconId} size={16} /></span
+								>
 							{/if}
 							<span class="group-name">{group.name}</span>
 						</label>
@@ -281,10 +278,7 @@
 							bind:value={currentBlendFeedA}
 						>
 							{#each availableCandidateFeeds as candidate (candidate.id)}
-								<option
-									value={candidate.id}
-									disabled={candidate.id === currentBlendFeedB}
-								>
+								<option value={candidate.id} disabled={candidate.id === currentBlendFeedB}>
 									{candidate.name}
 								</option>
 							{/each}
@@ -299,10 +293,7 @@
 							bind:value={currentBlendFeedB}
 						>
 							{#each availableCandidateFeeds as candidate (candidate.id)}
-								<option
-									value={candidate.id}
-									disabled={candidate.id === currentBlendFeedA}
-								>
+								<option value={candidate.id} disabled={candidate.id === currentBlendFeedA}>
 									{candidate.name}
 								</option>
 							{/each}
@@ -314,7 +305,8 @@
 					<div class="blend-ratio-header">
 						<span class="ratio-title">Dosage du mix :</span>
 						<span class="ratio-indicator">
-							{currentBlendRatio}% {getFeedName(currentBlendFeedA) || 'A'} / {100 - currentBlendRatio}% {getFeedName(currentBlendFeedB) || 'B'}
+							{currentBlendRatio}% {getFeedName(currentBlendFeedA) || 'A'} / {100 -
+								currentBlendRatio}% {getFeedName(currentBlendFeedB) || 'B'}
 						</span>
 					</div>
 
@@ -482,11 +474,7 @@
 				{/if}
 
 				{#if trendingTags.length > 0}
-					<TrendingTagsBar
-						tags={trendingTags}
-						selectedTags={currentTags}
-						onTagClick={toggleTag}
-					/>
+					<TrendingTagsBar tags={trendingTags} selectedTags={currentTags} onTagClick={toggleTag} />
 				{/if}
 			</div>
 		{/if}
@@ -599,10 +587,9 @@
 																	childType.id
 																];
 															} else {
-																currentCarouselContentTypes =
-																	currentCarouselContentTypes.filter(
-																		(t) => t !== childType.id
-																	);
+																currentCarouselContentTypes = currentCarouselContentTypes.filter(
+																	(t) => t !== childType.id
+																);
 															}
 														}}
 													/>
@@ -639,14 +626,13 @@
 									if (checked) {
 										currentExcludedGroups = [...currentExcludedGroups, group.id];
 									} else {
-										currentExcludedGroups = currentExcludedGroups.filter(
-											(g) => g !== group.id
-										);
+										currentExcludedGroups = currentExcludedGroups.filter((g) => g !== group.id);
 									}
 								}}
 							/>
 							{#if group.icon && group.icon !== 'star'}
-								<span class="group-icon-custom"><Icon name={group.icon as IconId} size={16} /></span>
+								<span class="group-icon-custom"><Icon name={group.icon as IconId} size={16} /></span
+								>
 							{/if}
 							<span class="group-name">{group.name}</span>
 						</label>
@@ -665,7 +651,9 @@
 				value="true"
 				checked={feed?.hideSeen}
 			/>
-			<label for={isEditing ? `hideSeen_${feed?.id}` : 'new_hideSeen'}>Masquer les posts déjà vus</label>
+			<label for={isEditing ? `hideSeen_${feed?.id}` : 'new_hideSeen'}
+				>Masquer les posts déjà vus</label
+			>
 		</div>
 
 		<div class="checkbox-group">
@@ -686,9 +674,7 @@
 		<SettingsButton type="submit" disabled={feedActionLoading}>
 			{isEditing ? 'Enregistrer' : 'Créer'}
 		</SettingsButton>
-		<SettingsButton variant="secondary" onclick={onCancel}>
-			Annuler
-		</SettingsButton>
+		<SettingsButton variant="secondary" onclick={onCancel}>Annuler</SettingsButton>
 	</div>
 </form>
 
@@ -1069,7 +1055,9 @@
 		align-items: center;
 		justify-content: center;
 		border-radius: 4px;
-		transition: color 0.15s, background 0.15s;
+		transition:
+			color 0.15s,
+			background 0.15s;
 	}
 	.btn-remove-rss:hover {
 		color: #ef4444;

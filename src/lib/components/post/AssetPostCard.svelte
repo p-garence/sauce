@@ -38,7 +38,9 @@
 	let isSaved = $derived(savedOverride ?? Boolean(asset.isSaved));
 
 	// Réactivité en temps réel pour le set d'icônes actif
-	let isRealtimeActiveIcon = $derived(type === 'icon_set' && iconTheme.activeIconSetId === asset.id);
+	let isRealtimeActiveIcon = $derived(
+		type === 'icon_set' && iconTheme.activeIconSetId === asset.id
+	);
 	let isActive = $derived(
 		activeOverride ?? (type === 'icon_set' ? isRealtimeActiveIcon : Boolean(asset.isActive))
 	);
@@ -47,8 +49,8 @@
 	let isOwn = $derived(
 		Boolean(
 			currentUserId &&
-				(asset.ownerId === currentUserId || postAuthorId === currentUserId) &&
-				!asset.isDeletedByOwner
+			(asset.ownerId === currentUserId || postAuthorId === currentUserId) &&
+			!asset.isDeletedByOwner
 		)
 	);
 

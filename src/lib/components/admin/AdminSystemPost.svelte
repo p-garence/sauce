@@ -144,7 +144,10 @@
 	}
 
 	function addTextPanel() {
-		items = [...items, { id: generateId(), type: 'text', text: '', url: '', file: null, align: 'center' }];
+		items = [
+			...items,
+			{ id: generateId(), type: 'text', text: '', url: '', file: null, align: 'center' }
+		];
 		currentIndex = items.length - 1;
 	}
 
@@ -797,7 +800,9 @@
 		font-size: 1rem;
 		font-weight: 700;
 		cursor: pointer;
-		transition: background 0.2s, transform 0.1s;
+		transition:
+			background 0.2s,
+			transform 0.1s;
 		box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.2);
 	}
 

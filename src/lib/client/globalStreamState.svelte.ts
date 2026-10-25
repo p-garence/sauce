@@ -7,9 +7,15 @@ class GlobalStreamState {
 	mutedChatIds = $state<string[]>([]);
 	activeChatId = $state<string | null>(null);
 	latestMessage = $state<ChatMessage | null>(null);
-	deletedMessage = $state<{ messageId: string; chatId: string; message?: ChatMessage } | null>(null);
+	deletedMessage = $state<{ messageId: string; chatId: string; message?: ChatMessage } | null>(
+		null
+	);
 	updatedMessage = $state<ChatMessage | null>(null);
-	reactionUpdate = $state<{ chatId: string; messageId: string; reactions: MessageReactionGroup[] } | null>(null);
+	reactionUpdate = $state<{
+		chatId: string;
+		messageId: string;
+		reactions: MessageReactionGroup[];
+	} | null>(null);
 
 	notifs = $state<AppNotification[]>([]);
 	hasMoreNotifs = $state(false);

@@ -23,11 +23,7 @@
 		onCancel?: () => void;
 	}
 
-	let {
-		isRecording = $bindable(false),
-		onRecordingComplete,
-		onCancel
-	}: Props = $props();
+	let { isRecording = $bindable(false), onRecordingComplete, onCancel }: Props = $props();
 
 	let recordingDuration = $state(0);
 	let audioStream: MediaStream | null = null;

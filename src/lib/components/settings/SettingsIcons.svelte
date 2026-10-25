@@ -396,7 +396,8 @@
 
 			<!-- Packs de la communauté autorisés par l'instance -->
 			{#each allowedCommunitySets as set (set.id)}
-				{@const isSetSelected = activeServerSetId === set.id || iconTheme.activeIconSetId === set.id}
+				{@const isSetSelected =
+					activeServerSetId === set.id || iconTheme.activeIconSetId === set.id}
 				<button
 					type="button"
 					class="theme-option"

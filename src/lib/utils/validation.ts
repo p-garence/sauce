@@ -40,9 +40,7 @@ export function isValidUsername(username: unknown): username is string {
 export function parseTagsInput(raw: unknown): string[] {
 	if (!raw) return [];
 	if (Array.isArray(raw)) {
-		return raw
-			.map((t) => String(t).trim().replace(/^#+/, ''))
-			.filter(Boolean);
+		return raw.map((t) => String(t).trim().replace(/^#+/, '')).filter(Boolean);
 	}
 	if (typeof raw !== 'string') return [];
 	const trimmed = raw.trim();
@@ -51,9 +49,7 @@ export function parseTagsInput(raw: unknown): string[] {
 	try {
 		const parsed = JSON.parse(trimmed);
 		if (Array.isArray(parsed)) {
-			return parsed
-				.map((t) => String(t).trim().replace(/^#+/, ''))
-				.filter(Boolean);
+			return parsed.map((t) => String(t).trim().replace(/^#+/, '')).filter(Boolean);
 		}
 	} catch {
 		// Fallback : chaîne séparée par des virgules ou espaces

@@ -207,4 +207,3 @@ export async function apiToggleChatMessageReaction(
 		body: JSON.stringify({ messageId, emoji })
 	});
 }
-

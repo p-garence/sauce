@@ -27,11 +27,7 @@
 		onDelete: (postId: string) => Promise<void> | void;
 	}
 
-	let {
-		posts,
-		deletingId,
-		onDelete
-	}: Props = $props();
+	let { posts, deletingId, onDelete }: Props = $props();
 
 	let sortBy = $state<'size_desc' | 'size_asc' | 'date_desc' | 'date_asc'>('size_desc');
 	let postsLimit = $state(4);

@@ -256,20 +256,10 @@
 				{/if}
 
 				<div class="drawer-actions-row">
-					<button
-						type="button"
-						class="btn-drawer-cancel"
-						onclick={onClose}
-						disabled={isSaving}
-					>
+					<button type="button" class="btn-drawer-cancel" onclick={onClose} disabled={isSaving}>
 						Annuler
 					</button>
-					<button
-						type="button"
-						class="btn-drawer-save"
-						onclick={handleSave}
-						disabled={isSaving}
-					>
+					<button type="button" class="btn-drawer-save" onclick={handleSave} disabled={isSaving}>
 						{#if isSaving}
 							Enregistrement...
 						{:else}

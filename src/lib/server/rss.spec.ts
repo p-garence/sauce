@@ -40,7 +40,8 @@ describe('RSS & Atom Parser', () => {
 	});
 
 	it('sanitizes HTML to plain text without tags or scripts', () => {
-		const html = '<p>Bienvenue sur <strong>notre site</strong> !</p><script>alert("hack")</script><br/>Suite du texte.';
+		const html =
+			'<p>Bienvenue sur <strong>notre site</strong> !</p><script>alert("hack")</script><br/>Suite du texte.';
 		expect(sanitizeToPlainText(html)).toBe('Bienvenue sur notre site ! Suite du texte.');
 	});
 

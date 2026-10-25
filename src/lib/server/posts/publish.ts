@@ -24,7 +24,9 @@ export interface PublishPostInput {
 	explicitTags?: string[];
 	visibility: PostVisibility;
 	groupId?: string | null;
-	layout: Array<{ type: 'text'; text: string; align?: 'left' | 'center' | 'right' } | { type: 'media' }>;
+	layout: Array<
+		{ type: 'text'; text: string; align?: 'left' | 'center' | 'right' } | { type: 'media' }
+	>;
 	files: File[];
 	iconSetId?: string | null;
 	emojiSetId?: string | null;
@@ -260,9 +262,7 @@ export async function updatePublishedPost(input: UpdatePublishedPostInput) {
 	// Liste blanche des médias appartenant déjà à ce post
 	const existingMediaItems = (existingPost.mediaUrls as CarouselItem[] | null) || [];
 	const existingMediaUrls = new Set(
-		existingMediaItems
-			.filter((m) => m.type === 'image' || m.type === 'video')
-			.map((m) => m.content)
+		existingMediaItems.filter((m) => m.type === 'image' || m.type === 'video').map((m) => m.content)
 	);
 
 	const finalCarousel: CarouselItem[] = [];

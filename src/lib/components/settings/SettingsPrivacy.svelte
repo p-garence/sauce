@@ -41,12 +41,7 @@
 		blockedUsers?: BlockedUserItem[];
 	}
 
-	let {
-		user,
-		form,
-		groups = [],
-		blockedUsers = []
-	}: Props = $props();
+	let { user, form, groups = [], blockedUsers = [] }: Props = $props();
 
 	let userGroups = $derived(
 		groups && groups.length > 0 ? groups : (page.data?.userGroups as UserGroup[]) || []

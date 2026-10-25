@@ -58,8 +58,8 @@
 			<div>
 				<h2>Données de l'application (Serveur)</h2>
 				<p class="action-desc">
-					Consommation totale des fichiers médias hébergés et espace disque restant sur la
-					machine serveur.
+					Consommation totale des fichiers médias hébergés et espace disque restant sur la machine
+					serveur.
 				</p>
 			</div>
 			{#if serverStorage?.uploadsCount}
@@ -120,8 +120,8 @@
 			<h2>Détection et Nettoyage des Médias Orphelins</h2>
 			<p class="action-desc">
 				Fichiers présents sur le disque (`uploads/`) non rattachés aux publications, stories,
-				messages de chat ou profils. Une période de sécurité de 2h protège les envois et
-				brouillons en cours.
+				messages de chat ou profils. Une période de sécurité de 2h protège les envois et brouillons
+				en cours.
 			</p>
 		</div>
 		{#if orphans && orphans.orphanCount > 0}

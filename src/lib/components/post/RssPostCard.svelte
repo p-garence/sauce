@@ -16,7 +16,9 @@
 	let articleUrl = $derived(/^https?:\/\//i.test(rawArticleUrl) ? rawArticleUrl : '');
 	let feedTitle = $derived(item?.siteName || post.author.name || 'Flux RSS');
 	let summary = $derived(item?.summary || '');
-	let rawImageUrl = $derived(item?.imageUrl || (post.mediaUrls && post.mediaUrls[0]?.content) || '');
+	let rawImageUrl = $derived(
+		item?.imageUrl || (post.mediaUrls && post.mediaUrls[0]?.content) || ''
+	);
 	let imageUrl = $derived(/^https?:\/\/|^\/media\//i.test(rawImageUrl) ? rawImageUrl : '');
 	let domain = $derived.by(() => {
 		if (!articleUrl) return '';
@@ -48,7 +50,7 @@
 			onClick: copyLink
 		},
 		{
-			label: "Ouvrir dans un nouvel onglet",
+			label: 'Ouvrir dans un nouvel onglet',
 			onClick: () => {
 				if (articleUrl) {
 					window.open(articleUrl, '_blank', 'noopener,noreferrer');

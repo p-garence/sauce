@@ -146,8 +146,8 @@
 	<div class="form-block">
 		<h3 class="block-title">Packs intégrés autorisés</h3>
 		<p class="block-desc">
-			Cochez les styles intégrés autorisés et ajoutez des packs personnalisés créés et publiés par la
-			communauté.
+			Cochez les styles intégrés autorisés et ajoutez des packs personnalisés créés et publiés par
+			la communauté.
 		</p>
 
 		<div class="checkbox-group">
@@ -179,7 +179,9 @@
 		<!-- Packs communautaires autorisés -->
 		{#if allowedCustomSets.length > 0}
 			<div class="added-community-section">
-				<h4 class="sub-block-title">Packs de la communauté autorisés ({allowedCustomSets.length}) :</h4>
+				<h4 class="sub-block-title">
+					Packs de la communauté autorisés ({allowedCustomSets.length}) :
+				</h4>
 				<div class="community-packs-list">
 					{#each allowedCustomSets as set (set.id)}
 						<div class="community-pack-item">
@@ -213,11 +215,7 @@
 							: 'Tous les packs personnalisés publiés sont déjà ajoutés aux autorisés.'}
 					</p>
 				{:else}
-					<select
-						id="select_add_community"
-						class="styled-select"
-						bind:value={selectedCustomToAdd}
-					>
+					<select id="select_add_community" class="styled-select" bind:value={selectedCustomToAdd}>
 						<option value="">-- Choisir un pack publié --</option>
 						{#each availableCustomToAdd as set (set.id)}
 							<option value={set.id}>
@@ -242,19 +240,14 @@
 	<div class="form-block">
 		<h3 class="block-title">Pack d'icônes par défaut de l'instance</h3>
 		<p class="block-desc">
-			Sélectionnez le pack appliqué par défaut aux utilisateurs et visiteurs parmi la liste autorisée
-			ci-dessus :
+			Sélectionnez le pack appliqué par défaut aux utilisateurs et visiteurs parmi la liste
+			autorisée ci-dessus :
 		</p>
 
 		<div class="radio-group">
 			{#if allowedBuiltin.includes('lucide')}
 				<label class="custom-radio">
-					<input
-						type="radio"
-						name="default_pack"
-						value="lucide"
-						bind:group={selectedDefaultKey}
-					/>
+					<input type="radio" name="default_pack" value="lucide" bind:group={selectedDefaultKey} />
 					<span><strong>Vectoriel (Lucide)</strong></span>
 				</label>
 			{/if}
@@ -273,12 +266,7 @@
 
 			{#each allowedCustomSets as set (set.id)}
 				<label class="custom-radio">
-					<input
-						type="radio"
-						name="default_pack"
-						value={set.id}
-						bind:group={selectedDefaultKey}
-					/>
+					<input type="radio" name="default_pack" value={set.id} bind:group={selectedDefaultKey} />
 					<span>
 						<strong>{set.name}</strong>
 						<span class="custom-tag">Pack commu</span>

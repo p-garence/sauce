@@ -142,11 +142,7 @@
 	}
 </script>
 
-<div
-	bind:this={cropAreaElement}
-	class="crop-area"
-	style="width: {cropW}px; height: {cropH}px;"
->
+<div bind:this={cropAreaElement} class="crop-area" style="width: {cropW}px; height: {cropH}px;">
 	{#if objectUrl}
 		{#if isVideo}
 			<video src={objectUrl} autoplay muted loop playsinline></video>

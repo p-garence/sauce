@@ -102,12 +102,7 @@
 				<Icon name="action.edit" size={18} color="white" />
 			</button>
 
-			<button
-				type="button"
-				class="btn-icon"
-				title="Supprimer la story"
-				onclick={onDelete}
-			>
+			<button type="button" class="btn-icon" title="Supprimer la story" onclick={onDelete}>
 				<Icon name="action.delete" size={18} color="white" />
 			</button>
 		{:else if author.id}

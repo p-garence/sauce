@@ -27,12 +27,7 @@
 		onCommentDeleted?: (deletedCount: number) => void;
 	}
 
-	let {
-		postId,
-		isOpen = $bindable(false),
-		onCommentAdded,
-		onCommentDeleted
-	}: Props = $props();
+	let { postId, isOpen = $bindable(false), onCommentAdded, onCommentDeleted }: Props = $props();
 
 	let commentsList = $state<CommentData[]>([]);
 	let isLoading = $state(false);
@@ -97,13 +92,9 @@
 				if (!commentsList[parentIndex].replies) {
 					commentsList[parentIndex].replies = [];
 				}
-				commentsList[parentIndex].replies = [
-					...commentsList[parentIndex].replies,
-					addedComment
-				];
+				commentsList[parentIndex].replies = [...commentsList[parentIndex].replies, addedComment];
 				commentsList[parentIndex].showReplies = true;
-				commentsList[parentIndex].repliesCount =
-					(commentsList[parentIndex].repliesCount || 0) + 1;
+				commentsList[parentIndex].repliesCount = (commentsList[parentIndex].repliesCount || 0) + 1;
 			}
 		} else {
 			if (sortBy === 'oldest') {

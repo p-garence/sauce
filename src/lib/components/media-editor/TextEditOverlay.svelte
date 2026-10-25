@@ -354,7 +354,9 @@
                 text-align: {activeAlign};
                 background: {activeText.hasBackground ? activeText.bgColor : 'transparent'};
                 --caret-color: {caretColor};
-                {(!activeText.hasBackground && isDarkText) ? 'text-shadow: 0 0 2px #ffffff, 0 0 8px rgba(255, 255, 255, 0.85);' : ''}
+                {!activeText.hasBackground && isDarkText
+				? 'text-shadow: 0 0 2px #ffffff, 0 0 8px rgba(255, 255, 255, 0.85);'
+				: ''}
             "
 		>
 			<RichTextInput

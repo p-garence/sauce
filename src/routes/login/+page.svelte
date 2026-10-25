@@ -71,7 +71,11 @@
 				<button type="button" class:active={mode === 'login'} onclick={() => (mode = 'login')}>
 					Connexion
 				</button>
-				<button type="button" class:active={mode === 'register'} onclick={() => (mode = 'register')}>
+				<button
+					type="button"
+					class:active={mode === 'register'}
+					onclick={() => (mode = 'register')}
+				>
 					J'ai une clé
 				</button>
 			</div>
@@ -112,12 +116,14 @@
 			<form onsubmit={handleRequestReset} class="auth-form">
 				<h2>Mot de passe oublié</h2>
 				<p class="desc-text">
-					Saisissez l'adresse e-mail associée à votre compte pour recevoir un lien de réinitialisation.
+					Saisissez l'adresse e-mail associée à votre compte pour recevoir un lien de
+					réinitialisation.
 				</p>
 
 				{#if forgotSuccess}
 					<div class="info-box">
-						Un e-mail vous a été envoyé si un compte correspond à cette adresse. Pensez à vérifier vos spams.
+						Un e-mail vous a été envoyé si un compte correspond à cette adresse. Pensez à vérifier
+						vos spams.
 					</div>
 				{/if}
 				{#if forgotError}

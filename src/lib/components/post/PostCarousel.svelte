@@ -70,7 +70,9 @@
 				{:else if media.type === 'image'}
 					<img src={media.content} alt="Média {index}" loading="lazy" decoding="async" />
 				{:else if media.type === 'text'}
-					<div class="text-slide" style="text-align: {media.align || 'center'};"><p><RichContent content={media.content} /></p></div>
+					<div class="text-slide" style="text-align: {media.align || 'center'};">
+						<p><RichContent content={media.content} /></p>
+					</div>
 				{/if}
 			</div>
 		{/each}

@@ -96,7 +96,12 @@
 	});
 
 	function updateDurationFromAudio() {
-		if (audioElement && audioElement.duration && isFinite(audioElement.duration) && audioElement.duration > 0) {
+		if (
+			audioElement &&
+			audioElement.duration &&
+			isFinite(audioElement.duration) &&
+			audioElement.duration > 0
+		) {
 			duration = audioElement.duration;
 		}
 	}
@@ -126,7 +131,11 @@
 		ontimeupdate={() => {
 			if (audioElement) {
 				currentTime = audioElement.currentTime;
-				if ((!duration || !isFinite(duration)) && isFinite(audioElement.duration) && audioElement.duration > 0) {
+				if (
+					(!duration || !isFinite(duration)) &&
+					isFinite(audioElement.duration) &&
+					audioElement.duration > 0
+				) {
 					duration = audioElement.duration;
 				}
 			}
@@ -210,7 +219,9 @@
 		justify-content: center;
 		cursor: pointer;
 		flex-shrink: 0;
-		transition: transform 0.15s ease, background-color 0.15s ease;
+		transition:
+			transform 0.15s ease,
+			background-color 0.15s ease;
 	}
 
 	.voice-player:not(.is-sent) .btn-play-pause {
@@ -267,7 +278,9 @@
 		max-width: 4px;
 		border-radius: 3px;
 		background: rgba(255, 255, 255, 0.4);
-		transition: background-color 0.1s ease, height 0.1s ease;
+		transition:
+			background-color 0.1s ease,
+			height 0.1s ease;
 	}
 
 	.wave-bar.played {

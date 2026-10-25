@@ -21,11 +21,7 @@
 		publishedEmojiSets?: EmojiSet[];
 	}
 
-	let {
-		instanceSettings,
-		publishedIconSets = [],
-		publishedEmojiSets = []
-	}: Props = $props();
+	let { instanceSettings, publishedIconSets = [], publishedEmojiSets = [] }: Props = $props();
 </script>
 
 <div class="appearance-container">

@@ -94,7 +94,9 @@
 </script>
 
 <div class="editor-scroll-anchor">
-	<SettingsCard title={editingSetId ? `Modifier le pack : ${setName}` : "Prévisualisation & Éditeur"}>
+	<SettingsCard
+		title={editingSetId ? `Modifier le pack : ${setName}` : 'Prévisualisation & Éditeur'}
+	>
 		<p class="mosaic-hint">
 			Cliquez sur une icône pour la remplacer par un SVG ou une image de votre choix.
 		</p>
@@ -119,11 +121,13 @@
 		{#if hasModifiedCustomIcons || editingSetId || saveSuccessMessage}
 			<div class="save-set-box">
 				<h4 class="save-box-title">
-					{editingSetId ? `Modifier le pack "${setName}"` : 'Sauvegarder ce pack dans ma bibliothèque'}
+					{editingSetId
+						? `Modifier le pack "${setName}"`
+						: 'Sauvegarder ce pack dans ma bibliothèque'}
 				</h4>
 				<p class="save-box-desc">
 					{editingSetId
-						? "Modifiez le nom, la description ou les icônes de ce pack, puis enregistrez les modifications."
+						? 'Modifiez le nom, la description ou les icônes de ce pack, puis enregistrez les modifications.'
 						: "Enregistrez votre composition d'icônes actuelle. Vous pourrez l'activer à tout moment ou la publier si vous le souhaitez."}
 				</p>
 

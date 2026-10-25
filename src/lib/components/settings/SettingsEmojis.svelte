@@ -292,11 +292,7 @@
 	/>
 
 	<!-- Éditeur de Collection -->
-	<EmojiSetEditorModal
-		{editingSet}
-		onSave={handleSaveSet}
-		onCancel={() => (editingSet = null)}
-	/>
+	<EmojiSetEditorModal {editingSet} onSave={handleSaveSet} onCancel={() => (editingSet = null)} />
 
 	<!-- Collections de l'Instance (par défaut) -->
 	{#if instanceDefaultSets.length > 0}
@@ -408,7 +404,9 @@
 							isOwned={false}
 							onActivate={() => handleToggleActivateSet(set)}
 							onDeactivate={() => handleToggleActivateSet(set)}
-							onPublish={!set.isDeletedByOwner ? () => goto(resolve(`/publier?emojiSetId=${set.id}`)) : undefined}
+							onPublish={!set.isDeletedByOwner
+								? () => goto(resolve(`/publier?emojiSetId=${set.id}`))
+								: undefined}
 							onRemoveSaved={() => handleRemoveSaved(set)}
 						/>
 					{/each}

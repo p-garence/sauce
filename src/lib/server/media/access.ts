@@ -77,7 +77,10 @@ export async function canAccessMediaFile(
 				throw error(401, 'Non autorisé. Vous devez être connecté pour accéder à ce fichier.');
 			}
 			const isParticipant = await db.query.chatParticipants.findFirst({
-				where: and(eq(chatParticipants.chatId, chatMsg.chatId), eq(chatParticipants.userId, viewerId))
+				where: and(
+					eq(chatParticipants.chatId, chatMsg.chatId),
+					eq(chatParticipants.userId, viewerId)
+				)
 			});
 			if (!isParticipant) {
 				throw error(403, 'Accès interdit. Vous ne participez pas à cette discussion.');
@@ -232,7 +235,10 @@ export async function canAccessMediaFile(
 					isPublicAsset = true;
 				} else if (!anyOwned) {
 					if (!viewerId) {
-						throw error(401, 'Non autorisé. Vous devez être connecté pour accéder à cette ressource.');
+						throw error(
+							401,
+							'Non autorisé. Vous devez être connecté pour accéder à cette ressource.'
+						);
 					}
 					const iconIds = matchedIcons.map((s) => s.id);
 					const emojiIds = matchedEmojis.map((s) => s.id);

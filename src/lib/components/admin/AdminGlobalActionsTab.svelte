@@ -74,8 +74,8 @@
 		<div class="action-card">
 			<h3>Générateur de Publications de Test</h3>
 			<p class="action-desc">
-				Crée automatiquement 30 publications variées avec dates aléatoires pour tester le flux
-				et le défilement infini.
+				Crée automatiquement 30 publications variées avec dates aléatoires pour tester le flux et le
+				défilement infini.
 			</p>
 			<form
 				method="POST"

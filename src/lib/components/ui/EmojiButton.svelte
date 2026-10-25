@@ -83,12 +83,7 @@
 	</button>
 
 	{#if isOpen}
-		<EmojiPickerPopover
-			{align}
-			{placement}
-			onSelect={handleSelect}
-			onClose={closePicker}
-		/>
+		<EmojiPickerPopover {align} {placement} onSelect={handleSelect} onClose={closePicker} />
 	{/if}
 </div>
 

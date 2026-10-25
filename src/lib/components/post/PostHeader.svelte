@@ -32,14 +32,8 @@
 		onVisibilityChange?: (newVisibility: PostVisibility, newGroupId: string | null) => void;
 	}
 
-	let {
-		post,
-		isLoggedIn,
-		isOwnPost,
-		isSystemPost,
-		postActions,
-		onVisibilityChange
-	}: Props = $props();
+	let { post, isLoggedIn, isOwnPost, isSystemPost, postActions, onVisibilityChange }: Props =
+		$props();
 
 	function goToProfile(e: MouseEvent) {
 		e.preventDefault();
@@ -49,11 +43,7 @@
 
 <header class="post-header">
 	{#if isSystemPost}
-		<a
-			href={resolve('/profil/serveur')}
-			class="author-profile-link"
-			onclick={goToProfile}
-		>
+		<a href={resolve('/profil/serveur')} class="author-profile-link" onclick={goToProfile}>
 			<div class="avatar avatar-server">
 				<Icon name="status.server" size={18} />
 			</div>

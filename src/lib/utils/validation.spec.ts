@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-	isValidUuid,
-	parseTagsInput,
-	UUID_REGEX,
-	isValidUsername
-} from './validation';
+import { isValidUuid, parseTagsInput, UUID_REGEX, isValidUsername } from './validation';
 
 describe('validation utils', () => {
 	it('validates UUID correctly', () => {
