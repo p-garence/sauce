@@ -42,6 +42,8 @@
 		isOwnProfile: boolean;
 		/** L'utilisateur connecté suit-il ce profil ? */
 		isFollowing: boolean;
+		/** Une demande d'abonnement est-elle en attente ? */
+		isPending?: boolean;
 		/** Statistiques d'abonnements/abonnés */
 		stats: {
 			following: number;
@@ -64,6 +66,7 @@
 		profile,
 		isOwnProfile,
 		isFollowing,
+		isPending = false,
 		stats,
 		followersCount,
 		lazyMutuals,
@@ -111,7 +114,7 @@
 					<FollowButton
 						targetId={profile.id || ''}
 						variant="profile"
-						initialStatus={isFollowing ? 'following' : 'none'}
+						initialStatus={isFollowing ? 'following' : isPending ? 'pending' : 'none'}
 						onToggle={onFollowToggle}
 					/>
 					{#if profile.username !== 'serveur'}

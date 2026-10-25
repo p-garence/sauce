@@ -86,16 +86,50 @@ L'application est accessible sur : **[http://localhost:5173](http://localhost:51
 | Commande                   | Description                                                                    |
 | :------------------------- | :----------------------------------------------------------------------------- |
 | `npm run dev`              | Lance le serveur de développement Vite (`localhost:5173`)                      |
-| `npm run check`            | Check les erreurs svelte                                                       |
-| `npm run lint`             | Check pour problemes de lint                                                   |
-| `npm run audit:bundle`     | Genere fichiers d'audit                                                        |
-| `npm run audit:lighthouse` | Genere fichiers d'audit                                                        |
 | `npm run db:push`          | Pousse les changements de schema das la bdd configuré. A utiliser en dev local |
 | `npm run db:studio`        | Ouvre l'interface visuelle Drizzle Studio pour explorer la base de données     |
 | `npm run test:unit`        | Exécute les tests unitaires avec Vitest                                        |
 | `npm run test:e2e`         | Exécute les tests de bout en bout avec Playwright                              |
 
+### Exécuter les tests et vérifications
+
+#### Vérifications
+
+
+```bash
+npm run check
+```
+
+```bash
+npm run lint
+```
+
+
+#### Tests
+
+
+Avant de lancer les tests pour la première fois, installez le navigateur de test Chromium :
+
+```bash
+npx playwright install chromium
+```
+
+Puis lancez les suites de tests selon vos besoins :
+- **Tests unitaires & composants** : `npm run test:unit`
+- **Tests de bout en bout (E2E)** : `npm run test:e2e`
+
 ---
+
+#### Audits
+
+```bash
+npm run audit:bundle
+```
+
+```bash
+npm run audit:lighthouse
+```
+
 
 ## Déploiement complet local avec Docker
 

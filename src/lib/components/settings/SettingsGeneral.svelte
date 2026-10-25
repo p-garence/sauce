@@ -29,7 +29,7 @@
 			emailSuccess?: boolean;
 			emailMessage?: string;
 			emailError?: string;
-		};
+		} | null;
 	} = $props();
 
 	// Identifiants de connexion

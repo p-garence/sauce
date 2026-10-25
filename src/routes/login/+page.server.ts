@@ -14,8 +14,23 @@ export const actions: Actions = {
 		const username = ((formData.get('username') as string) || '').trim();
 		const key = ((formData.get('inviteKey') as string) || '').trim();
 
-		if (!email || !password || !username || !key) {
-			return fail(400, { message: 'Tous les champs sont requis.' });
+		if (!key) {
+			return fail(400, { message: "La clé d'invitation est requise." });
+		}
+		if (!username || username.length < 3) {
+			return fail(400, { message: "Le nom d'utilisateur doit contenir au moins 3 caractères." });
+		}
+		if (!/^[a-zA-Z0-9_.-]+$/.test(username)) {
+			return fail(400, {
+				message:
+					"Le nom d'utilisateur ne peut contenir que des lettres, chiffres, points, tirets et underscores."
+			});
+		}
+		if (!email || !email.includes('@') || !email.includes('.')) {
+			return fail(400, { message: 'Veuillez saisir une adresse email valide.' });
+		}
+		if (!password || password.length < 8) {
+			return fail(400, { message: 'Le mot de passe doit comporter au moins 8 caractères.' });
 		}
 
 		try {

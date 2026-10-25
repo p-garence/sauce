@@ -69,7 +69,7 @@
 			title="Gérer mes émojis favoris"
 			onclick={(e) => e.stopPropagation()}
 		>
-			<Icon name="action.plus" size={14} />
+			<Icon name="action.add" size={14} />
 		</a>
 	{:else}
 		<a

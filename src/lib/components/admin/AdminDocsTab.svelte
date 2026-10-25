@@ -7,6 +7,7 @@
 	 * - Proposer un lien direct vers la documentation Astro Starlight locale
 	 * - Résumer les points d'architecture clés et commandes CLI utiles pour l'administrateur
 	 */
+	import { resolve } from '$app/paths';
 </script>
 
 <section class="tab-section docs-section">
@@ -18,7 +19,7 @@
 				texte intégrée).
 			</p>
 		</div>
-		<a href="/wikidev" target="_blank" rel="noopener noreferrer" class="btn btn-blue">
+		<a href={resolve('/wikidev')} target="_blank" rel="noopener noreferrer" class="btn btn-blue">
 			Ouvrir le Wiki Dev (/wikidev) ↗
 		</a>
 	</div>

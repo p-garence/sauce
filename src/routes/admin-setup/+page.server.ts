@@ -1,13 +1,18 @@
 import { auth } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import { user } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, ne } from 'drizzle-orm';
 import { redirect, fail } from '@sveltejs/kit';
+import { SYSTEM_USER_ID } from '$lib/server/admin';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-	// SÉCURITÉ & OPTIMISATION : On cherche juste si 1 id existe (plus rapide que count())
-	const existingUsers = await db.select({ id: user.id }).from(user).limit(1);
+	// SÉCURITÉ & OPTIMISATION : On cherche juste si 1 utilisateur réel existe (hors compte système)
+	const existingUsers = await db
+		.select({ id: user.id })
+		.from(user)
+		.where(ne(user.id, SYSTEM_USER_ID))
+		.limit(1);
 
 	if (existingUsers.length > 0) {
 		throw redirect(302, '/login');
@@ -17,7 +22,11 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
 	default: async ({ request }) => {
-		const existingUsers = await db.select({ id: user.id }).from(user).limit(1);
+		const existingUsers = await db
+			.select({ id: user.id })
+			.from(user)
+			.where(ne(user.id, SYSTEM_USER_ID))
+			.limit(1);
 		if (existingUsers.length > 0) {
 			return fail(403, { message: 'Un administrateur est déjà configuré.' });
 		}

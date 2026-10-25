@@ -1,13 +1,18 @@
 // src/routes/+layout.server.ts
 import { db } from '$lib/server/db';
 import { user } from '$lib/server/db/schema';
-import { count } from 'drizzle-orm';
+import { count, ne } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
+import { SYSTEM_USER_ID } from '$lib/server/admin';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
-	// 1. Vérification du nombre d'utilisateurs en base
-	const [result] = await db.select({ value: count() }).from(user).limit(1);
+	// 1. Vérification du nombre d'utilisateurs réels (hors compte système interne)
+	const [result] = await db
+		.select({ value: count() })
+		.from(user)
+		.where(ne(user.id, SYSTEM_USER_ID))
+		.limit(1);
 	const userCount = result.value;
 
 	// Si 0 utilisateur, on verrouille tout et on redirige vers l'installation

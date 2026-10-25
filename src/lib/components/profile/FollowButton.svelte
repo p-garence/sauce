@@ -31,10 +31,12 @@
 		onToggle = undefined
 	}: Props = $props();
 
-	// Initialisation dans le store partagé si une valeur est passée en prop
+	// Synchronisation immédiate avec le statut transmis par la page (SSR ou navigation)
 	$effect(() => {
 		if (initialStatus !== undefined && initialStatus !== null) {
-			globalFollowState.init(targetId, initialStatus);
+			const status: FollowStatus =
+				typeof initialStatus === 'boolean' ? (initialStatus ? 'following' : 'none') : initialStatus;
+			globalFollowState.set(targetId, status);
 		}
 	});
 

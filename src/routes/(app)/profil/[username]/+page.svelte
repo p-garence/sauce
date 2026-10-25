@@ -145,6 +145,7 @@
 		profile={data.profile}
 		isOwnProfile={data.isOwnProfile}
 		isFollowing={data.isFollowing}
+		isPending={data.isPending}
 		stats={data.stats}
 		{followersCount}
 		lazyMutuals={data.lazy?.mutuals}

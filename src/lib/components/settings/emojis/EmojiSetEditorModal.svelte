@@ -106,6 +106,11 @@
 			return;
 		}
 
+		if (setEmojis.length === 0) {
+			saveErrorMessage = 'Veuillez ajouter au moins un émoji à la collection.';
+			return;
+		}
+
 		const wasEditing = Boolean(editingSet?.id);
 		isSaving = true;
 		saveErrorMessage = null;
@@ -221,7 +226,8 @@
 			<button
 				type="button"
 				class="btn-save-collection"
-				disabled={isSaving || !setName.trim()}
+				disabled={isSaving || !setName.trim() || setEmojis.length === 0}
+				title={setEmojis.length === 0 ? 'Ajoutez au moins un émoji' : undefined}
 				onclick={handleSubmit}
 			>
 				{isSaving

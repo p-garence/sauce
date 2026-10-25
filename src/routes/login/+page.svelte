@@ -22,20 +22,42 @@
 
 	async function handleLogin(e: Event) {
 		e.preventDefault();
+		const trimmedIdentifier = identifier.trim();
+		const trimmedPassword = secretKey;
+
+		if (!trimmedIdentifier || !trimmedPassword) {
+			error = 'Veuillez renseigner votre email et votre mot de passe.';
+			return;
+		}
+
+		// Si l'utilisateur a saisi un nom d'utilisateur au lieu d'un email
+		if (!trimmedIdentifier.includes('@') || !trimmedIdentifier.includes('.')) {
+			error = 'Veuillez saisir une adresse email valide (ex: exemple@domaine.com).';
+			return;
+		}
+
 		loading = true;
 		error = '';
 
-		const { error: err } = await authClient.signIn.email({
-			email: identifier,
-			password: secretKey
-		});
+		try {
+			const res = await authClient.signIn.email({
+				email: trimmedIdentifier,
+				password: trimmedPassword
+			});
 
-		if (err) {
+			if (res?.error) {
+				error = 'Identifiant ou mot de passe incorrect.';
+			} else if (res?.data) {
+				window.location.href = resolve('/');
+			} else {
+				error = 'Identifiant ou mot de passe incorrect.';
+			}
+		} catch (err: unknown) {
+			console.error('Erreur lors de la connexion:', err);
 			error = 'Identifiant ou mot de passe incorrect.';
-		} else {
-			window.location.href = resolve('/');
+		} finally {
+			loading = false;
 		}
-		loading = false;
 	}
 
 	async function handleRequestReset(e: Event) {
@@ -68,13 +90,23 @@
 	<div class="auth-box">
 		{#if mode !== 'forgot'}
 			<div class="tabs">
-				<button type="button" class:active={mode === 'login'} onclick={() => (mode = 'login')}>
+				<button
+					type="button"
+					class:active={mode === 'login'}
+					onclick={() => {
+						mode = 'login';
+						error = '';
+					}}
+				>
 					Connexion
 				</button>
 				<button
 					type="button"
 					class:active={mode === 'register'}
-					onclick={() => (mode = 'register')}
+					onclick={() => {
+						mode = 'register';
+						error = '';
+					}}
 				>
 					J'ai une clé
 				</button>
@@ -82,17 +114,31 @@
 		{/if}
 
 		{#if mode === 'login'}
-			<form onsubmit={handleLogin} class="auth-form">
+			<form onsubmit={handleLogin} class="auth-form" novalidate>
 				<h2>Bon retour</h2>
 				{#if error}<div class="error-box">{error}</div>{/if}
 
 				<div class="input-group">
 					<label for="identifier">Email</label>
-					<input id="identifier" type="email" bind:value={identifier} required />
+					<input
+						id="identifier"
+						type="text"
+						placeholder="nom@exemple.com"
+						bind:value={identifier}
+						autocomplete="email"
+						required
+					/>
 				</div>
 				<div class="input-group">
 					<label for="secretKey">Mot de passe</label>
-					<input id="secretKey" type="password" bind:value={secretKey} required />
+					<input
+						id="secretKey"
+						type="password"
+						placeholder="••••••••"
+						bind:value={secretKey}
+						autocomplete="current-password"
+						required
+					/>
 				</div>
 				<div class="forgot-link-wrapper">
 					<button
@@ -100,7 +146,7 @@
 						class="link-btn"
 						onclick={() => {
 							mode = 'forgot';
-							forgotEmail = identifier || '';
+							forgotEmail = identifier && identifier.includes('@') ? identifier : '';
 							forgotSuccess = false;
 							forgotError = '';
 						}}
@@ -109,7 +155,7 @@
 					</button>
 				</div>
 				<button type="submit" disabled={loading}>
-					{loading ? 'Chargement...' : 'Se connecter'}
+					{loading ? 'Connexion en cours...' : 'Se connecter'}
 				</button>
 			</form>
 		{:else if mode === 'forgot'}
@@ -159,14 +205,14 @@
 				method="POST"
 				action="?/registerWithKey"
 				class="auth-form"
+				novalidate
 				use:enhance={() => {
 					loading = true;
 					return async ({ update }) => {
 						try {
-							// LE FIX EST ICI : reset: false empêche d'effacer le mot de passe
+							// reset: false empêche d'effacer les champs en cas d'erreur
 							await update({ reset: false });
 						} finally {
-							// finally garantit que le bouton redeviendra cliquable, quoi qu'il arrive
 							loading = false;
 						}
 					};
@@ -178,23 +224,44 @@
 
 				<div class="input-group">
 					<label for="inviteKey">Clé d'invitation (Obligatoire)</label>
-					<input id="inviteKey" name="inviteKey" type="text" placeholder="INV-XXXXX" required />
+					<input id="inviteKey" name="inviteKey" type="text" placeholder="Ex: INV-XXXXX" required />
 				</div>
 				<div class="input-group">
 					<label for="username">Nom d'utilisateur</label>
-					<input id="username" name="username" type="text" required />
+					<input
+						id="username"
+						name="username"
+						type="text"
+						placeholder="Ex: alice"
+						autocomplete="username"
+						required
+					/>
 				</div>
 				<div class="input-group">
 					<label for="email">Email</label>
-					<input id="email" name="email" type="email" required />
+					<input
+						id="email"
+						name="email"
+						type="email"
+						placeholder="Ex: alice@domaine.com"
+						autocomplete="email"
+						required
+					/>
 				</div>
 				<div class="input-group">
-					<label for="password">Mot de passe</label>
-					<input id="password" name="password" type="password" minlength="8" required />
+					<label for="password">Mot de passe (8 caractères minimum)</label>
+					<input
+						id="password"
+						name="password"
+						type="password"
+						placeholder="Min. 8 caractères"
+						autocomplete="new-password"
+						required
+					/>
 				</div>
 
 				<button type="submit" disabled={loading}>
-					{loading ? 'Création...' : 'Créer mon compte'}
+					{loading ? 'Création en cours...' : 'Créer mon compte'}
 				</button>
 			</form>
 		{/if}

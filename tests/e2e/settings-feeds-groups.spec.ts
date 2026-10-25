@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import path from 'path';
 import { getKey, registerNewUser } from './helpers';
 
 test.describe
@@ -123,19 +124,26 @@ test.describe
 		const emojiPackName = `Chats E2E ${Date.now()}`;
 		await page.fill('#emoji_set_name', emojiPackName);
 		await page.fill('#emoji_set_desc', 'Collection E2E de test');
+
+		// Téléverser un émoji de test
+		const samplePngPath = path.join(process.cwd(), 'tests/fixtures/sample.png');
+		await page.locator('.emojis-management-section input[type="file"]').setInputFiles(samplePngPath);
+		await expect(page.locator('.emoji-card')).toBeVisible();
+
 		await page.locator('button.btn-save-collection').click();
 
-		// Vérifier que la collection apparaît bien dans la bibliothèque
+		// Vérifier que la collection apparaît bien dans la bibliothèque et est active par défaut
 		const emojiPackCard = page.locator(`.pack-card:has(.pack-title:has-text("${emojiPackName}"))`);
 		await expect(emojiPackCard).toBeVisible();
-
-		// Sélectionner / Activer la collection
-		await emojiPackCard.locator('button.btn-pack-primary:has-text("Activer")').click();
 		await expect(emojiPackCard.locator('.active-badge')).toBeVisible();
 
 		// Désactiver la collection
 		await emojiPackCard.locator('button.btn-pack-secondary:has-text("Désactiver")').click();
 		await expect(emojiPackCard.locator('.active-badge')).toBeHidden();
+
+		// Réactiver la collection
+		await emojiPackCard.locator('button.btn-pack-primary:has-text("Activer")').click();
+		await expect(emojiPackCard.locator('.active-badge')).toBeVisible();
 
 		// Publier la collection sur le flux
 		await emojiPackCard.locator('button.btn-pack-publish:has-text("Publier")').click();
@@ -173,16 +181,17 @@ test.describe
 		await page.fill('input[placeholder*="Nom du pack"]', iconPackName);
 		await page.locator('button.btn-save-pack').click();
 
-		// Vérifier que le pack d'icônes apparaît dans la bibliothèque
+		// Vérifier que le pack d'icônes apparaît dans la bibliothèque et est actif par défaut
 		const iconPackCard = page.locator(`.pack-card:has(.pack-title:has-text("${iconPackName}"))`);
 		await expect(iconPackCard).toBeVisible();
-
-		// Activer puis désactiver le pack
-		await iconPackCard.locator('button.btn-pack-primary:has-text("Activer")').click();
 		await expect(iconPackCard.locator('.active-badge')).toBeVisible();
 
+		// Désactiver puis réactiver le pack
 		await iconPackCard.locator('button.btn-pack-secondary:has-text("Désactiver")').click();
 		await expect(iconPackCard.locator('.active-badge')).toBeHidden();
+
+		await iconPackCard.locator('button.btn-pack-primary:has-text("Activer")').click();
+		await expect(iconPackCard.locator('.active-badge')).toBeVisible();
 
 		// Publier le pack d'icônes sur le flux
 		await iconPackCard.locator('button.btn-pack-publish:has-text("Publier")').click();

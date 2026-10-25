@@ -16,7 +16,7 @@
 	import { formatBytes } from '$lib/utils/format';
 	import { formatFullDate, formatDateISO } from '$lib/dates';
 	import { parseStoryReply, type StoryReplyData } from '$lib/stories';
-	import type { EmojiItem, MenuAction, Message } from '$lib/types';
+	import type { EmojiItem, MenuAction, Message, ChatMessage } from '$lib/types';
 	import RichContent from '$lib/components/ui/RichContent.svelte';
 	import RichTextInput from '$lib/components/ui/RichTextInput.svelte';
 	import EmojiButton from '$lib/components/ui/EmojiButton.svelte';
@@ -26,10 +26,6 @@
 	import MessageReactionBar from '$lib/components/chat/MessageReactionBar.svelte';
 	import MessageReactionsModal from '$lib/components/chat/MessageReactionsModal.svelte';
 	import Emoji from '$lib/components/ui/Emoji.svelte';
-
-	export type ChatMessage = Message & {
-		sender?: { name: string | null; username: string | null; image: string | null } | null;
-	};
 
 	interface Props {
 		/** Message affiché */
@@ -85,14 +81,15 @@
 	let showReactionsModal = $state(false);
 	let longPressTimer: ReturnType<typeof setTimeout> | null = null;
 	let pointerStartPos = { x: 0, y: 0 };
-	let isLongPressTriggered = false;
 
 	let favoriteEmojisList = $derived.by<EmojiItem[]>(() => {
 		if (userFavoriteEmojis && userFavoriteEmojis.length > 0) return userFavoriteEmojis;
 		return (page.data?.userFavoriteEmojis as EmojiItem[]) || [];
 	});
 
-	let totalReactionsCount = $derived(message.reactions?.reduce((sum, r) => sum + r.count, 0) || 0);
+	let totalReactionsCount = $derived(
+		message.reactions?.reduce((sum: number, r) => sum + r.count, 0) || 0
+	);
 
 	let hasUserReactedAny = $derived(Boolean(message.reactions?.some((r) => r.hasReacted)));
 
@@ -106,10 +103,8 @@
 			return;
 
 		pointerStartPos = { x: e.clientX, y: e.clientY };
-		isLongPressTriggered = false;
 
 		longPressTimer = setTimeout(() => {
-			isLongPressTriggered = true;
 			if (menuDirection === 'up') {
 				reactionBarDirection = 'up';
 			} else if (messageElementRef) {

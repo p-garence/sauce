@@ -20,7 +20,7 @@
 		apiToggleChatMessageReaction
 	} from '$lib/client/api';
 	import type { PageData } from './$types';
-	import type { MenuAction, Message, StoryBundle } from '$lib/types';
+	import type { MenuAction, Message, StoryBundle, ChatMessage } from '$lib/types';
 	import type { StoryReplyData } from '$lib/stories';
 	import StoryViewerModal from '$lib/components/stories/StoryViewerModal.svelte';
 	import ChatHeader from '$lib/components/chat/ChatHeader.svelte';
@@ -28,10 +28,6 @@
 	import ChatAudioRecorder from '$lib/components/chat/ChatAudioRecorder.svelte';
 	import ChatMessageRequestsBanner from '$lib/components/chat/ChatMessageRequestsBanner.svelte';
 	import ChatInputBar from '$lib/components/chat/ChatInputBar.svelte';
-
-	type ChatMessage = Message & {
-		sender?: { name: string | null; username: string | null; image: string | null } | null;
-	};
 
 	let { data }: { data: PageData } = $props();
 

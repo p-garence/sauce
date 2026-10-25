@@ -41,10 +41,12 @@ export const load: PageServerLoad = async ({ params, url, parent }) => {
 	}
 
 	let isFollowing = false;
+	let isPending = false;
 
 	if (!isOwnProfile) {
 		const status = await checkFollowStatus(currentUser.id, profileUser.id);
 		isFollowing = status.isFollowing;
+		isPending = status.isPending;
 	}
 
 	const getMutuals = async () => {
@@ -99,6 +101,7 @@ export const load: PageServerLoad = async ({ params, url, parent }) => {
 		},
 		isOwnProfile,
 		isFollowing,
+		isPending,
 		lazy: {
 			mutuals: getMutuals()
 		},
