@@ -1,0 +1,1 @@
+ALTER TABLE "user" ALTER COLUMN "profile_visibility" SET DEFAULT '{"bio":true,"site":false,"age":false,"genre":false,"contactEmail":false,"requireFollowRequest":false,"showFollowers":true,"showFollowing":true}'::jsonb;

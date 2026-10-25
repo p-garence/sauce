@@ -1,0 +1,33 @@
+# Dépendances locales
+node_modules/
+
+# Dossiers de données (très important)
+data/
+data_sauce/
+data_prod/
+uploads/
+videos/
+prod.sql
+
+# Fichiers générés par SvelteKit
+.svelte-kit/
+build/
+dist/
+
+# Fichiers sensibles et Git
+.env*
+compose.yaml
+docker-compose.yml
+Dockerfile
+README.md
+.git/
+
+# Rapports, tests et fichiers locaux
+reports/
+.eslintcache
+GEMINI.md
+test-results/
+tests/
+playwright.audit.config.ts
+backups_secours/
+sauvegarde_prod_restauree.sql

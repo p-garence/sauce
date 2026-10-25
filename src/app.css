@@ -1,0 +1,59 @@
+/* 1. RESET (Règle 99% des bugs de dépassement sur mobile) */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	max-width: 100vw;
+	overflow-x: hidden; /* Empêche l'UI de sortir de l'écran horizontalement */
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	background-color: var(--bg-default);
+	color: var(--text-default);
+	touch-action: manipulation;
+}
+
+html.chat-lock,
+body.chat-lock,
+html.story-modal-open,
+body.story-modal-open {
+	overflow: hidden !important;
+	overscroll-behavior: none !important;
+	height: 100% !important;
+}
+
+/* Empêche les éléments flex de déborder (très commun dans les listes) */
+* {
+	min-width: 0;
+}
+
+/* 2. DESIGN TOKENS (Vos variables globales) */
+:root {
+	/* Couleurs */
+	--bg-default: #f9fafb;
+	--bg-surface: #ffffff;
+	--border-color: #eaeaea;
+	--text-default: #1a1a1a;
+	--text-muted: #666666;
+	--primary: #007bff; /* Changez pour la couleur de votre app */
+
+	/* Espacements (Base 4px ou 8px) */
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-6: 24px;
+	--space-8: 32px;
+
+	/* Tailles UI */
+	--nav-height: 60px;
+	--max-content-width: 600px;
+
+	/* Z-index (pour ne pas s'y perdre) */
+	--z-nav: 100;
+	--z-modal: 1000;
+}

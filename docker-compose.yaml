@@ -1,0 +1,52 @@
+services:
+
+  init-folders:
+    image: alpine
+    container_name: social_init
+    volumes:
+      - ${HOST_DATA_PATH}:/app/data
+    # On donne les droits sur data_prod et uploads à l'utilisateur 1000 (hôte et node)
+    command: sh -c "mkdir -p /app/data/uploads && chown 1000:1000 /app/data && chown -R 1000:1000 /app/data/uploads"
+    
+  db:
+    image: postgres:16-alpine
+    container_name: social_db
+    restart: unless-stopped
+    depends_on:
+      init-folders:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    volumes:
+      - ${HOST_DATA_PATH}/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d social -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: social_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "4539:3000"
+    env_file:
+      - .env
+    environment:
+      - ORIGIN=${DOCKER_ORIGIN:-http://localhost:4539}
+      - BETTER_AUTH_URL=${DOCKER_ORIGIN:-http://localhost:4539}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - NODE_ENV=production
+      - HOST_DATA_PATH=/app/data
+      - BODY_SIZE_LIMIT=1048576000
+    volumes:
+      - ${HOST_DATA_PATH}:/app/data
+
