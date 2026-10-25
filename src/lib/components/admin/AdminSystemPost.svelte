@@ -427,7 +427,7 @@
 					</div>
 				{/if}
 
-				<!-- SECTION HASHTAGS -->
+				<!-- SECTION TAGS -->
 				<div class="tags-section">
 					<div class="tags-section-header">
 						<span class="tags-icon"><Icon name="status.tag" size={16} /></span>

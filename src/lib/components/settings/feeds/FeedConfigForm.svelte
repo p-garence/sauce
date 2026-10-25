@@ -414,23 +414,23 @@
 		<!-- SECTION FILTRE DE TAGS -->
 		<div class="input-group">
 			<label for={isEditing ? `tag_filter_mode_${feed?.id}` : 'new_tag_filter_mode'}>
-				Filtre par hashtags (#)
+				Filtre par tags
 			</label>
 			<select
 				id={isEditing ? `tag_filter_mode_${feed?.id}` : 'new_tag_filter_mode'}
 				name="tagFilterMode"
 				bind:value={currentTagFilterMode}
 			>
-				<option value="all">Tous les hashtags (aucun filtre)</option>
-				<option value="include">Afficher uniquement avec ces hashtags</option>
-				<option value="exclude">Exclure les publications avec ces hashtags</option>
+				<option value="all">Tous les Tags (aucun filtre)</option>
+				<option value="include">Afficher uniquement avec ces tags</option>
+				<option value="exclude">Exclure les publications avec ces tags</option>
 			</select>
 		</div>
 
 		{#if currentTagFilterMode !== 'all'}
 			<div class="input-group">
 				<label for={isEditing ? `tag_input_${feed?.id}` : 'new_tag_input'}>
-					Hashtags cibles ({currentTagFilterMode === 'include' ? 'inclus' : 'exclus'})
+					Tags cibles ({currentTagFilterMode === 'include' ? 'inclus' : 'exclus'})
 				</label>
 				<span class="input-hint">
 					Tapez un tag et appuyez sur Entrée, virgule ou espace pour l'ajouter.

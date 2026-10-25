@@ -65,7 +65,7 @@ export const load: PageServerLoad = async ({ request }) => {
 		dbUser.activeFeedId as string | null
 	);
 
-	// 5. Récupérer les hashtags populaires pour les suggestions
+	// 5. Récupérer les tags populaires pour les suggestions
 	const trendingTags = await getTrendingTags(10, 7, session.user.id);
 
 	return {

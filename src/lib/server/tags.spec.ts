@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeTagName, extractHashtags } from './tags';
+import { normalizeTagName, extractTags } from './tags';
 
 describe('normalizeTagName', () => {
 	it('converts tag to lowercase', () => {
@@ -18,29 +18,29 @@ describe('normalizeTagName', () => {
 	});
 });
 
-describe('extractHashtags', () => {
-	it('extracts hashtags from simple text', () => {
+describe('extractTags', () => {
+	it('extracts tags from simple text', () => {
 		const text = 'Voici un post avec #diy et #ff pour le weekend !';
-		expect(extractHashtags(text)).toEqual(['diy', 'ff']);
+		expect(extractTags(text)).toEqual(['diy', 'ff']);
 	});
 
-	it('extracts hashtags with accents and numbers', () => {
+	it('extracts tags with accents and numbers', () => {
 		const text = 'Super #fête_2026 à Paris #santé #123';
-		expect(extractHashtags(text)).toEqual(['fête_2026', 'santé', '123']);
+		expect(extractTags(text)).toEqual(['fête_2026', 'santé', '123']);
 	});
 
 	it('deduplicates tags and normalizes case', () => {
 		const text = 'Re-bonjour #Diy et encore #diy';
-		expect(extractHashtags(text)).toEqual(['diy']);
+		expect(extractTags(text)).toEqual(['diy']);
 	});
 
 	it('ignores lone hash symbols and extracts valid tag', () => {
 		const text = 'Prix # 5€ et #tag valide';
-		expect(extractHashtags(text)).toEqual(['tag']);
+		expect(extractTags(text)).toEqual(['tag']);
 	});
 
-	it('returns empty array when text is empty or has no hashtags', () => {
-		expect(extractHashtags('')).toEqual([]);
-		expect(extractHashtags('Juste du texte sans aucun hashtag.')).toEqual([]);
+	it('returns empty array when text is empty or has no tags', () => {
+		expect(extractTags('')).toEqual([]);
+		expect(extractTags('Juste du texte sans aucun tag.')).toEqual([]);
 	});
 });

@@ -1,7 +1,7 @@
 <!--
   @component RichContent
   @domain ui
-  @description Afficheur de texte enrichi (mentions, hashtags cliquables, liens et émojis personnalisés).
+  @description Afficheur de texte enrichi (mentions, tags cliquables, liens et émojis personnalisés).
 -->
 <script lang="ts">
 	import { resolve } from '$app/paths';

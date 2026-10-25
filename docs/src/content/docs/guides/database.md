@@ -21,7 +21,7 @@ Les schémas sont organisés par domaine dans `src/lib/server/db/schema/` et ré
 | `feeds.ts` | Flux personnalisés (`userFeeds`), algorithmes et mixage blend (`algorithms`, `userAlgorithms`) |
 | `emojis.ts` | Packs d'émojis personnalisés (`emojiSets`), packs enregistrés (`userSavedEmojiSets`) |
 | `icons.ts` | Packs d'icônes vectorielles SVG (`iconSets`), packs enregistrés (`userSavedIconSets`) |
-| `tags.ts` | Répertoire des hashtags (`tags`), liaison aux publications (`postTags`) |
+| `tags.ts` | Répertoire des tags (`tags`), liaison aux publications (`postTags`) |
 | `push.ts` | Abonnements Web Push VAPID (`pushSubscriptions`) |
 | `instanceSettings.ts` | Configuration globale de l'instance (`instanceSettings`) |
 | `auth.ts` | Tables Better-Auth (`user`, `session`, `account`, `verification`) et clés d'invitation (`inviteKeys`) |

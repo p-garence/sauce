@@ -14,7 +14,7 @@ import {
 	getUserMediaUsage,
 	formatBytes
 } from '$lib/server/media';
-import { syncPostTags, extractHashtags } from '$lib/server/tags';
+import { syncPostTags, extractTags } from '$lib/server/tags';
 import { notifyMentions } from '$lib/server/mentions';
 import { createPost } from './crud';
 
@@ -338,7 +338,7 @@ export async function updatePublishedPost(input: UpdatePublishedPostInput) {
 		.map((m) => m.content)
 		.join(' ');
 	const combinedText = `${caption || ''} ${textSlides}`;
-	const extractedTags = extractHashtags(combinedText);
+	const extractedTags = extractTags(combinedText);
 	const allTags = Array.from(new Set([...explicitTags, ...extractedTags]));
 	await syncPostTags(postId, allTags);
 

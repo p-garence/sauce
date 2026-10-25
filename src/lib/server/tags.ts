@@ -29,9 +29,9 @@ export function normalizeTagName(tag: string): string {
 }
 
 /**
- * Extrait automatiquement les hashtags d'un texte (supporte les lettres accentuées et chiffres).
+ * Extrait automatiquement les tags d'un texte (supporte les lettres accentuées et chiffres).
  */
-export function extractHashtags(text: string): string[] {
+export function extractTags(text: string): string[] {
 	if (!text) return [];
 	const matches = text.match(/#([a-zA-Z0-9_\p{L}]+)/gu);
 	if (!matches) return [];
@@ -201,7 +201,7 @@ export async function getTrendingTags(
 }
 
 /**
- * Récupère les posts associés à un hashtag spécifique, avec pagination et tri (récent, populaire, ancien).
+ * Récupère les posts associés à un tag spécifique, avec pagination et tri (récent, populaire, ancien).
  */
 export async function getPostsByTag(
 	tagName: string,

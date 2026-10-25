@@ -1,7 +1,7 @@
 <!--
   @component TrendingTagsBar
   @domain post
-  @description Ruban horizontal défilant des hashtags populaires.
+  @description Ruban horizontal défilant des tags populaires.
 -->
 <script lang="ts">
 	import type { TrendingTagItem } from '$lib/types';

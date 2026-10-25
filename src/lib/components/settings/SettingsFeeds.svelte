@@ -21,7 +21,7 @@
 		feeds: UserFeed[];
 		/** Groupes de l'utilisateur pour le filtrage par groupe */
 		groups?: UserGroup[];
-		/** Liste des hashtags tendances suggérés */
+		/** Liste des tags tendances suggérés */
 		trendingTags?: { name: string; count?: number }[];
 		/** Données de retour d'action de formulaire SvelteKit */
 		form?: { success?: boolean; message?: string } | null;

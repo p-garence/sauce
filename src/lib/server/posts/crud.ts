@@ -17,13 +17,13 @@ import type {
 	IconSet,
 	EmojiSet
 } from '$lib/types';
-import { getTagsForPosts, attachTagsToPost, extractHashtags } from '$lib/server/tags';
+import { getTagsForPosts, attachTagsToPost, extractTags } from '$lib/server/tags';
 import { notifyMentions } from '$lib/server/mentions';
 import { canSeePost } from './helpers';
 
 /**
  * Crée un nouveau post en base de données, détermine automatiquement son type
- * (text, image, video, carousel), associe les hashtags détectés et notifie les mentions @username.
+ * (text, image, video, carousel), associe les tags détectés et notifie les mentions @username.
  *
  * @param params - Données de création (auteur, contenu, slides médias, visibilité, groupe optionnel, etc.)
  * @returns Le post créé avec son identifiant { id: string }
@@ -87,13 +87,13 @@ export async function createPost(params: {
 		})
 		.returning({ id: posts.id });
 
-	// Extraction et association automatique des hashtags
+	// Extraction et association automatique des tags
 	const textSlides = mediaUrls
 		.filter((m) => m.type === 'text')
 		.map((m) => m.content)
 		.join(' ');
 	const combinedText = `${content || ''} ${textSlides}`;
-	const extracted = extractHashtags(combinedText);
+	const extracted = extractTags(combinedText);
 	const allTags = Array.from(new Set([...extracted, ...(explicitTags || [])]));
 
 	if (allTags.length > 0) {

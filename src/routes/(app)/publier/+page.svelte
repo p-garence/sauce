@@ -7,7 +7,7 @@
 	 * @responsibilities
 	 * - Permettre le basculement rapide entre mode publication classique et mode story éphémère.
 	 * - Orchestrer la composition du carrousel avec les sous-composants dédiés.
-	 * - Gérer les hashtags, la visibilité et les packs d'assets joints.
+	 * - Gérer les tags, la visibilité et les packs d'assets joints.
 	 * - Soumettre le formulaire multipart vers le serveur et actualiser l'état du flux.
 	 */
 
