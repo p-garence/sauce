@@ -5,6 +5,31 @@ yarn.lock
 bun.lock
 bun.lockb
 
+# Databases & local data
+data
+data/**
+data_sauce
+data_sauce/**
+data_prod
+data_prod/**
+prod.sql
+
+# Build outputs & cache
+.svelte-kit
+.svelte-kit/**
+build
+build/**
+dist
+dist/**
+.output
+.output/**
+test-results
+test-results/**
+reports
+reports/**
+
 # Miscellaneous
-/static/
-/drizzle/
+static
+static/**
+drizzle
+drizzle/**
