@@ -82,5 +82,23 @@ export const handle: Handle = async ({ event, resolve }) => {
 		`total;dur=${totalDuration.toFixed(1)};desc="Total", auth;dur=${authDuration.toFixed(1)};desc="Auth"`
 	);
 
+	// Protection SEO : interdire l'indexation des chemins privés, d'administration et de l'API
+	const privatePaths = [
+		'/api',
+		'/chat',
+		'/creer_discussion',
+		'/parametres',
+		'/publier',
+		'/modifier_post',
+		'/modifier_profil',
+		'/story',
+		'/admin',
+		'/admin-setup',
+		'/setup'
+	];
+	if (privatePaths.some((p) => event.url.pathname.startsWith(p))) {
+		response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+	}
+
 	return response;
 };

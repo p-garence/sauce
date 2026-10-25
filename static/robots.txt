@@ -1,3 +1,62 @@
-# allow crawling everything by default
+# =============================================================================
+# Robots.txt - Sauce et Ail
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Moteurs de recherche généraux (Googlebot, Bingbot, etc.)
+# Indexation des contenus publics uniquement
+# -----------------------------------------------------------------------------
 User-agent: *
-Disallow:
+# Pages publiques autorisées
+Allow: /$
+Allow: /calendrier
+Allow: /docs
+Allow: /post/
+Allow: /profil/
+Allow: /tag/
+Allow: /tags
+Allow: /explorer
+
+# Chemins privés, administratifs et techniques interdits
+Disallow: /api/
+Disallow: /chat/
+Disallow: /creer_discussion/
+Disallow: /parametres
+Disallow: /publier
+Disallow: /modifier_post/
+Disallow: /modifier_profil
+Disallow: /story/
+Disallow: /admin
+Disallow: /admin-setup
+Disallow: /setup
+Disallow: /login
+Disallow: /reinitialiser-mot-de-passe
+
+# -----------------------------------------------------------------------------
+# Robots de scraping et d'entraînement d'IA
+# Interdiction stricte sur l'ensemble du site
+# -----------------------------------------------------------------------------
+# OpenAI
+User-agent: GPTBot
+User-agent: ChatGPT-User
+# Google AI
+User-agent: Google-Extended
+# Anthropic
+User-agent: ClaudeBot
+User-agent: anthropic-ai
+# Common Crawl (utilisé pour les datasets d'IA)
+User-agent: CCBot
+# ByteDance
+User-agent: Bytespider
+# Perplexity
+User-agent: PerplexityBot
+# Meta
+User-agent: FacebookBot
+User-agent: Meta-ExternalAgent
+# Cohere
+User-agent: cohere-ai
+# Autres crawlers d'IA & scraping massif
+User-agent: Diffbot
+User-agent: Omgilibot
+User-agent: ImagesiftBot
+Disallow: /
