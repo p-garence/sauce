@@ -14,7 +14,11 @@
 	import { resolve } from '$app/paths';
 	import { goto, afterNavigate, invalidateAll } from '$app/navigation';
 	import { globalStream } from '$lib/client/globalStreamState.svelte';
-	import { apiUpdateChatMessage, apiDeleteChatMessage } from '$lib/client/api';
+	import {
+		apiUpdateChatMessage,
+		apiDeleteChatMessage,
+		apiToggleChatMessageReaction
+	} from '$lib/client/api';
 	import type { PageData } from './$types';
 	import type { MenuAction, Message, StoryBundle } from '$lib/types';
 	import type { StoryReplyData } from '$lib/stories';
@@ -178,6 +182,23 @@
 		}
 	});
 
+	$effect(() => {
+		const reaction = globalStream.reactionUpdate;
+		if (reaction && reaction.chatId === data.chatId) {
+			untrack(() => {
+				const current = messageOverrides[reaction.messageId] || {};
+				const localizedReactions = reaction.reactions.map((r) => ({
+					...r,
+					hasReacted: r.users.some((u) => u.id === data.currentUserId)
+				}));
+				messageOverrides[reaction.messageId] = {
+					...current,
+					reactions: localizedReactions
+				};
+			});
+		}
+	});
+
 	async function markAsRead() {
 		try {
 			await fetch('/api/chat/read', {
@@ -320,6 +341,80 @@
 		}
 	}
 
+	async function handleToggleReaction(msg: ChatMessage, emoji: import('$lib/types').EmojiItem) {
+		const currentReactions = msg.reactions || [];
+		const existingGroupIndex = currentReactions.findIndex((r) => r.emojiId === emoji.id);
+		let updatedReactions = [...currentReactions];
+
+		if (existingGroupIndex !== -1) {
+			const group = { ...updatedReactions[existingGroupIndex] };
+			if (group.hasReacted) {
+				const newUsers = group.users.filter((u) => u.id !== data.currentUserId);
+				if (newUsers.length === 0) {
+					updatedReactions.splice(existingGroupIndex, 1);
+				} else {
+					group.users = newUsers;
+					group.count = newUsers.length;
+					group.hasReacted = false;
+					updatedReactions[existingGroupIndex] = group;
+				}
+			} else {
+				group.users = [
+					...group.users,
+					{
+						id: data.currentUserId,
+						name: data.sessionUser?.name || null,
+						username: data.sessionUser?.username || null,
+						image: data.sessionUser?.image || null
+					}
+				];
+				group.count = group.users.length;
+				group.hasReacted = true;
+				updatedReactions[existingGroupIndex] = group;
+			}
+		} else {
+			updatedReactions.push({
+				emojiId: emoji.id,
+				emojiName: emoji.name,
+				emojiUrl: emoji.url,
+				count: 1,
+				users: [
+					{
+						id: data.currentUserId,
+						name: data.sessionUser?.name || null,
+						username: data.sessionUser?.username || null,
+						image: data.sessionUser?.image || null
+					}
+				],
+				hasReacted: true
+			});
+		}
+
+		messageOverrides[msg.id] = {
+			...(messageOverrides[msg.id] || {}),
+			reactions: updatedReactions
+		};
+
+		try {
+			const res = await apiToggleChatMessageReaction(msg.id, emoji);
+			if (res?.reactions) {
+				const localized = res.reactions.map((r) => ({
+					...r,
+					hasReacted: r.users.some((u) => u.id === data.currentUserId)
+				}));
+				messageOverrides[msg.id] = {
+					...(messageOverrides[msg.id] || {}),
+					reactions: localized
+				};
+			}
+		} catch (e) {
+			console.error('Erreur bascule réaction:', e);
+			const current = { ...(messageOverrides[msg.id] || {}) };
+			delete current.reactions;
+			messageOverrides[msg.id] = current;
+		}
+	}
+
 	function handleAudioComplete(file: File, url: string, autoSend: boolean) {
 		selectedFile = file;
 		selectedFilePreview = null;
@@ -432,6 +527,8 @@
 				isEditing={editingMessageId === msg.id}
 				{isSavingEdit}
 				menuDirection={idx >= chatMessages.length - 2 ? 'up' : 'auto'}
+				userFavoriteEmojis={data.userFavoriteEmojis}
+				onToggleReaction={handleToggleReaction}
 				onStartEdit={(m) => (editingMessageId = m.id)}
 				onCancelEdit={() => (editingMessageId = null)}
 				onSaveEdit={saveEditMessage}

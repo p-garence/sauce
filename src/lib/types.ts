@@ -215,8 +215,25 @@ export type CommentData = {
 	repliesPage?: number;
 };
 
+export interface MessageReactionUser {
+	id: string;
+	name: string | null;
+	username: string | null;
+	image?: string | null;
+}
+
+export interface MessageReactionGroup {
+	emojiId: string;
+	emojiName: string;
+	emojiUrl: string;
+	count: number;
+	users: MessageReactionUser[];
+	hasReacted: boolean;
+}
+
 export type ChatMessage = Message & {
 	sender?: { name: string | null; username: string | null; image: string | null } | null;
+	reactions?: MessageReactionGroup[];
 };
 
 export type ChatContact = {
@@ -296,11 +313,22 @@ export type ChatSeenStreamEvent = {
 	data: { chatId: string; userId?: string };
 };
 
+// Événement déclenché quand une réaction de message change
+export type MessageReactionStreamEvent = {
+	type: 'message_reaction';
+	data: {
+		chatId: string;
+		messageId: string;
+		reactions: MessageReactionGroup[];
+	};
+};
+
 // L'union de tous les événements possibles
 export type StreamEvent =
 	| MessageStreamEvent
 	| MessageUpdatedStreamEvent
 	| MessageDeletedStreamEvent
+	| MessageReactionStreamEvent
 	| NotificationStreamEvent
 	| ChatSeenStreamEvent
 	| NotificationDeletedStreamEvent;

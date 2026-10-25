@@ -12,6 +12,7 @@
 	 * - Proposer le menu d'actions (modification et suppression).
 	 */
 
+	import { page } from '$app/state';
 	import { formatBytes } from '$lib/utils/format';
 	import { formatFullDate, formatDateISO } from '$lib/dates';
 	import { parseStoryReply, type StoryReplyData } from '$lib/stories';
@@ -22,6 +23,8 @@
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import ActionMenu from '$lib/components/ui/ActionMenu.svelte';
 	import VoiceMessagePlayer from '$lib/components/chat/VoiceMessagePlayer.svelte';
+	import MessageReactionBar from '$lib/components/chat/MessageReactionBar.svelte';
+	import MessageReactionsModal from '$lib/components/chat/MessageReactionsModal.svelte';
 
 	export type ChatMessage = Message & {
 		sender?: { name: string | null; username: string | null; image: string | null } | null;
@@ -42,6 +45,10 @@
 		isSavingEdit?: boolean;
 		/** Direction d'ouverture du menu déroulant */
 		menuDirection?: 'up' | 'auto';
+		/** Emojis favoris de l'utilisateur */
+		userFavoriteEmojis?: EmojiItem[];
+		/** Callback pour basculer une réaction */
+		onToggleReaction?: (msg: ChatMessage, emoji: EmojiItem) => void;
 		/** Callback déclenché pour entrer en mode édition */
 		onStartEdit: (msg: ChatMessage) => void;
 		/** Callback pour annuler l'édition */
@@ -62,12 +69,72 @@
 		isEditing = false,
 		isSavingEdit = false,
 		menuDirection = 'auto',
+		userFavoriteEmojis,
+		onToggleReaction,
 		onStartEdit,
 		onCancelEdit,
 		onSaveEdit,
 		onDelete,
 		onOpenStoryModal
 	}: Props = $props();
+
+	let showReactionBar = $state(false);
+	let showReactionsModal = $state(false);
+	let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+	let pointerStartPos = { x: 0, y: 0 };
+	let isLongPressTriggered = false;
+
+	let favoriteEmojisList = $derived.by<EmojiItem[]>(() => {
+		if (userFavoriteEmojis && userFavoriteEmojis.length > 0) return userFavoriteEmojis;
+		return (page.data?.userFavoriteEmojis as EmojiItem[]) || [];
+	});
+
+	let totalReactionsCount = $derived(
+		message.reactions?.reduce((sum, r) => sum + r.count, 0) || 0
+	);
+
+	let hasUserReactedAny = $derived(
+		Boolean(message.reactions?.some((r) => r.hasReacted))
+	);
+
+	function handlePointerDown(e: PointerEvent) {
+		if (isDeleted || isEditing) return;
+		if (e.button !== 0) return;
+		// Sur PC (souris), l'ouverture se fait via le menu ...
+		if (e.pointerType === 'mouse') return;
+		const target = e.target as HTMLElement;
+		if (target.closest('button, a, input, textarea, audio, video, .message-reactions-badge')) return;
+
+		pointerStartPos = { x: e.clientX, y: e.clientY };
+		isLongPressTriggered = false;
+
+		longPressTimer = setTimeout(() => {
+			isLongPressTriggered = true;
+			showReactionBar = true;
+			if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+				try {
+					navigator.vibrate(30);
+				} catch {}
+			}
+		}, 420);
+	}
+
+	function handlePointerMove(e: PointerEvent) {
+		if (!longPressTimer) return;
+		const dx = Math.abs(e.clientX - pointerStartPos.x);
+		const dy = Math.abs(e.clientY - pointerStartPos.y);
+		if (dx > 10 || dy > 10) {
+			clearTimeout(longPressTimer);
+			longPressTimer = null;
+		}
+	}
+
+	function handlePointerUp() {
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = null;
+		}
+	}
 
 	let editContent = $state('');
 	let editRichInputRef = $state<RichTextInput | null>(null);
@@ -102,8 +169,16 @@
 	let replyData = $derived(parseStoryReply(message.content));
 
 	let actions = $derived.by<MenuAction[]>(() => {
-		const list: MenuAction[] = [];
-		if (isMe && !isDeleted) {
+		if (isDeleted) return [];
+		const list: MenuAction[] = [
+			{
+				label: 'Réagir',
+				onClick: () => {
+					showReactionBar = true;
+				}
+			}
+		];
+		if (isMe) {
 			list.push({
 				label: 'Modifier',
 				onClick: () => onStartEdit(message)
@@ -126,7 +201,22 @@
 	class="message {isMe ? 'sent' : 'received'} {isMentioned ? 'mentioned' : ''} {isDeleted
 		? 'deleted'
 		: ''} {isEditing ? 'editing' : ''}"
+	class:has-reactions={totalReactionsCount > 0}
+	role="group"
+	aria-label="Message de {isMe ? 'vous' : message.sender?.name || message.sender?.username || 'utilisateur'}"
+	onpointerdown={handlePointerDown}
+	onpointermove={handlePointerMove}
+	onpointerup={handlePointerUp}
+	onpointercancel={handlePointerUp}
 >
+	{#if showReactionBar}
+		<MessageReactionBar
+			favoriteEmojis={favoriteEmojisList}
+			align={isMe ? 'right' : 'left'}
+			onSelect={(emoji) => onToggleReaction?.(message, emoji)}
+			onClose={() => (showReactionBar = false)}
+		/>
+	{/if}
 	{#if !isMe && chatType === 'group'}
 		<span class="group-sender">{message.sender?.name || message.sender?.username}</span>
 	{/if}
@@ -285,6 +375,29 @@
 		{/if}
 	{/if}
 
+	{#if message.reactions && message.reactions.length > 0}
+		<button
+			type="button"
+			class="message-reactions-badge"
+			class:has-user-reacted={hasUserReactedAny}
+			onclick={(e) => {
+				e.stopPropagation();
+				showReactionsModal = true;
+			}}
+			title="Voir qui a réagi ({totalReactionsCount})"
+			aria-label="Voir qui a réagi"
+		>
+			<span class="reactions-icons">
+				{#each message.reactions.slice(0, 3) as reaction (reaction.emojiId)}
+					<img src={reaction.emojiUrl} alt={reaction.emojiName} class="reaction-badge-img" />
+				{/each}
+			</span>
+			{#if totalReactionsCount > 1}
+				<span class="reactions-badge-count">{totalReactionsCount}</span>
+			{/if}
+		</button>
+	{/if}
+
 	<div class="message-footer">
 		{#if isEdited}
 			<span class="edited-badge" title={formatFullDate(message.updatedAt, { withTime: true })}>
@@ -309,12 +422,101 @@
 	</div>
 </div>
 
+<MessageReactionsModal
+	isOpen={showReactionsModal}
+	onClose={() => (showReactionsModal = false)}
+	reactions={message.reactions || []}
+	{currentUserId}
+	favoriteEmojis={favoriteEmojisList}
+	onToggleReaction={(emoji) => onToggleReaction?.(message, emoji)}
+/>
+
 <style>
 	.message {
+		position: relative;
 		max-width: 75%;
+		min-width: 80px;
 		padding: 10px 14px;
 		border-radius: 18px;
 		word-wrap: break-word;
+		touch-action: pan-y;
+	}
+
+	.message.has-reactions {
+		margin-bottom: 16px;
+		min-width: 155px; /* La bulle s'agrandit pour accueillir le badge et l'heure sans chevauchement */
+	}
+
+	.message-reactions-badge {
+		position: absolute;
+		bottom: -11px;
+		display: inline-flex;
+		align-items: center;
+		gap: 3px;
+		padding: 2px 7px;
+		border-radius: 9999px;
+		background: #ffffff;
+		border: 1px solid rgba(0, 0, 0, 0.1);
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+		cursor: pointer;
+		z-index: 5;
+		user-select: none;
+		line-height: 1;
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.15s ease;
+	}
+
+	/* Message envoyé (à droite) : l'émoji est vers le centre de la conversation (à gauche de la bulle) */
+	.message.sent .message-reactions-badge {
+		left: 14px;
+		right: auto;
+		transform: none;
+	}
+
+	.message.sent .message-reactions-badge:hover {
+		transform: scale(1.08);
+		box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+	}
+
+	/* Message reçu (à gauche) : l'émoji est vers le centre de la conversation (à droite de la bulle) */
+	.message.received .message-reactions-badge {
+		right: 14px;
+		left: auto;
+		transform: none;
+	}
+
+	.message.received .message-reactions-badge:hover {
+		transform: scale(1.08);
+		box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+	}
+
+	.message-reactions-badge.has-user-reacted {
+		border-color: #38bdf8;
+		background: #f0f9ff;
+	}
+
+	.reactions-icons {
+		display: inline-flex;
+		align-items: center;
+		gap: 2px;
+	}
+
+	.reaction-badge-img {
+		width: 17px;
+		height: 17px;
+		object-fit: contain;
+	}
+
+	.reactions-badge-count {
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: #334155;
+		margin-left: 2px;
+	}
+
+	.message-reactions-badge.has-user-reacted .reactions-badge-count {
+		color: #0284c7;
 	}
 
 	.message p {
@@ -324,11 +526,20 @@
 	}
 
 	.message .time {
-		font-size: 0.7rem;
-		opacity: 0.7;
-		display: block;
-		text-align: right;
-		margin-top: 4px;
+		font-size: 0.72rem;
+		font-weight: 500;
+		display: inline-block;
+		margin: 0;
+		line-height: 1;
+	}
+
+	.message.sent .time {
+		color: #ffffff;
+		text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+	}
+
+	.message.received .time {
+		color: #334155;
 	}
 
 	.message.sent {
@@ -559,9 +770,16 @@
 	.message-footer {
 		display: flex;
 		align-items: center;
-		justify-content: flex-end;
 		gap: 6px;
-		margin-top: 4px;
+		margin-top: 5px;
+	}
+
+	.message.sent .message-footer {
+		justify-content: flex-end;
+	}
+
+	.message.received .message-footer {
+		justify-content: flex-start;
 	}
 
 	.message.deleted {
@@ -711,18 +929,27 @@
 		width: 20px;
 		height: 20px;
 		font-size: 0.85rem;
-		opacity: 0.7;
-		color: inherit;
 		border-radius: 50%;
 		transition: opacity 0.15s, background 0.15s;
 	}
 
-	.message-action-menu :global(.btn-more:hover) {
+	.message.sent .message-action-menu :global(.btn-more) {
+		color: #ffffff;
+		opacity: 0.85;
+	}
+
+	.message.received .message-action-menu :global(.btn-more) {
+		color: #475569;
+		opacity: 0.85;
+	}
+
+	.message.sent .message-action-menu :global(.btn-more:hover) {
 		opacity: 1;
 		background: rgba(255, 255, 255, 0.25);
 	}
 
 	.message.received .message-action-menu :global(.btn-more:hover) {
+		opacity: 1;
 		background: rgba(0, 0, 0, 0.08);
 	}
 </style>

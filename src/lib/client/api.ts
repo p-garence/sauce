@@ -192,3 +192,19 @@ export async function apiDeleteChatMessage(messageId: string) {
 	);
 }
 
+export async function apiToggleChatMessageReaction(
+	messageId: string,
+	emoji: import('$lib/types').EmojiItem
+) {
+	return apiFetch<{
+		success: boolean;
+		messageId: string;
+		chatId: string;
+		reactions: import('$lib/types').MessageReactionGroup[];
+	}>('/api/chat/reactions', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ messageId, emoji })
+	});
+}
+

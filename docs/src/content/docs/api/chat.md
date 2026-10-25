@@ -143,3 +143,50 @@ Alimente la pagination ascendante lors du défilement vers le haut dans la conve
   "success": true
 }
 ```
+
+---
+
+## 7. Ajouter ou retirer une réaction emoji sur un message
+
+- **Méthode** : `POST`
+- **Chemin** : `/api/chat/reactions`
+- **Authentification** : Requise (Participant du salon uniquement)
+
+Bascule (ajoute si absente, retire si présente) une réaction emoji sur un message existant et diffuse l'événement SSE `message_reaction` en temps réel à tous les membres de la conversation.
+
+### Requête
+
+```json
+{
+  "messageId": "msg_123",
+  "emoji": {
+    "id": "em_fire",
+    "name": "fire",
+    "url": "/media/emojis/fire.webp"
+  }
+}
+```
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true,
+  "messageId": "msg_123",
+  "chatId": "chat_abc",
+  "reactions": [
+    {
+      "emojiId": "em_fire",
+      "emojiName": "fire",
+      "emojiUrl": "/media/emojis/fire.webp",
+      "count": 2,
+      "users": [
+        { "id": "u_1", "name": "Alice", "username": "alice" },
+        { "id": "u_2", "name": "Bob", "username": "bob" }
+      ],
+      "hasReacted": true
+    }
+  ]
+}
+```
+

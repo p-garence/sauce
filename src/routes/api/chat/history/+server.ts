@@ -5,6 +5,7 @@ import { eq, and, desc, lt, gt } from 'drizzle-orm';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { MESSAGES_PER_CHAT } from '$lib/constants';
+import { formatMessageReactions } from '$lib/server/chat';
 
 export const GET: RequestHandler = async ({ request, url }) => {
 	const session = await requireApiSession(request);
@@ -36,10 +37,20 @@ export const GET: RequestHandler = async ({ request, url }) => {
 		orderBy: [desc(messages.createdAt)],
 		limit: MESSAGES_PER_CHAT,
 		with: {
-			sender: { columns: { name: true, username: true, image: true } }
+			sender: { columns: { name: true, username: true, image: true } },
+			reactions: {
+				with: {
+					user: { columns: { id: true, name: true, username: true, image: true } }
+				}
+			}
 		}
 	});
 
 	history.reverse();
-	return json({ messages: history, hasMore: history.length === MESSAGES_PER_CHAT });
+	const formattedHistory = history.map((m) => ({
+		...m,
+		reactions: formatMessageReactions(m.reactions || [], session.user.id)
+	}));
+
+	return json({ messages: formattedHistory, hasMore: history.length === MESSAGES_PER_CHAT });
 };

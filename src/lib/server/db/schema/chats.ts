@@ -7,7 +7,8 @@ import {
 	boolean,
 	integer,
 	primaryKey,
-	index
+	index,
+	uniqueIndex
 } from 'drizzle-orm/pg-core';
 import { user } from './auth';
 import { chatTypeEnum, chatParticipantStatusEnum } from './enums';
@@ -73,5 +74,27 @@ export const messages = pgTable(
 		index('messages_created_at_idx').on(t.createdAt),
 		index('messages_sender_id_idx').on(t.senderId),
 		index('messages_chat_created_idx').on(t.chatId, t.createdAt.desc())
+	]
+);
+
+export const messageReactions = pgTable(
+	'message_reactions',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		messageId: uuid('message_id')
+			.references(() => messages.id, { onDelete: 'cascade' })
+			.notNull(),
+		userId: text('user_id')
+			.references(() => user.id, { onDelete: 'cascade' })
+			.notNull(),
+		emojiId: varchar('emoji_id', { length: 64 }).notNull(),
+		emojiName: varchar('emoji_name', { length: 64 }).notNull(),
+		emojiUrl: text('emoji_url').notNull(),
+		createdAt: timestamp('created_at').defaultNow().notNull()
+	},
+	(t) => [
+		index('message_reactions_message_id_idx').on(t.messageId),
+		index('message_reactions_user_id_idx').on(t.userId),
+		uniqueIndex('message_reactions_msg_user_emoji_idx').on(t.messageId, t.userId, t.emojiId)
 	]
 );

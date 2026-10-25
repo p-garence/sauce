@@ -12,7 +12,7 @@ import {
 	postViews,
 	interactions
 } from './posts';
-import { chats, chatParticipants, messages } from './chats';
+import { chats, chatParticipants, messages, messageReactions } from './chats';
 import { follows, userBlocks, notifications, userInstanceConsents } from './social';
 import { tags, postTags } from './tags';
 import { stories, storyViews, storyLikes } from './stories';
@@ -130,9 +130,15 @@ export const chatParticipantsRelations = relations(chatParticipants, ({ one }) =
 	user: one(user, { fields: [chatParticipants.userId], references: [user.id] })
 }));
 
-export const newMessagesRelations = relations(messages, ({ one }) => ({
+export const newMessagesRelations = relations(messages, ({ one, many }) => ({
 	chat: one(chats, { fields: [messages.chatId], references: [chats.id] }),
-	sender: one(user, { fields: [messages.senderId], references: [user.id] })
+	sender: one(user, { fields: [messages.senderId], references: [user.id] }),
+	reactions: many(messageReactions)
+}));
+
+export const messageReactionsRelations = relations(messageReactions, ({ one }) => ({
+	message: one(messages, { fields: [messageReactions.messageId], references: [messages.id] }),
+	user: one(user, { fields: [messageReactions.userId], references: [user.id] })
 }));
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({

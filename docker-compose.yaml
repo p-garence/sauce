@@ -41,8 +41,8 @@ services:
     env_file:
       - .env
     environment:
-      - ORIGIN=${DOCKER_ORIGIN:-http://localhost:4539}
-      - BETTER_AUTH_URL=${DOCKER_ORIGIN:-http://localhost:4539}
+      - ORIGIN=${DOCKER_ORIGIN:-${ORIGIN:-http://localhost:4539}}
+      - BETTER_AUTH_URL=${DOCKER_ORIGIN:-${ORIGIN:-http://localhost:4539}}
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - NODE_ENV=production
       - HOST_DATA_PATH=/app/data

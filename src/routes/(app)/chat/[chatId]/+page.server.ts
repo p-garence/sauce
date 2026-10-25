@@ -15,7 +15,8 @@ import {
 	toggleChatMute,
 	deleteChatMessage,
 	updateChatMessage,
-	assertCanSendChatMessage
+	assertCanSendChatMessage,
+	formatMessageReactions
 } from '$lib/server/chat';
 import { saveChatFile, getUserMediaUsage, formatBytes } from '$lib/server/media';
 import { isValidUuid } from '$lib/utils/validation';
@@ -56,10 +57,22 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 		where: and(eq(messages.chatId, params.chatId), gt(messages.createdAt, participation.clearedAt)),
 		orderBy: [desc(messages.createdAt)],
 		limit: MESSAGES_PER_CHAT,
-		with: { sender: { columns: { name: true, username: true, image: true } } }
+		with: {
+			sender: { columns: { name: true, username: true, image: true } },
+			reactions: {
+				with: {
+					user: { columns: { id: true, name: true, username: true, image: true } }
+				}
+			}
+		}
 	});
 
 	chatMessages.reverse();
+
+	const formattedMessages = chatMessages.map((m) => ({
+		...m,
+		reactions: formatMessageReactions(m.reactions || [], currentUserId)
+	}));
 
 	await db
 		.update(chatParticipants)
@@ -104,7 +117,7 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 		title: title || 'Groupe',
 		description: chat.type === 'group' ? chat.description : null,
 		image,
-		messages: chatMessages,
+		messages: formattedMessages,
 		currentUserId,
 		hasMore: chatMessages.length === MESSAGES_PER_CHAT,
 		otherUserId,

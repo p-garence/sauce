@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import type { ChatMessage, AppNotification, StreamEvent } from '$lib/types';
+import type { ChatMessage, AppNotification, StreamEvent, MessageReactionGroup } from '$lib/types';
 
 class GlobalStreamState {
 	// ÉTATS
@@ -9,6 +9,7 @@ class GlobalStreamState {
 	latestMessage = $state<ChatMessage | null>(null);
 	deletedMessage = $state<{ messageId: string; chatId: string; message?: ChatMessage } | null>(null);
 	updatedMessage = $state<ChatMessage | null>(null);
+	reactionUpdate = $state<{ chatId: string; messageId: string; reactions: MessageReactionGroup[] } | null>(null);
 
 	notifs = $state<AppNotification[]>([]);
 	hasMoreNotifs = $state(false);
@@ -91,6 +92,9 @@ class GlobalStreamState {
 					break;
 				case 'message_deleted':
 					this.deletedMessage = parsed.data;
+					break;
+				case 'message_reaction':
+					this.reactionUpdate = parsed.data;
 					break;
 				case 'chat_seen':
 					this.markChatAsRead(parsed.data.chatId);

@@ -47,6 +47,8 @@ description: Fiches de référence des composants de messagerie instantanée dir
 | `chatType` | `'direct' \| 'group'` | Requis | Contexte de discussion (affiche l'avatar/nom en groupe). |
 | `isEditing` | `boolean` | `false` | Vrai si le message est actuellement en cours d'édition inline. |
 | `isSavingEdit` | `boolean` | `false` | Vrai pendant la requête réseau de sauvegarde de l'édition. |
+| `userFavoriteEmojis` | `EmojiItem[]` | `undefined` | Liste des emojis favoris pour la barre de réaction. |
+| `onToggleReaction` | `(message: ChatMessage, emoji: EmojiItem) => void` | `undefined` | Callback lors de la sélection ou bascule d'une réaction. |
 | `onStartEdit` | `(message: ChatMessage) => void` | `undefined` | Callback pour basculer le message en mode édition. |
 | `onCancelEdit` | `() => void` | `undefined` | Callback pour annuler l'édition en cours. |
 | `onSaveEdit` | `(messageId: string, newText: string) => void` | `undefined` | Callback pour enregistrer le texte modifié. |
@@ -126,3 +128,49 @@ description: Fiches de référence des composants de messagerie instantanée dir
 ### Dépendances
 - **Stores & États globaux** : Aucun état global
 - **APIs réseau** : Actions de formulaire `?/acceptRequest` et `?/refuseRequest`.
+
+---
+
+## 6. `MessageReactionBar.svelte`
+
+- **Fichier** : `src/lib/components/chat/MessageReactionBar.svelte`
+- **Domaine** : Messagerie & Réactions
+- **Responsabilité(s)** : Barre flottante d'emojis favoris s'ouvrant sur appui long (long-press tactile mobile) ou via l'option "Réagir" du menu `...` (sur PC et mobile) au-dessus de la bulle de message. Permet d'ajouter ou retirer une réaction d'un clic, ou de rediriger vers les paramètres d'emojis (`/parametres?tab=emojis`) si l'utilisateur n'a aucun favori configuré.
+
+### Props
+
+| Nom | Type | Défaut | Description |
+| :--- | :--- | :--- | :--- |
+| `favoriteEmojis` | `EmojiItem[]` | `[]` | Liste des emojis favoris de l'utilisateur connecté (résolus même si leur collection d'origine est désactivée). |
+| `align` | `'left' \| 'right'` | `'left'` | Positionnement de la barre (droite pour messages envoyés, gauche pour reçus). |
+| `onSelect` | `(emoji: EmojiItem) => void` | Requis | Callback exécuté lors du clic sur un emoji. |
+| `onClose` | `() => void` | Requis | Callback pour fermer la barre flottante. |
+
+### Dépendances
+- **Composants** : `Icon.svelte`
+- **Navigation** : Lien vers `resolve('/parametres?tab=emojis')`
+
+---
+
+## 7. `MessageReactionsModal.svelte`
+
+- **Fichier** : `src/lib/components/chat/MessageReactionsModal.svelte`
+- **Domaine** : Messagerie & Réactions
+- **Responsabilité(s)** : Modale affichant la liste complète des participants ayant réagi à un message, ouverte au clic sur le badge de réaction centré en bas de la bulle de message (style Instagram). Propose un filtrage par onglet d'émoji ("Tous", "❤️", etc.), l'avatar et profil de chaque utilisateur, le retrait direct de sa propre réaction, et une rangée d'émojis favoris pour réagir immédiatement.
+
+### Props
+
+| Nom | Type | Défaut | Description |
+| :--- | :--- | :--- | :--- |
+| `isOpen` | `boolean` | `false` | Détermine l'affichage de la modale. |
+| `onClose` | `() => void` | Requis | Callback de fermeture (croix, touche Échap ou clic hors cadre). |
+| `reactions` | `MessageReactionGroup[]` | `[]` | Groupes de réactions du message avec liste des participants et compteurs. |
+| `currentUserId` | `string` | Requis | Identifiant de l'utilisateur connecté pour identifier sa réaction et permettre son retrait. |
+| `favoriteEmojis` | `EmojiItem[]` | `[]` | Émojis favoris de l'utilisateur pour la barre de réaction rapide en pied de modale. |
+| `onToggleReaction` | `(emoji: EmojiItem) => void` | `undefined` | Callback pour ajouter ou retirer une réaction. |
+
+### Dépendances
+- **Composants** : `Icon.svelte`
+- **Navigation** : Liens profils vers `resolve('/profil/${username}')` et `/parametres?tab=emojis`
+
+

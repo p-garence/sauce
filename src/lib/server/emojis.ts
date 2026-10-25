@@ -662,17 +662,12 @@ export async function getUserActiveEmojiData(userId: string) {
 		new Set([...activeDefaultSets.map((s) => s.id), ...activeIds])
 	);
 
-	if (allActiveIds.length === 0) {
-		return {
-			activeSets: [],
-			emojis: [] as EmojiItem[],
-			favoriteEmojis: [] as EmojiItem[]
-		};
-	}
-
-	const sets = await db.query.emojiSets.findMany({
-		where: inArray(emojiSets.id, allActiveIds)
-	});
+	const sets =
+		allActiveIds.length > 0
+			? await db.query.emojiSets.findMany({
+					where: inArray(emojiSets.id, allActiveIds)
+				})
+			: [];
 
 	const allEmojis: EmojiItem[] = [];
 	const seenEmojiIds = new Set<string>();
@@ -687,15 +682,64 @@ export async function getUserActiveEmojiData(userId: string) {
 		}
 	}
 
-	// Favoris personnels de l'utilisateur
+	// Favoris personnels de l'utilisateur (doivent être disponibles même si leur collection d'origine est désactivée)
 	const userFavIds = (currentUser.favoriteEmojiIds as string[]) || [];
-	const favoriteEmojis: EmojiItem[] =
-		userFavIds.length > 0
-			? userFavIds
-					.map((id) => allEmojis.find((e) => e.id === id))
-					.filter((e): e is EmojiItem => Boolean(e))
-					.slice(0, 6)
-			: allEmojis.slice(0, 6);
+	const favoriteEmojis: EmojiItem[] = [];
+
+	if (userFavIds.length > 0) {
+		const foundFavs = new Map<string, EmojiItem>();
+
+		// 1. Chercher dans les emojis déjà actifs
+		for (const em of allEmojis) {
+			if (userFavIds.includes(em.id) && !foundFavs.has(em.id)) {
+				foundFavs.set(em.id, em);
+			}
+		}
+
+		// 2. Si certains favoris manquent (collection désactivée ou par défaut désactivée) :
+		const missingFromActive = userFavIds.filter((id) => !foundFavs.has(id));
+		if (missingFromActive.length > 0) {
+			// Chercher dans tous les sets par défaut (y compris ceux désactivés)
+			for (const set of defaultSets) {
+				for (const em of (set.emojis as EmojiItem[]) || []) {
+					if (missingFromActive.includes(em.id) && !foundFavs.has(em.id)) {
+						foundFavs.set(em.id, em);
+					}
+				}
+			}
+
+			// Si encore des manquants, chercher dans les collections possédées ou publiées accessibles
+			const stillMissing = userFavIds.filter((id) => !foundFavs.has(id));
+			if (stillMissing.length > 0) {
+				const extraSets = await db.query.emojiSets.findMany({
+					where: and(
+						or(eq(emojiSets.ownerId, userId), eq(emojiSets.isPublished, true)),
+						eq(emojiSets.isDeletedByOwner, false)
+					)
+				});
+				for (const set of extraSets) {
+					for (const em of (set.emojis as EmojiItem[]) || []) {
+						if (stillMissing.includes(em.id) && !foundFavs.has(em.id)) {
+							foundFavs.set(em.id, em);
+						}
+					}
+				}
+			}
+		}
+
+		// Assembler la liste finale selon l'ordre défini par l'utilisateur
+		for (const id of userFavIds) {
+			const em = foundFavs.get(id);
+			if (em) {
+				favoriteEmojis.push(em);
+				// Ajouter aussi aux emojis actifs globaux pour permettre leur rendu dans l'app
+				if (!seenEmojiIds.has(em.id)) {
+					seenEmojiIds.add(em.id);
+					allEmojis.push(em);
+				}
+			}
+		}
+	}
 
 	return {
 		activeSets: sets,

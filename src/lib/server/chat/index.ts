@@ -26,3 +26,8 @@ export {
 	updateChatMessage,
 	deleteChatMessage
 } from './messages';
+
+export {
+	formatMessageReactions,
+	toggleMessageReaction
+} from './reactions';

@@ -46,9 +46,6 @@
 						<Icon name="status.mute" size={14} />
 					</span>
 				{/if}
-				{#if contact.lastMessageTime}
-					<FormattedDate date={contact.lastMessageTime} class="contact-time" compact />
-				{/if}
 			</div>
 			<span class="last-message {contact.isUnread ? 'unread-text' : ''}">
 				{#if contact.isLastMessageFromMe}
@@ -63,6 +60,9 @@
 		</div>
 		{#if contact.isUnread}
 			<span class="unread-dot"></span>
+		{/if}
+		{#if contact.lastMessageTime}
+			<FormattedDate date={contact.lastMessageTime} class="contact-time" compact />
 		{/if}
 	</a>
 	{#if actions.length > 0}
@@ -97,7 +97,10 @@
 	}
 
 	.contact-actions {
-		margin-left: 8px;
+		display: flex;
+		align-items: center;
+		margin-left: 6px;
+		flex-shrink: 0;
 	}
 
 	.avatar-container {
@@ -159,10 +162,11 @@
 
 	:global(.contact-time) {
 		margin-left: auto;
-		font-size: 0.75rem;
+		font-size: 0.78rem;
 		color: var(--text-muted, #888);
 		white-space: nowrap;
 		flex-shrink: 0;
+		line-height: 1;
 	}
 
 	.last-message {
