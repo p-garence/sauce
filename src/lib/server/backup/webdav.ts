@@ -188,7 +188,9 @@ async function uploadSingleFileToWebdav(
 			`Échec upload WebDAV (HTTP 413 Request Entity Too Large) : le serveur Nginx ou proxy de votre Cloud refuse les fichiers de cette taille (${(
 				fileStat.size /
 				(1024 * 1024)
-			).toFixed(1)} Mo). Solution : activez l'option "Découpage en fragments" (ex: 5 Mo ou 10 Mo) dans la configuration des sauvegardes.`
+			).toFixed(
+				1
+			)} Mo). Solution : activez l'option "Découpage en fragments" (ex: 5 Mo ou 10 Mo) dans la configuration des sauvegardes.`
 		);
 	}
 
@@ -244,11 +246,7 @@ export async function uploadBackupToWebdav(
 				const partPath = path.join(parentDir, partName);
 				const partSuffix = partName.substring(basePrefix.length);
 				const remotePartFilename = `${filename}.part${partSuffix}`;
-				await uploadSingleFileToWebdav(
-					partPath,
-					`${backupFolderUrl}${remotePartFilename}`,
-					auth
-				);
+				await uploadSingleFileToWebdav(partPath, `${backupFolderUrl}${remotePartFilename}`, auth);
 			}
 
 			return { partsCount: partFiles.length, destinationFolder: backupFolderName };

@@ -57,7 +57,9 @@ export async function calculateFileSha256(filePath: string): Promise<string> {
  * Réalise un dump SQL complet de la base PostgreSQL.
  * Tente d'abord `pg_dump` direct, puis le conteneur Docker `social_db`.
  */
-export async function dumpDatabase(targetPath: string): Promise<{ sizeBytes: number; sha256: string }> {
+export async function dumpDatabase(
+	targetPath: string
+): Promise<{ sizeBytes: number; sha256: string }> {
 	const dbUrl = env.DATABASE_URL || 'postgres://root:mysecretpassword@localhost:5432/social';
 	let dumpSuccess = false;
 	let lastError: unknown = null;
@@ -73,7 +75,9 @@ export async function dumpDatabase(targetPath: string): Promise<{ sizeBytes: num
 	// 2. Fallback avec le conteneur Docker social_db
 	if (!dumpSuccess) {
 		try {
-			await execAsync(`docker exec social_db pg_dump -U root -d social --clean --if-exists > "${targetPath}"`);
+			await execAsync(
+				`docker exec social_db pg_dump -U root -d social --clean --if-exists > "${targetPath}"`
+			);
 			dumpSuccess = true;
 		} catch (err) {
 			lastError = err;

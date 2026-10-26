@@ -40,10 +40,8 @@ export async function assembleBackupParts(
 	}
 
 	await new Promise<void>((resolve, reject) => {
-		destStream.end((err) => {
-			if (err) reject(err);
-			else resolve();
-		});
+		destStream.once('error', reject);
+		destStream.end(() => resolve());
 	});
 }
 
@@ -63,7 +61,10 @@ export async function inspectBackupArchive(archiveTarGzPath: string): Promise<Ba
 		// Fallback de robustesse : au cas où le manifest se trouve sous un chemin relatif (ex: ./manifest.json)
 		try {
 			const { stdout: listOut } = await execAsync(`tar -tzf "${archiveTarGzPath}"`);
-			const lines = listOut.split('\n').map((l) => l.trim()).filter(Boolean);
+			const lines = listOut
+				.split('\n')
+				.map((l) => l.trim())
+				.filter(Boolean);
 			const manifestEntry = lines.find((l) => l.endsWith('manifest.json'));
 			if (manifestEntry) {
 				await execAsync(`tar -xzf "${archiveTarGzPath}" -C "${tempInspectDir}" "${manifestEntry}"`);
@@ -74,14 +75,13 @@ export async function inspectBackupArchive(archiveTarGzPath: string): Promise<Ba
 		throw new Error(
 			`Le fichier manifest.json est introuvable dans l'archive : ${
 				err instanceof Error ? err.message : String(err)
-			}`
+			}`,
+			{ cause: err }
 		);
 	} finally {
 		await fs.rm(tempInspectDir, { recursive: true, force: true }).catch(() => {});
 	}
 }
-
-
 
 /**
  * Exécute la restauration intégrale depuis l'image de sauvegarde (base de données et médias).
@@ -90,7 +90,11 @@ export async function inspectBackupArchive(archiveTarGzPath: string): Promise<Ba
 export async function executeRestore(
 	archiveTarGzPath: string,
 	options: { restoreDb?: boolean; restoreMedia?: boolean } = { restoreDb: true, restoreMedia: true }
-): Promise<{ success: boolean; message: string; details?: { dbRestored: boolean; mediaRestoredCount: number } }> {
+): Promise<{
+	success: boolean;
+	message: string;
+	details?: { dbRestored: boolean; mediaRestoredCount: number };
+}> {
 	const stagingDir = path.resolve('/tmp', `restore-staging-${Date.now()}`);
 	await fs.mkdir(stagingDir, { recursive: true });
 

@@ -19,7 +19,8 @@
 		<div>
 			<h1 class="page-title">Post système et notification globale</h1>
 			<p class="page-desc">
-				Rédigez un message officiel publié au nom du système et diffusé en temps réel par notification push à tous les membres.
+				Rédigez un message officiel publié au nom du système et diffusé en temps réel par
+				notification push à tous les membres.
 			</p>
 		</div>
 	</header>

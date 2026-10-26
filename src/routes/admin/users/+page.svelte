@@ -19,7 +19,8 @@
 		<div>
 			<h1 class="page-title">Gestion des utilisateurs</h1>
 			<p class="page-desc">
-				Administrez les comptes de l'instance ({data.users.length} membres) : modération, rôles, quotas de stockage et parrainage.
+				Administrez les comptes de l'instance ({data.users.length} membres) : modération, rôles, quotas
+				de stockage et parrainage.
 			</p>
 		</div>
 	</header>

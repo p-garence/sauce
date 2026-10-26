@@ -19,7 +19,8 @@
 		<div>
 			<h1 class="page-title">Stockage et médias</h1>
 			<p class="page-desc">
-				Surveillez l'occupation disque globale, analysez la répartition des fichiers et purgez les médias orphelins.
+				Surveillez l'occupation disque globale, analysez la répartition des fichiers et purgez les
+				médias orphelins.
 			</p>
 		</div>
 	</header>

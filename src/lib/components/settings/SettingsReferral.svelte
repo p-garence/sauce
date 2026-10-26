@@ -166,7 +166,9 @@
 		background: #f8f9fa;
 		border-radius: 8px;
 		border: 1px dashed #cbd5e1;
-		transition: background-color 0.15s ease, border-color 0.15s ease;
+		transition:
+			background-color 0.15s ease,
+			border-color 0.15s ease;
 	}
 	.key-item:hover {
 		background: #f1f5f9;

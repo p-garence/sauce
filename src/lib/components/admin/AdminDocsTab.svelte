@@ -20,7 +20,12 @@
 				texte intégrée).
 			</p>
 		</div>
-		<a href={resolve('/wikidev')} target="_blank" rel="noopener noreferrer" class="btn btn-blue">
+		<a
+			href={resolve('/wikidev' as Parameters<typeof resolve>[0])}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="btn btn-blue"
+		>
 			Ouvrir le Wiki Dev (/wikidev) ↗
 		</a>
 	</div>

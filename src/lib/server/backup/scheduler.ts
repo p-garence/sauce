@@ -62,7 +62,7 @@ export async function executeBackupToCloud(targetConfigId?: string): Promise<{
 
 	isBackupRunning = true;
 
-	let config: BackupConfigItem | null = null;
+	let config: BackupConfigItem | null;
 	if (targetConfigId) {
 		config = await getBackupConfigById(targetConfigId);
 	} else {
@@ -102,11 +102,7 @@ export async function executeBackupToCloud(targetConfigId?: string): Promise<{
 		}
 
 		// 4. Upload WebDAV avec gestion automatique des fragments (anti-413)
-		const { partsCount } = await uploadBackupToWebdav(
-			finalUploadPath,
-			finalUploadFilename,
-			config
-		);
+		const { partsCount } = await uploadBackupToWebdav(finalUploadPath, finalUploadFilename, config);
 
 		// 5. Purge des anciens backups selon la politique de rétention
 		const { deletedCount } = await pruneWebdavBackups(config);
@@ -159,7 +155,9 @@ async function checkAndRunScheduledBackup(): Promise<void> {
 		const allConfigs = await getAllBackupConfigs();
 		for (const config of allConfigs) {
 			if (isBackupDue(config)) {
-				console.log(`[Backup Scheduler] Déclenchement automatique de la sauvegarde pour "${config.name}"...`);
+				console.log(
+					`[Backup Scheduler] Déclenchement automatique de la sauvegarde pour "${config.name}"...`
+				);
 				await executeBackupToCloud(config.id);
 			}
 		}
@@ -190,7 +188,10 @@ export function initBackupScheduler(): void {
 		checkAndRunScheduledBackup().catch(() => {});
 	}, 60 * 1000);
 
-	schedulerInterval = setInterval(() => {
-		checkAndRunScheduledBackup().catch(() => {});
-	}, 60 * 60 * 1000);
+	schedulerInterval = setInterval(
+		() => {
+			checkAndRunScheduledBackup().catch(() => {});
+		},
+		60 * 60 * 1000
+	);
 }

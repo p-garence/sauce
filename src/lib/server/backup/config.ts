@@ -149,10 +149,7 @@ export async function getAllBackupConfigs(): Promise<BackupConfigItem[]> {
 	try {
 		const masterKey = await getMasterEncryptionKey();
 
-		const rows = await db
-			.select()
-			.from(backupConfig)
-			.orderBy(desc(backupConfig.updatedAt));
+		const rows = await db.select().from(backupConfig).orderBy(desc(backupConfig.updatedAt));
 
 		if (rows.length === 0) {
 			const defaultItem = {
@@ -202,11 +199,7 @@ export async function getAllBackupConfigs(): Promise<BackupConfigItem[]> {
  * Récupère une configuration de sauvegarde par son ID.
  */
 export async function getBackupConfigById(id: string): Promise<BackupConfigItem | null> {
-	const [item] = await db
-		.select()
-		.from(backupConfig)
-		.where(eq(backupConfig.id, id))
-		.limit(1);
+	const [item] = await db.select().from(backupConfig).where(eq(backupConfig.id, id)).limit(1);
 
 	if (!item) return null;
 
@@ -224,7 +217,8 @@ export async function getBackupConfigById(id: string): Promise<BackupConfigItem 
 		chunkSizeMb: item.chunkSizeMb ?? 10,
 		encryptionKey: item.encryptionKey || masterKey,
 		lastRunAt: item.lastRunAt ? item.lastRunAt.toISOString() : null,
-		lastRunStatus: (item.lastRunStatus as 'idle' | 'running' | 'success' | 'error' | null) || 'idle',
+		lastRunStatus:
+			(item.lastRunStatus as 'idle' | 'running' | 'success' | 'error' | null) || 'idle',
 		lastRunError: item.lastRunError,
 		updatedAt: item.updatedAt
 	};
@@ -247,27 +241,36 @@ export async function saveBackupConfigItem(
 
 	const payload: typeof backupConfig.$inferInsert = {
 		id: configId,
-		name: input.name !== undefined ? input.name.trim() : (existing?.name || 'Sauvegarde Cloud'),
+		name: input.name !== undefined ? input.name.trim() : existing?.name || 'Sauvegarde Cloud',
 		enabled: input.enabled !== undefined ? input.enabled : (existing?.enabled ?? false),
 		webdavUrl: input.webdavUrl !== undefined ? input.webdavUrl.trim() : (existing?.webdavUrl ?? ''),
-		webdavUsername: input.webdavUsername !== undefined ? input.webdavUsername.trim() : (existing?.webdavUsername ?? ''),
-		webdavPassword: input.webdavPassword !== undefined ? input.webdavPassword : (existing?.webdavPassword ?? ''),
+		webdavUsername:
+			input.webdavUsername !== undefined
+				? input.webdavUsername.trim()
+				: (existing?.webdavUsername ?? ''),
+		webdavPassword:
+			input.webdavPassword !== undefined ? input.webdavPassword : (existing?.webdavPassword ?? ''),
 		frequency: input.frequency || existing?.frequency || 'daily',
-		retentionCount: input.retentionCount !== undefined ? input.retentionCount : (existing?.retentionCount ?? 7),
-		chunkSizeMb: input.chunkSizeMb !== undefined ? input.chunkSizeMb : (existing?.chunkSizeMb ?? 10),
+		retentionCount:
+			input.retentionCount !== undefined ? input.retentionCount : (existing?.retentionCount ?? 7),
+		chunkSizeMb:
+			input.chunkSizeMb !== undefined ? input.chunkSizeMb : (existing?.chunkSizeMb ?? 10),
 		encryptionKey: existing?.encryptionKey || masterKey,
-		lastRunAt: input.lastRunAt !== undefined ? (input.lastRunAt ? new Date(input.lastRunAt) : null) : existing?.lastRunAt,
-		lastRunStatus: input.lastRunStatus !== undefined ? input.lastRunStatus : existing?.lastRunStatus,
+		lastRunAt:
+			input.lastRunAt !== undefined
+				? input.lastRunAt
+					? new Date(input.lastRunAt)
+					: null
+				: existing?.lastRunAt,
+		lastRunStatus:
+			input.lastRunStatus !== undefined ? input.lastRunStatus : existing?.lastRunStatus,
 		lastRunError: input.lastRunError !== undefined ? input.lastRunError : existing?.lastRunError
 	};
 
-	await db
-		.insert(backupConfig)
-		.values(payload)
-		.onConflictDoUpdate({
-			target: backupConfig.id,
-			set: payload
-		});
+	await db.insert(backupConfig).values(payload).onConflictDoUpdate({
+		target: backupConfig.id,
+		set: payload
+	});
 
 	return (await getBackupConfigById(configId))!;
 }
@@ -276,10 +279,7 @@ export async function saveBackupConfigItem(
  * Active ou désactive rapidement une configuration.
  */
 export async function toggleBackupConfig(id: string, enabled: boolean): Promise<void> {
-	await db
-		.update(backupConfig)
-		.set({ enabled })
-		.where(eq(backupConfig.id, id));
+	await db.update(backupConfig).set({ enabled }).where(eq(backupConfig.id, id));
 }
 
 /**

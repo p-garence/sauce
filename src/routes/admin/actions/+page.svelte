@@ -19,7 +19,8 @@
 		<div>
 			<h1 class="page-title">Actions globales et maintenance</h1>
 			<p class="page-desc">
-				Statistiques générales de l'instance et outils de génération de données de test pour le développement.
+				Statistiques générales de l'instance et outils de génération de données de test pour le
+				développement.
 			</p>
 		</div>
 	</header>

@@ -60,7 +60,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 
 			if (uploadedFiles.length === 0) {
-				return json({ success: false, message: 'Aucun fichier de sauvegarde valide trouvé.' }, { status: 400 });
+				return json(
+					{ success: false, message: 'Aucun fichier de sauvegarde valide trouvé.' },
+					{ status: 400 }
+				);
 			}
 
 			// Filtrer uniquement les fichiers d'archive (ignorer un manifest.json externe non binaire lors du réassemblage)
@@ -131,14 +134,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	// ACTION 2 : RESTAURATION DÉFINITIVE
 	if (action === 'restore') {
 		const inspectToken = String(formData.get('inspectToken') || '').trim();
-		const restoreDb = formData.get('restoreDb') === 'true';
-		const restoreMedia = formData.get('restoreMedia') === 'true';
 
 		if (!inspectToken || !inspectToken.startsWith('restore_')) {
-			return json({ success: false, message: 'Jeton de restauration invalide ou expiré.' }, { status: 400 });
+			return json(
+				{ success: false, message: 'Jeton de restauration invalide ou expiré.' },
+				{ status: 400 }
+			);
 		}
 
-		await setGlobalRestoreStatus('running', 'Restauration en cours de la base de données et des médias...');
+		await setGlobalRestoreStatus(
+			'running',
+			'Restauration en cours de la base de données et des médias...'
+		);
 
 		const stagingDir = path.resolve('/tmp', inspectToken);
 		try {
@@ -148,7 +155,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json(
 				{
 					success: false,
-					message: 'La session de restauration a expiré. Veuillez sélectionner à nouveau vos fichiers.'
+					message:
+						'La session de restauration a expiré. Veuillez sélectionner à nouveau vos fichiers.'
 				},
 				{ status: 400 }
 			);

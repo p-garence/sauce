@@ -16,10 +16,8 @@
 		children: Snippet;
 		data: {
 			sessionUser: {
-				id: string;
 				name: string;
 				username: string;
-				role: string;
 				image?: string | null;
 			};
 		};
@@ -37,7 +35,18 @@
 		isMobileMenuOpen = false;
 	}
 
-	const navGroups = [
+	interface AdminNavItem {
+		href: string;
+		label: string;
+		exact?: boolean;
+	}
+
+	interface AdminNavGroup {
+		title: string;
+		items: AdminNavItem[];
+	}
+
+	const navGroups: AdminNavGroup[] = [
 		{
 			title: 'Vue générale',
 			items: [
@@ -134,7 +143,15 @@
 			aria-label="Ouvrir le menu d'administration"
 			aria-expanded={isMobileMenuOpen}
 		>
-			<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+			<svg
+				viewBox="0 0 24 24"
+				width="22"
+				height="22"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+			>
 				<line x1="3" y1="6" x2="21" y2="6"></line>
 				<line x1="3" y1="12" x2="21" y2="12"></line>
 				<line x1="3" y1="18" x2="21" y2="18"></line>
@@ -143,9 +160,7 @@
 		<div class="mobile-brand">
 			<span class="brand-title">Administration</span>
 		</div>
-		<a href={resolve('/flux')} class="mobile-exit-btn" title="Retour au réseau">
-			Quitter
-		</a>
+		<a href={resolve('/flux')} class="mobile-exit-btn" title="Retour au réseau"> Quitter </a>
 	</header>
 
 	<!-- OVERLAY SOMBRE SUR MOBILE -->
@@ -177,14 +192,14 @@
 		</div>
 
 		<nav class="sidebar-nav">
-			{#each navGroups as group}
+			{#each navGroups as group (group.title)}
 				<div class="nav-group">
 					<h3 class="nav-group-title">{group.title}</h3>
 					<ul class="nav-list">
-						{#each group.items as item}
+						{#each group.items as item (item.href)}
 							<li>
 								<a
-									href={resolve(item.href as any)}
+									href={resolve(item.href as Parameters<typeof resolve>[0])}
 									class="nav-link"
 									class:active={isItemActive(item.href, item.exact)}
 									onclick={closeMobileMenu}
@@ -200,7 +215,16 @@
 
 		<div class="sidebar-footer">
 			<a href={resolve('/flux')} class="btn-return-app">
-				<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<svg
+					viewBox="0 0 24 24"
+					width="16"
+					height="16"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
 					<line x1="19" y1="12" x2="5" y2="12"></line>
 					<polyline points="12 19 5 12 12 5"></polyline>
 				</svg>
@@ -532,7 +556,9 @@
 
 		.admin-sidebar.open {
 			transform: translateX(0);
-			box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+			box-shadow:
+				0 20px 25px -5px rgb(0 0 0 / 0.1),
+				0 8px 10px -6px rgb(0 0 0 / 0.1);
 		}
 
 		.sidebar-close-btn {

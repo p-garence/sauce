@@ -6,11 +6,7 @@
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { assertAdmin } from '$lib/server/admin';
-import {
-	getServerAppStorageStats,
-	getOrphanMedia,
-	deleteOrphanMedia
-} from '$lib/server/media';
+import { getServerAppStorageStats, getOrphanMedia, deleteOrphanMedia } from '$lib/server/media';
 
 function getErrorMessage(err: unknown): string {
 	return err instanceof Error ? err.message : 'Une erreur est survenue';

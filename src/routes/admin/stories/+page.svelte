@@ -19,7 +19,8 @@
 		<div>
 			<h1 class="page-title">Modération des stories</h1>
 			<p class="page-desc">
-				Surveillez et modérez les stories éphémères de l'instance ({data.totalStories} stories actives ou archivées).
+				Surveillez et modérez les stories éphémères de l'instance ({data.totalStories} stories actives
+				ou archivées).
 			</p>
 		</div>
 	</header>

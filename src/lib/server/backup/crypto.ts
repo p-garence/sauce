@@ -51,10 +51,8 @@ export async function encryptBackupArchive(
 	// 3. Écrire le tag d'authentification (16 octets) à la fin
 	const authTag = cipher.getAuthTag();
 	await new Promise<void>((resolve, reject) => {
-		writeStream.end(authTag, (err) => {
-			if (err) reject(err);
-			else resolve();
-		});
+		writeStream.once('error', reject);
+		writeStream.end(authTag, () => resolve());
 	});
 }
 

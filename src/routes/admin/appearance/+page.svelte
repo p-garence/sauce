@@ -19,7 +19,8 @@
 		<div>
 			<h1 class="page-title">Apparence et personnalisation</h1>
 			<p class="page-desc">
-				Configurez les packs d'icônes par défaut et la bibliothèque d'émojis officiels mis à disposition de tous les membres.
+				Configurez les packs d'icônes par défaut et la bibliothèque d'émojis officiels mis à
+				disposition de tous les membres.
 			</p>
 		</div>
 	</header>

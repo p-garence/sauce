@@ -12,7 +12,8 @@
 		<div>
 			<h1 class="page-title">Documentation et architecture</h1>
 			<p class="page-desc">
-				Guides techniques d'exploitation, architecture du système et documentation interactive du Wiki Dev.
+				Guides techniques d'exploitation, architecture du système et documentation interactive du
+				Wiki Dev.
 			</p>
 		</div>
 	</header>

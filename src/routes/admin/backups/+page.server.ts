@@ -188,7 +188,8 @@ export const actions: Actions = {
 				success: false,
 				action: 'triggerBackup',
 				configId: id,
-				message: 'Veuillez configurer et enregistrer les paramètres WebDAV avant de lancer une sauvegarde.'
+				message:
+					'Veuillez configurer et enregistrer les paramètres WebDAV avant de lancer une sauvegarde.'
 			});
 		}
 

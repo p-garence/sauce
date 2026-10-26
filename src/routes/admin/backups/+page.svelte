@@ -8,6 +8,7 @@
 	import type { ActionData, PageData } from './$types';
 	import { formatBytes } from '$lib/utils/format';
 	import { enhance } from '$app/forms';
+	import { resolve } from '$app/paths';
 
 	interface Props {
 		data: PageData;
@@ -17,7 +18,7 @@
 	let { data, form }: Props = $props();
 
 	let configs = $state<typeof data.configs>([]);
-	let restoreStatus = $state<typeof data.restoreStatus>(null as any);
+	let restoreStatus = $state<typeof data.restoreStatus>(data.restoreStatus);
 
 	$effect.pre(() => {
 		configs = data.configs;
@@ -99,7 +100,8 @@
 								if (statusData.restore.status === 'success') {
 									importFeedback = {
 										success: true,
-										message: 'Restauration terminée avec succès ! Redirection vers la page de connexion...'
+										message:
+											'Restauration terminée avec succès ! Redirection vers la page de connexion...'
 									};
 									inspectResult = null;
 									selectedFiles = [];
@@ -222,13 +224,19 @@
 		}
 	}
 
-	async function scanEntry(entry: any, outFiles: File[]) {
+	async function scanEntry(entry: FileSystemEntry, outFiles: File[]) {
 		if (entry.isFile) {
-			const file = await new Promise<File>((resolve, reject) => entry.file(resolve, reject));
+			const fileEntry = entry as FileSystemFileEntry;
+			const file = await new Promise<File>((resolveCb, rejectCb) =>
+				fileEntry.file(resolveCb, rejectCb)
+			);
 			outFiles.push(file);
 		} else if (entry.isDirectory) {
-			const dirReader = entry.createReader();
-			const entries = await new Promise<any[]>((resolve, reject) => dirReader.readEntries(resolve, reject));
+			const dirEntry = entry as FileSystemDirectoryEntry;
+			const dirReader = dirEntry.createReader();
+			const entries = await new Promise<FileSystemEntry[]>((resolveCb, rejectCb) =>
+				dirReader.readEntries(resolveCb, rejectCb)
+			);
 			for (const child of entries) {
 				await scanEntry(child, outFiles);
 			}
@@ -245,7 +253,7 @@
 
 		const collected: File[] = [];
 		for (let i = 0; i < items.length; i++) {
-			const entry = items[i].webkitGetAsEntry ? items[i].webkitGetAsEntry() : null;
+			const entry = items[i].webkitGetAsEntry();
 			if (entry) {
 				await scanEntry(entry, collected);
 			} else {
@@ -368,7 +376,8 @@
 		<div>
 			<h1 class="page-title">Sauvegardes et restauration</h1>
 			<p class="page-desc">
-				Exportez vos données, restaurez depuis une sauvegarde, ou gérez vos destinations automatiques chiffrées.
+				Exportez vos données, restaurez depuis une sauvegarde, ou gérez vos destinations
+				automatiques chiffrées.
 			</p>
 		</div>
 	</header>
@@ -391,7 +400,9 @@
 			<span class="metric-label">Volume des médias</span>
 			<div class="metric-value">{formatBytes(data.serverStorage.totalAppBytes ?? 0)}</div>
 			<span class="metric-desc">
-				{data.serverStorage.uploadsCount ?? 0} fichiers • {formatBytes(data.serverStorage.freeDiskBytes ?? 0)} libres
+				{data.serverStorage.uploadsCount ?? 0} fichiers • {formatBytes(
+					data.serverStorage.freeDiskBytes ?? 0
+				)} libres
 			</span>
 		</div>
 
@@ -409,14 +420,18 @@
 		<div class="card-header">
 			<div>
 				<h2>Clé de déchiffrement des sauvegardes (AES-256)</h2>
-				<p>Cette clé maîtresse chiffre toutes les archives envoyées vers vos espaces Cloud distants.</p>
+				<p>
+					Cette clé maîtresse chiffre toutes les archives envoyées vers vos espaces Cloud distants.
+				</p>
 			</div>
 		</div>
 
 		<div class="security-warning">
 			<strong>Conservation obligatoire en lieu sûr</strong>
 			<p>
-				La clé n'est jamais transmise au serveur distant. Sans elle, il sera strictement impossible de déchiffrer ou restaurer vos données depuis une sauvegarde Cloud. Copiez-la et conservez-la dans votre gestionnaire de mots de passe.
+				La clé n'est jamais transmise au serveur distant. Sans elle, il sera strictement impossible
+				de déchiffrer ou restaurer vos données depuis une sauvegarde Cloud. Copiez-la et
+				conservez-la dans votre gestionnaire de mots de passe.
 			</p>
 		</div>
 
@@ -461,7 +476,9 @@
 		<div class="card-header">
 			<div>
 				<h2>Exporter les données brutes de l'instance</h2>
-				<p>Générez et téléchargez immédiatement une archive complète au format <code>.tar.gz</code>.</p>
+				<p>
+					Générez et téléchargez immédiatement une archive complète au format <code>.tar.gz</code>.
+				</p>
 			</div>
 		</div>
 
@@ -469,14 +486,20 @@
 			<span class="info-title">Contenu inclus dans l'archive :</span>
 			<ul class="file-list">
 				<li><strong>database.sql</strong> : Dump SQL intégral de toutes les tables PostgreSQL.</li>
-				<li><strong>uploads/</strong> : L'ensemble des médias du serveur (photos, vidéos, audio, bannières, avatars).</li>
-				<li><strong>manifest.json</strong> : Métadonnées d'intégrité (date, version de l'instance, sommes de contrôle SHA-256).</li>
+				<li>
+					<strong>uploads/</strong> : L'ensemble des médias du serveur (photos, vidéos, audio, bannières,
+					avatars).
+				</li>
+				<li>
+					<strong>manifest.json</strong> : Métadonnées d'intégrité (date, version de l'instance, sommes
+					de contrôle SHA-256).
+				</li>
 			</ul>
 		</div>
 
 		<div class="export-actions">
 			<a
-				href="/api/admin/backups/export"
+				href={resolve('/api/admin/backups/export' as Parameters<typeof resolve>[0])}
 				download
 				class="btn btn-primary btn-large"
 				onclick={() => {
@@ -490,11 +513,11 @@
 					Exporter les données (.tar.gz)
 				{/if}
 			</a>
-			<span class="help-text">Le téléchargement démarre dès que la base et les médias sont compressés.</span>
+			<span class="help-text"
+				>Le téléchargement démarre dès que la base et les médias sont compressés.</span
+			>
 		</div>
 	</div>
-
-
 
 	<!-- SECTION 3 : DESTINATIONS DE SAUVEGARDES WEBDAV MULTIPLES -->
 	<div class="card">
@@ -502,7 +525,8 @@
 			<div>
 				<h2>Sauvegardes automatiques chiffrées dans le Cloud (WebDAV)</h2>
 				<p>
-					Chaque sauvegarde est isolée dans son propre sous-dossier dédié (avec ses fragments chiffrés) pour un import simplifié.
+					Chaque sauvegarde est isolée dans son propre sous-dossier dédié (avec ses fragments
+					chiffrés) pour un import simplifié.
 				</p>
 			</div>
 			<button type="button" class="btn btn-primary" onclick={openCreateModal}>
@@ -545,9 +569,7 @@
 											Fragments {cfg.chunkSizeMb} Mo
 										</span>
 									{:else}
-										<span class="badge badge-outline">
-											Archive unique
-										</span>
+										<span class="badge badge-outline"> Archive unique </span>
 									{/if}
 								</div>
 							</div>
@@ -575,7 +597,11 @@
 							{/if}
 
 							{#if testFeedback && testFeedback.configId === cfg.id}
-								<div class="test-feedback {testFeedback.success ? 'feedback-success' : 'feedback-error'}">
+								<div
+									class="test-feedback {testFeedback.success
+										? 'feedback-success'
+										: 'feedback-error'}"
+								>
 									<span>{testFeedback.message}</span>
 								</div>
 							{/if}
@@ -603,7 +629,9 @@
 									class="btn btn-primary btn-sm"
 									disabled={cfg.lastRunStatus === 'running' || !cfg.webdavUrl}
 								>
-									{cfg.lastRunStatus === 'running' ? 'Traitement en cours...' : 'Sauvegarder maintenant'}
+									{cfg.lastRunStatus === 'running'
+										? 'Traitement en cours...'
+										: 'Sauvegarder maintenant'}
 								</button>
 							</form>
 
@@ -624,7 +652,9 @@
 								<button
 									type="submit"
 									class="btn btn-secondary btn-sm"
-									disabled={cfg.lastRunStatus === 'running' || loadingAction === `test_${cfg.id}` || !cfg.webdavUrl}
+									disabled={cfg.lastRunStatus === 'running' ||
+										loadingAction === `test_${cfg.id}` ||
+										!cfg.webdavUrl}
 								>
 									{loadingAction === `test_${cfg.id}` ? 'Test...' : 'Tester'}
 								</button>
@@ -700,14 +730,18 @@
 			<div>
 				<h2>Importer et restaurer une sauvegarde</h2>
 				<p>
-					Restauration intégrale du système à partir d'une image antérieure (dossier de fragments ou archive unique).
+					Restauration intégrale du système à partir d'une image antérieure (dossier de fragments ou
+					archive unique).
 				</p>
 			</div>
 		</div>
 
 		{#if restoreStatus?.status === 'running'}
 			<div class="alert alert-info">
-				<span>Traitement en cours : Restauration de l'instance en progression... Veuillez patienter sans éteindre le serveur.</span>
+				<span
+					>Traitement en cours : Restauration de l'instance en progression... Veuillez patienter
+					sans éteindre le serveur.</span
+				>
 			</div>
 		{/if}
 
@@ -729,14 +763,12 @@
 			aria-label="Zone de dépôt ou sélection de sauvegarde"
 		>
 			<!-- Inputs masqués -->
-			<!-- svelte-ignore a11y_missing_attribute -->
 			<input
 				type="file"
 				bind:this={folderInputRef}
 				onchange={handleFilesChange}
 				style="display: none;"
-				webkitdirectory=""
-				directory=""
+				webkitdirectory={true}
 				multiple
 				disabled={restoreStatus?.status === 'running'}
 			/>
@@ -873,7 +905,10 @@
 						<strong>Option unique : Restauration intégrale depuis l'image</strong>
 					</div>
 					<p class="mode-desc">
-						Le serveur actuel sera réinitialisé pour correspondre fidèlement à l'état de l'image (schéma, publications, commentaires et médias). Les éléments créés après cette sauvegarde seront supprimés. Après restauration, vous serez automatiquement redirigé vers l'écran de connexion.
+						Le serveur actuel sera réinitialisé pour correspondre fidèlement à l'état de l'image
+						(schéma, publications, commentaires et médias). Les éléments créés après cette
+						sauvegarde seront supprimés. Après restauration, vous serez automatiquement redirigé
+						vers l'écran de connexion.
 					</p>
 				</div>
 
@@ -884,7 +919,9 @@
 						onclick={triggerRestore}
 						disabled={isRestoring || restoreStatus?.status === 'running'}
 					>
-						{isRestoring || restoreStatus?.status === 'running' ? 'Traitement en cours...' : 'Lancer la restauration intégrale'}
+						{isRestoring || restoreStatus?.status === 'running'
+							? 'Traitement en cours...'
+							: 'Lancer la restauration intégrale'}
 					</button>
 					<button
 						type="button"
@@ -917,8 +954,12 @@
 			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div class="modal-header">
-				<h2>{modalMode === 'create' ? 'Créer une configuration Cloud' : 'Modifier la configuration'}</h2>
-				<button type="button" class="modal-close-btn" onclick={() => (isModalOpen = false)}>✕</button>
+				<h2>
+					{modalMode === 'create' ? 'Créer une configuration Cloud' : 'Modifier la configuration'}
+				</h2>
+				<button type="button" class="modal-close-btn" onclick={() => (isModalOpen = false)}
+					>✕</button
+				>
 			</div>
 
 			<form
@@ -986,7 +1027,9 @@
 							type="password"
 							id="cfg_pass"
 							name="webdavPassword"
-							placeholder={formHasPassword ? '•••••••••••• (inchangé)' : 'Mot de passe ou App Token'}
+							placeholder={formHasPassword
+								? '•••••••••••• (inchangé)'
+								: 'Mot de passe ou App Token'}
 							bind:value={formWebdavPassword}
 							class="input"
 						/>
@@ -1022,10 +1065,13 @@
 							<option value={25}>Fragments de 25 Mo</option>
 							<option value={50}>Fragments de 50 Mo</option>
 							<option value={100}>Fragments de 100 Mo</option>
-							<option value={0}>Archive unique sans découpage (Nécessite client_max_body_size élevé)</option>
+							<option value={0}
+								>Archive unique sans découpage (Nécessite client_max_body_size élevé)</option
+							>
 						</select>
 						<span class="field-hint">
-							Si le serveur Nginx rejette l'envoi avec l'erreur HTTP 413, sélectionnez 5 Mo ou 10 Mo.
+							Si le serveur Nginx rejette l'envoi avec l'erreur HTTP 413, sélectionnez 5 Mo ou 10
+							Mo.
 						</span>
 					</div>
 				</div>
@@ -1396,7 +1442,9 @@
 		background: #ffffff;
 		border: 1px solid #e2e8f0;
 		border-radius: 8px;
-		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 10px 15px -3px rgba(0, 0, 0, 0.1),
+			0 4px 6px -4px rgba(0, 0, 0, 0.1);
 		min-width: 260px;
 		overflow: hidden;
 		display: flex;
@@ -1839,8 +1887,6 @@
 		font-size: 0.76rem;
 		color: #64748b;
 	}
-
-
 
 	.modal-actions {
 		display: flex;

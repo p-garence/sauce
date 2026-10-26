@@ -16,28 +16,58 @@
 		{
 			category: 'Modération & Contenu',
 			permissions: [
-				{ name: 'Supprimer les publications d\'autrui', admin: true, moderator: true, user: false },
-				{ name: 'Supprimer les stories d\'autrui', admin: true, moderator: true, user: false },
+				{ name: "Supprimer les publications d'autrui", admin: true, moderator: true, user: false },
+				{ name: "Supprimer les stories d'autrui", admin: true, moderator: true, user: false },
 				{ name: 'Supprimer les commentaires signalés', admin: true, moderator: true, user: false },
-				{ name: 'Bannir ou suspendre temporairement un compte', admin: true, moderator: true, user: false }
+				{
+					name: 'Bannir ou suspendre temporairement un compte',
+					admin: true,
+					moderator: true,
+					user: false
+				}
 			]
 		},
 		{
 			category: 'Gestion des Membres & Comptes',
 			permissions: [
-				{ name: 'Modifier le rôle d\'un utilisateur', admin: true, moderator: false, user: false },
-				{ name: 'Ajuster les quotas d\'upload disque', admin: true, moderator: false, user: false },
-				{ name: 'Générer des clés d\'invitation système', admin: true, moderator: false, user: false },
-				{ name: 'Suppression définitive d\'un compte', admin: true, moderator: false, user: false }
+				{ name: "Modifier le rôle d'un utilisateur", admin: true, moderator: false, user: false },
+				{ name: "Ajuster les quotas d'upload disque", admin: true, moderator: false, user: false },
+				{
+					name: "Générer des clés d'invitation système",
+					admin: true,
+					moderator: false,
+					user: false
+				},
+				{ name: "Suppression définitive d'un compte", admin: true, moderator: false, user: false }
 			]
 		},
 		{
 			category: 'Système & Diffusion Globale',
 			permissions: [
-				{ name: 'Publier un post système avec notification push', admin: true, moderator: false, user: false },
-				{ name: 'Publier des packs d\'icônes / émojis d\'instance', admin: true, moderator: false, user: false },
-				{ name: 'Purge du stockage et fichiers orphelins', admin: true, moderator: false, user: false },
-				{ name: 'Gestion des sauvegardes de la base de données', admin: true, moderator: false, user: false }
+				{
+					name: 'Publier un post système avec notification push',
+					admin: true,
+					moderator: false,
+					user: false
+				},
+				{
+					name: "Publier des packs d'icônes / émojis d'instance",
+					admin: true,
+					moderator: false,
+					user: false
+				},
+				{
+					name: 'Purge du stockage et fichiers orphelins',
+					admin: true,
+					moderator: false,
+					user: false
+				},
+				{
+					name: 'Gestion des sauvegardes de la base de données',
+					admin: true,
+					moderator: false,
+					user: false
+				}
 			]
 		}
 	];
@@ -48,7 +78,8 @@
 		<div>
 			<h1 class="page-title">Permissions et rôles</h1>
 			<p class="page-desc">
-				Définition des privilèges d'accès et matrice des rôles pour les administrateurs, modérateurs et membres.
+				Définition des privilèges d'accès et matrice des rôles pour les administrateurs, modérateurs
+				et membres.
 			</p>
 		</div>
 	</header>
@@ -58,19 +89,25 @@
 		<div class="role-card">
 			<div class="role-badge admin">Administrateur</div>
 			<div class="role-count">{data.roleDistribution.admin} compte(s)</div>
-			<p class="role-desc">Accès total à la console, configuration serveur, quotas et actions destructives.</p>
+			<p class="role-desc">
+				Accès total à la console, configuration serveur, quotas et actions destructives.
+			</p>
 		</div>
 
 		<div class="role-card">
 			<div class="role-badge moderator">Modérateur</div>
 			<div class="role-count">{data.roleDistribution.moderator} compte(s)</div>
-			<p class="role-desc">Modération des contenus inappropriés, gestion des signalements et suspensions.</p>
+			<p class="role-desc">
+				Modération des contenus inappropriés, gestion des signalements et suspensions.
+			</p>
 		</div>
 
 		<div class="role-card">
 			<div class="role-badge user">Membre standard</div>
 			<div class="role-count">{data.roleDistribution.user} compte(s)</div>
-			<p class="role-desc">Utilisation normale du réseau selon les règles de visibilité et quotas attribués.</p>
+			<p class="role-desc">
+				Utilisation normale du réseau selon les règles de visibilité et quotas attribués.
+			</p>
 		</div>
 	</div>
 
@@ -92,11 +129,11 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each permissionsMatrix as section}
+					{#each permissionsMatrix as section (section.category)}
 						<tr class="section-row">
 							<td colspan="4">{section.category}</td>
 						</tr>
-						{#each section.permissions as perm}
+						{#each section.permissions as perm (perm.name)}
 							<tr>
 								<td class="perm-name">{perm.name}</td>
 								<td class="col-center">

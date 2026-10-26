@@ -111,7 +111,11 @@ describe('Backup system', () => {
 				stats: { databaseSizeBytes: 12345, uploadsCount: 42, uploadsSizeBytes: 67890 },
 				checksums: { databaseSqlSha256: 'dummy' }
 			};
-			await fs.writeFile(path.join(testDir, 'manifest.json'), JSON.stringify(sampleManifest), 'utf-8');
+			await fs.writeFile(
+				path.join(testDir, 'manifest.json'),
+				JSON.stringify(sampleManifest),
+				'utf-8'
+			);
 
 			const { exec } = await import('node:child_process');
 			const { promisify } = await import('node:util');
@@ -132,8 +136,16 @@ describe('Backup system', () => {
 	});
 
 	describe('Scheduler isBackupDue', () => {
+		const baseConfig = {
+			id: 'test-config',
+			name: 'Sauvegarde Test',
+			chunkSizeMb: 10,
+			updatedAt: new Date().toISOString()
+		};
+
 		it('returns false when backup is disabled', () => {
 			const config = {
+				...baseConfig,
 				enabled: false,
 				webdavUrl: 'https://cloud.exemple.com/dav',
 				webdavUsername: 'user',
@@ -150,6 +162,7 @@ describe('Backup system', () => {
 
 		it('returns false when frequency is manual', () => {
 			const config = {
+				...baseConfig,
 				enabled: true,
 				webdavUrl: 'https://cloud.exemple.com/dav',
 				webdavUsername: 'user',
@@ -166,6 +179,7 @@ describe('Backup system', () => {
 
 		it('returns true when enabled and never run', () => {
 			const config = {
+				...baseConfig,
 				enabled: true,
 				webdavUrl: 'https://cloud.exemple.com/dav',
 				webdavUsername: 'user',
@@ -183,6 +197,7 @@ describe('Backup system', () => {
 		it('returns false if daily run was recent (< 24h)', () => {
 			const recentDate = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
 			const config = {
+				...baseConfig,
 				enabled: true,
 				webdavUrl: 'https://cloud.exemple.com/dav',
 				webdavUsername: 'user',
@@ -200,6 +215,7 @@ describe('Backup system', () => {
 		it('returns true if daily run was > 24h ago', () => {
 			const oldDate = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
 			const config = {
+				...baseConfig,
 				enabled: true,
 				webdavUrl: 'https://cloud.exemple.com/dav',
 				webdavUsername: 'user',

@@ -22,7 +22,9 @@
 	<header class="page-header">
 		<div>
 			<h1 class="page-title">Tableau de bord</h1>
-			<p class="page-desc">Vue d'ensemble de l'activité, des ressources et de la santé de votre instance.</p>
+			<p class="page-desc">
+				Vue d'ensemble de l'activité, des ressources et de la santé de votre instance.
+			</p>
 		</div>
 	</header>
 
@@ -61,7 +63,8 @@
 				<span class="metric-value">{formatBytes(data.serverStorage.totalAppBytes ?? 0)}</span>
 			</div>
 			<span class="metric-subtext">
-				{formatBytes(data.serverStorage.freeDiskBytes ?? 0)} restants sur le disque ({data.serverStorage.uploadsCount ?? 0} fichiers)
+				{formatBytes(data.serverStorage.freeDiskBytes ?? 0)} restants sur le disque ({data
+					.serverStorage.uploadsCount ?? 0} fichiers)
 			</span>
 			<a href={resolve('/admin/storage')} class="metric-link">Détails du stockage →</a>
 		</div>
@@ -73,12 +76,12 @@
 			<div class="alert-content">
 				<strong>Fichiers orphelins détectés</strong>
 				<p>
-					{data.orphans.orphanCount} fichier(s) sur le disque ({formatBytes(data.orphans.orphanTotalBytes)}) ne sont plus référencés dans la base de données.
+					{data.orphans.orphanCount} fichier(s) sur le disque ({formatBytes(
+						data.orphans.totalOrphanBytes
+					)}) ne sont plus référencés dans la base de données.
 				</p>
 			</div>
-			<a href={resolve('/admin/storage')} class="alert-action-btn">
-				Nettoyer le stockage
-			</a>
+			<a href={resolve('/admin/storage')} class="alert-action-btn"> Nettoyer le stockage </a>
 		</div>
 	{/if}
 

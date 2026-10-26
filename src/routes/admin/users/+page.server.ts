@@ -72,7 +72,7 @@ export const actions: Actions = {
 		const userId = form.get('userId') as string;
 		const newName = form.get('newName') as string;
 		try {
-			await updateUserNameByAdmin(userId, newName);
+			await updateUserNameByAdmin(locals.user.id, userId, newName);
 			return { success: true };
 		} catch (err) {
 			return fail(400, { message: getErrorMessage(err) });
@@ -85,7 +85,7 @@ export const actions: Actions = {
 		const userId = form.get('userId') as string;
 		const count = parseInt(form.get('count') as string, 10);
 		try {
-			await addInvitesToUser(userId, count);
+			await addInvitesToUser(locals.user.id, userId, count);
 			return { success: true };
 		} catch (err) {
 			return fail(400, { message: getErrorMessage(err) });
@@ -96,9 +96,10 @@ export const actions: Actions = {
 		assertAdmin(locals.user);
 		const form = await request.formData();
 		const userId = form.get('userId') as string;
-		const quotaBytes = form.get('quotaBytes') ? parseInt(form.get('quotaBytes') as string, 10) : null;
+		const quotaBytesRaw = form.get('quotaBytes');
+		const quotaBytes = quotaBytesRaw ? parseInt(quotaBytesRaw as string, 10) : 0;
 		try {
-			await updateUserQuota(userId, quotaBytes);
+			await updateUserQuota(locals.user.id, userId, quotaBytes);
 			return { success: true };
 		} catch (err) {
 			return fail(400, { message: getErrorMessage(err) });
