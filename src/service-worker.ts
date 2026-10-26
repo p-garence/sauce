@@ -68,7 +68,10 @@ sw.addEventListener('push', (event) => {
 				badge: payload.badge || '/icon-192.png',
 				tag: payload.tag || undefined,
 				data: {
-					url: payload.url || '/'
+					url: payload.url || '/',
+					notificationId: payload.data?.notificationId,
+					entityId: payload.data?.entityId,
+					type: payload.data?.type
 				}
 			};
 
@@ -88,17 +91,42 @@ sw.addEventListener('notificationclick', (event) => {
 			.catch(() => {});
 	}
 
-	const rawUrl = event.notification.data?.url || '/';
+	const notifData = (event.notification.data || {}) as {
+		url?: string;
+		notificationId?: string;
+		entityId?: string;
+		type?: string;
+	};
+	const rawUrl = notifData.url || '/';
 	const targetUrl = new URL(rawUrl, sw.location.origin).href;
+	const notificationId = notifData.notificationId;
 
 	event.waitUntil(
 		(async () => {
+			// Marquer immédiatement la notification comme vue/lue côté serveur
+			if (notificationId) {
+				try {
+					await fetch(`/api/notifications/read?id=${encodeURIComponent(notificationId)}`, {
+						method: 'POST'
+					});
+				} catch {
+					// Ignorer en mode hors ligne
+				}
+			}
+
 			const clientList = await sw.clients.matchAll({ type: 'window', includeUncontrolled: true });
+			const messagePayload = {
+				type: 'NOTIFICATION_CLICK',
+				url: targetUrl,
+				rawUrl,
+				notificationId,
+				entityId: notifData.entityId
+			};
 
 			// 1. Si une fenêtre est déjà exactement sur l'URL cible, on lui donne le focus et on lui signale le clic
 			for (const client of clientList) {
 				if (client.url === targetUrl && 'focus' in client) {
-					client.postMessage({ type: 'NOTIFICATION_CLICK', url: targetUrl, rawUrl });
+					client.postMessage(messagePayload);
 					return client.focus();
 				}
 			}
@@ -108,7 +136,7 @@ sw.addEventListener('notificationclick', (event) => {
 			for (const client of clientList) {
 				if ('navigate' in client && 'focus' in client) {
 					await client.focus();
-					client.postMessage({ type: 'NOTIFICATION_CLICK', url: targetUrl, rawUrl });
+					client.postMessage(messagePayload);
 					return client.navigate(targetUrl);
 				}
 			}

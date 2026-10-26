@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
-
 	/**
 	 * @component AdminDocsTab
 	 * @domain Admin / Docs
@@ -20,12 +18,8 @@
 				texte intégrée).
 			</p>
 		</div>
-		<a
-			href={resolve('/wikidev' as Parameters<typeof resolve>[0])}
-			target="_blank"
-			rel="noopener noreferrer"
-			class="btn btn-blue"
-		>
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+		<a href="/wikidev" target="_blank" rel="noopener noreferrer" class="btn btn-blue">
 			Ouvrir le Wiki Dev (/wikidev) ↗
 		</a>
 	</div>

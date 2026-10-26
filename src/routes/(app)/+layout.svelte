@@ -28,9 +28,26 @@
 	});
 
 	onMount(() => {
-		// On initialise le stream globale en local
+		// On initialise le stream global en local
 		if (data.sessionUser?.id) {
 			globalStream.init(data.sessionUser.id);
+		}
+
+		if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+			const handleSwMessage = (event: MessageEvent) => {
+				if (event.data?.type === 'NOTIFICATION_CLICK') {
+					if (event.data.notificationId) {
+						globalStream.markNotifAsReadById(event.data.notificationId);
+					}
+					if (event.data.entityId) {
+						globalStream.markNotifsForEntityAsRead(event.data.entityId);
+					}
+				}
+			};
+			navigator.serviceWorker.addEventListener('message', handleSwMessage);
+			return () => {
+				navigator.serviceWorker.removeEventListener('message', handleSwMessage);
+			};
 		}
 	});
 

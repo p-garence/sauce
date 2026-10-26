@@ -67,7 +67,9 @@ export async function ensureSystemUser() {
 /**
  * Ensure the requesting user has the admin role.
  */
-export function assertAdmin(currentUser?: { id: string; role?: string | null } | null) {
+export function assertAdmin(
+	currentUser?: { id: string; role?: string | null } | null
+): asserts currentUser is { id: string; role: 'admin' } {
 	if (!currentUser || currentUser.role !== 'admin') {
 		throw error(403, 'Accès interdit : privilèges administrateur requis.');
 	}

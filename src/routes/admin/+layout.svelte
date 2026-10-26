@@ -35,8 +35,21 @@
 		isMobileMenuOpen = false;
 	}
 
+	type AdminPath =
+		| '/admin'
+		| '/admin/users'
+		| '/admin/permissions'
+		| '/admin/posts'
+		| '/admin/stories'
+		| '/admin/system-post'
+		| '/admin/appearance'
+		| '/admin/storage'
+		| '/admin/backups'
+		| '/admin/actions'
+		| '/admin/docs';
+
 	interface AdminNavItem {
-		href: string;
+		href: AdminPath;
 		label: string;
 		exact?: boolean;
 	}
@@ -199,7 +212,7 @@
 						{#each group.items as item (item.href)}
 							<li>
 								<a
-									href={resolve(item.href as Parameters<typeof resolve>[0])}
+									href={resolve(item.href)}
 									class="nav-link"
 									class:active={isItemActive(item.href, item.exact)}
 									onclick={closeMobileMenu}

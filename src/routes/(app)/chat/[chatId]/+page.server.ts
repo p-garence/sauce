@@ -81,7 +81,7 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 			and(eq(chatParticipants.chatId, params.chatId), eq(chatParticipants.userId, currentUserId))
 		);
 
-	// On marque également comme lues les notifications de mentions pour cette conversation
+	// On marque également comme lues toutes les notifications pour cette conversation
 	await db
 		.update(notifications)
 		.set({ isRead: true })
@@ -89,7 +89,6 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 			and(
 				eq(notifications.recipientId, currentUserId),
 				eq(notifications.entityId, params.chatId),
-				eq(notifications.type, 'mention'),
 				eq(notifications.isRead, false)
 			)
 		);

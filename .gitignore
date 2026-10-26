@@ -47,9 +47,4 @@ reports/
 # Directives locales IA
 GEMINI.md
 
-# Sauvegardes de secours locales
-backups_secours/
-sauvegarde_prod_restauree.sql
-*.sql
-!drizzle/*.sql
 

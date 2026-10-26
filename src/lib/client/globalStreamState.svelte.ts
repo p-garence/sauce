@@ -168,6 +168,29 @@ class GlobalStreamState {
 		this.updateAppBadge();
 	}
 
+	markNotifAsReadById(notifId: string) {
+		const found = this.notifs.find((n) => n.id === notifId);
+		if (found && !found.isRead) {
+			found.isRead = true;
+			this.unreadNotifsCount = Math.max(0, this.unreadNotifsCount - 1);
+			this.updateAppBadge();
+		}
+	}
+
+	markNotifsForEntityAsRead(entityId: string) {
+		let decreased = 0;
+		for (const n of this.notifs) {
+			if (n.entityId === entityId && !n.isRead) {
+				n.isRead = true;
+				decreased++;
+			}
+		}
+		if (decreased > 0) {
+			this.unreadNotifsCount = Math.max(0, this.unreadNotifsCount - decreased);
+			this.updateAppBadge();
+		}
+	}
+
 	updateNotifActionState(notifId: string, state: 'accepted' | 'refused') {
 		const idx = this.notifs.findIndex((n) => n.id === notifId);
 		if (idx !== -1) {

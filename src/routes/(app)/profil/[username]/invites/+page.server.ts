@@ -1,5 +1,8 @@
 import { error, redirect } from '@sveltejs/kit';
 import { getPendingFollowRequests } from '$lib/server/follows';
+import { db } from '$lib/server/db';
+import { notifications } from '$lib/server/db/schema';
+import { eq, and } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent, params }) => {
@@ -12,6 +15,17 @@ export const load: PageServerLoad = async ({ parent, params }) => {
 	}
 
 	const pendingRequests = await getPendingFollowRequests(sessionUser.id);
+
+	db.update(notifications)
+		.set({ isRead: true })
+		.where(
+			and(
+				eq(notifications.recipientId, sessionUser.id),
+				eq(notifications.type, 'follow'),
+				eq(notifications.isRead, false)
+			)
+		)
+		.catch((e) => console.error('[InvitesRead] Erreur notifications follow lues:', e));
 
 	return {
 		pendingRequests,

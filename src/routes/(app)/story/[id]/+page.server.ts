@@ -1,6 +1,9 @@
 import { error, redirect } from '@sveltejs/kit';
 import { getStoryBundleForStory } from '$lib/server/stories';
 import { isValidUuid } from '$lib/utils/validation';
+import { db } from '$lib/server/db';
+import { notifications } from '$lib/server/db/schema';
+import { eq, and } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, parent }) => {
@@ -32,6 +35,17 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 		}
 		throw error(404, 'Story introuvable');
 	}
+
+	db.update(notifications)
+		.set({ isRead: true })
+		.where(
+			and(
+				eq(notifications.recipientId, sessionUser.id),
+				eq(notifications.entityId, storyId),
+				eq(notifications.isRead, false)
+			)
+		)
+		.catch((e) => console.error('[StoryRead] Erreur notifications lues:', e));
 
 	return {
 		isAvailable: true,

@@ -19,7 +19,7 @@ function sendPushForNotification(
 	db.query.user
 		.findFirst({
 			where: eq(userTable.id, payload.recipientId),
-			columns: { notificationSettings: true }
+			columns: { notificationSettings: true, username: true }
 		})
 		.then((recipientUser) => {
 			const settings = recipientUser?.notificationSettings;
@@ -54,16 +54,34 @@ function sendPushForNotification(
 					body = payload.content || 'Nouveau commentaire sur votre publication.';
 					if (payload.entityId) targetUrl = `/post/${payload.entityId}`;
 					break;
-				case 'follow':
-					title = `${actorName} a commencé à vous suivre`;
-					body = payload.content || `${actorName} est désormais abonné.`;
-					if (actorInfos?.username) targetUrl = `/profil/${actorInfos.username}`;
+				case 'follow': {
+					const isPending =
+						payload.actionState === 'pending' || payload.content?.includes('demandé');
+					title = isPending
+						? `Demande d'abonnement de ${actorName}`
+						: `${actorName} a commencé à vous suivre`;
+					body =
+						payload.content ||
+						(isPending ? 'a demandé à vous suivre.' : `${actorName} est désormais abonné.`);
+					if (isPending && recipientUser?.username) {
+						targetUrl = `/profil/${recipientUser.username}/invites`;
+					} else if (actorInfos?.username) {
+						targetUrl = `/profil/${actorInfos.username}`;
+					}
 					break;
-				case 'mention':
+				}
+				case 'mention': {
 					title = `${actorName} vous a mentionné`;
 					body = payload.content || `${actorName} vous a mentionné.`;
-					if (payload.entityId) targetUrl = `/post/${payload.entityId}`;
+					const isChatMention =
+						payload.content?.includes('message') ||
+						payload.content?.includes('conversation') ||
+						payload.content?.includes('chat');
+					if (payload.entityId) {
+						targetUrl = isChatMention ? `/chat/${payload.entityId}` : `/post/${payload.entityId}`;
+					}
 					break;
+				}
 				case 'message':
 					title = `Message de ${actorName}`;
 					body = payload.content || 'Nouveau message reçu.';
@@ -80,7 +98,12 @@ function sendPushForNotification(
 				title,
 				body,
 				url: targetUrl,
-				tag: `notif-${payload.type}-${payload.entityId || fallbackTagId}`
+				tag: `notif-${payload.type}-${payload.entityId || fallbackTagId}`,
+				data: {
+					notificationId: fallbackTagId,
+					entityId: payload.entityId,
+					type: payload.type
+				}
 			}).catch((err) => console.error('[PushNotification] Erreur envoi push:', err));
 		})
 		.catch((err) => console.error('[PushNotification] Erreur lecture destinataire:', err));
@@ -281,7 +304,12 @@ export async function broadcastSystemNotification(payload: { postId: string; mes
 			title: 'Le serveur',
 			body: payload.message,
 			url: `/post/${payload.postId}`,
-			tag: `notif-system-${payload.postId}`
+			tag: `notif-system-${payload.postId}`,
+			data: {
+				notificationId: notif.id,
+				entityId: payload.postId,
+				type: 'system'
+			}
 		}).catch(console.error);
 	}
 }

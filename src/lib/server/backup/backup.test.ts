@@ -140,7 +140,7 @@ describe('Backup system', () => {
 			id: 'test-config',
 			name: 'Sauvegarde Test',
 			chunkSizeMb: 10,
-			updatedAt: new Date().toISOString()
+			updatedAt: new Date()
 		};
 
 		it('returns false when backup is disabled', () => {

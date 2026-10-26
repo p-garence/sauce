@@ -18,7 +18,9 @@
 	let { data, form }: Props = $props();
 
 	let configs = $state<typeof data.configs>([]);
-	let restoreStatus = $state<typeof data.restoreStatus>(data.restoreStatus);
+	let restoreStatus = $state<typeof data.restoreStatus>(
+		null as unknown as typeof data.restoreStatus
+	);
 
 	$effect.pre(() => {
 		configs = data.configs;
@@ -499,7 +501,7 @@
 
 		<div class="export-actions">
 			<a
-				href={resolve('/api/admin/backups/export' as Parameters<typeof resolve>[0])}
+				href={resolve('/api/admin/backups/export' as unknown as '/admin')}
 				download
 				class="btn btn-primary btn-large"
 				onclick={() => {
