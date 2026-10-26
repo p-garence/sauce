@@ -51,7 +51,7 @@ export const roadmapData: RoadmapCategory[] = [
 	{
 		theme: 'Messagerie',
 		items: [
-			{ title: 'Reaction aux messages', status: 'todo' },
+			{ title: 'Reaction aux messages', status: 'done' },
 			{ title: 'Envoie Image / fichier', status: 'done' },
 			{ title: 'Emojis personalisé', status: 'done' },
 			{ title: '@ Dans conversation', status: 'done' },
@@ -161,7 +161,8 @@ export const roadmapData: RoadmapCategory[] = [
 			{ title: 'Systeme de report', status: 'todo' },
 			{ title: 'Changement des constante serveur ', status: 'todo' },
 			{ title: 'System de permissions modérateur / admin', status: 'todo' },
-			{ title: 'Interface', status: 'todo' }
+			{ title: 'Systeme de Sauvegardes', status: 'todo' },
+			{ title: 'Interface', status: 'done' }
 		]
 	},
 	{

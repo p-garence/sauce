@@ -15,7 +15,7 @@ RUN npm run build
 # Étape 2 : Production
 FROM node:22-alpine AS runner
 
-RUN apk add --no-cache ffmpeg libc6-compat
+RUN apk add --no-cache ffmpeg libc6-compat postgresql-client
 
 WORKDIR /app
 ENV NODE_ENV=production

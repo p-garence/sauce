@@ -11,4 +11,5 @@ export * from './push';
 export * from './icons';
 export * from './emojis';
 export * from './instanceSettings';
+export * from './backups';
 export * from './relations';
