@@ -51,4 +51,5 @@ GEMINI.md
 backups_secours/
 sauvegarde_prod_restauree.sql
 *.sql
+!drizzle/*.sql
 
