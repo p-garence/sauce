@@ -171,6 +171,14 @@
 		z-index: var(--z-nav);
 	}
 
+	:global(body.keyboard-open) .bottom-nav {
+		display: none !important;
+	}
+
+	:global(body.keyboard-open) .app-content {
+		padding-bottom: 0 !important;
+	}
+
 	/* Comportement Desktop : La barre reste en bas, mais s'aligne avec le contenu */
 	@media (min-width: 600px) {
 		.bottom-nav {

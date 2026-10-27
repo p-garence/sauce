@@ -457,7 +457,11 @@
 			chatHeight = `${vv.height}px`;
 			chatTop = `${vv.offsetTop}px`;
 			if (vv.height > baseViewportHeight) baseViewportHeight = vv.height;
+			const wasKeyboardOpen = isKeyboardOpen;
 			isKeyboardOpen = baseViewportHeight - vv.height > 120;
+			if (!wasKeyboardOpen && isKeyboardOpen) {
+				scrollToBottom();
+			}
 		};
 
 		if (window.visualViewport) {
@@ -480,6 +484,7 @@
 			if (recordedAudioUrl) URL.revokeObjectURL(recordedAudioUrl);
 			document.documentElement.classList.remove('chat-lock');
 			document.body.classList.remove('chat-lock');
+			document.body.classList.remove('keyboard-open');
 		};
 	});
 </script>
@@ -608,7 +613,7 @@
 		position: fixed;
 		left: 0;
 		right: 0;
-		z-index: 50;
+		z-index: 70;
 	}
 
 	.messages-container {
