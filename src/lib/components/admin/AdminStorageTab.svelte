@@ -9,6 +9,7 @@
 	 * - Détecter les fichiers orphelins et permettre leur purge sécurisée
 	 */
 	import { enhance } from '$app/forms';
+	import { resolve } from '$app/paths';
 	import { formatBytes } from '$lib/utils/format';
 
 	export interface ServerStorageData {
@@ -37,6 +38,8 @@
 	}
 
 	let { serverStorage, orphans }: Props = $props();
+
+	let isCleaning = $state(false);
 
 	let usedDiskBytes = $derived(
 		serverStorage && serverStorage.totalDiskBytes > 0
@@ -127,8 +130,14 @@
 		{#if orphans && orphans.orphanCount > 0}
 			<form
 				method="POST"
-				action="?/cleanupOrphans"
-				use:enhance
+				action="{resolve('/admin/storage')}?/cleanupOrphans"
+				use:enhance={() => {
+					isCleaning = true;
+					return async ({ update }) => {
+						await update();
+						isCleaning = false;
+					};
+				}}
 				onsubmit={(e) => {
 					if (
 						!confirm(
@@ -138,8 +147,10 @@
 						e.preventDefault();
 				}}
 			>
-				<button class="btn btn-red">
-					Nettoyer tous les orphelins ({orphans.orphanCount})
+				<button class="btn btn-red" disabled={isCleaning}>
+					{isCleaning
+						? 'Nettoyage en cours...'
+						: `Nettoyer tous les orphelins (${orphans.orphanCount})`}
 				</button>
 			</form>
 		{/if}

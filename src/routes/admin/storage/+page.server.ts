@@ -27,11 +27,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-	deleteOrphans: async ({ locals }) => {
+	cleanupOrphans: async ({ locals }) => {
 		assertAdmin(locals.user);
 		try {
 			const res = await deleteOrphanMedia();
-			return { success: true, count: res.deletedCount };
+			return { success: true, count: res.deletedCount, freedBytes: res.freedBytes };
 		} catch (err) {
 			return fail(500, { message: getErrorMessage(err) });
 		}
