@@ -10,6 +10,7 @@
 	 */
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import type { PostData, PostVisibility, MenuAction } from '$lib/types';
 	import FollowButton from '$lib/components/profile/FollowButton.svelte';
 	import ActionMenu from '$lib/components/ui/ActionMenu.svelte';
@@ -34,6 +35,11 @@
 
 	let { post, isLoggedIn, isOwnPost, isSystemPost, postActions, onVisibilityChange }: Props =
 		$props();
+
+	let isPrivateInstance = $derived(
+		page.data.instanceSettings?.privacySettings?.isPublicInstance === false
+	);
+	let showPrivateWarning = $derived(isPrivateInstance && post.visibility === 'public');
 
 	function goToProfile(e: MouseEvent) {
 		e.preventDefault();
@@ -67,7 +73,20 @@
 			</div>
 			<div class="author-info">
 				<strong>{post.author.name}</strong>
-				<FormattedDate date={post.createdAt} class="date" />
+				<div class="date-container">
+					<FormattedDate date={post.createdAt} class="date" />
+					{#if showPrivateWarning}
+						<span
+							class="private-warning-badge"
+							title={isOwnPost
+								? "L'instance est privée, votre post n'est pas visible publiquement"
+								: "L'instance est privée, ce post n'est pas visible publiquement"}
+							aria-label="Publication privée due au mode d'instance restreint"
+						>
+							<Icon name="status.lock" size={13} />
+						</span>
+					{/if}
+				</div>
 			</div>
 		</a>
 	{/if}
@@ -150,6 +169,18 @@
 	.author-info :global(.date) {
 		font-size: 0.8rem;
 		color: var(--text-muted, #888);
+	}
+	.date-container {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.private-warning-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		color: #eab308;
+		cursor: help;
 	}
 	.header-actions {
 		display: flex;

@@ -16,11 +16,12 @@
 	} from '$lib/client/feedMemory.svelte';
 	import type { PageData } from './$types';
 	import type { SerializedPost } from '$lib/types';
-	import { POSTS_PER_SCROLL } from '$lib/constants';
 	import { onMount, tick } from 'svelte';
 	import { SvelteDate } from 'svelte/reactivity';
 
 	let { data }: { data: PageData } = $props();
+
+	let postsPerScroll = $derived(data.instanceSettings?.performanceSettings?.postsPerScroll || 8);
 
 	let myFeeds = $derived(data.myFeeds);
 	let selectedFeedOverride = $state<string | null>(null);
@@ -36,7 +37,7 @@
 
 	// Initialisation du flux branché sur le State Memory
 	const feed = useFeed(() => ({
-		loadNumber: POSTS_PER_SCROLL,
+		loadNumber: postsPerScroll,
 		feedType: 'flux',
 		feedId: selectedFeed,
 		initialPosts: data.posts,
@@ -168,7 +169,7 @@
 				window.scrollTo({ top: cached.scrollY, behavior: 'instant' });
 			} else {
 				// Chargement direct depuis l'API pour le nouveau flux
-				const res = await fetch(`/api/feed-posts?feedId=${feedId}&limit=${POSTS_PER_SCROLL}`);
+				const res = await fetch(`/api/feed-posts?feedId=${feedId}&limit=${postsPerScroll}`);
 				if (res.ok) {
 					const json = (await res.json()) as {
 						posts: SerializedPost[];
@@ -204,7 +205,7 @@
 		try {
 			// Requête directe sans curseur : force la génération d'une NOUVELLE seed côté serveur pour les flux aléatoires et le rafraîchissement des flux RSS
 			const res = await fetch(
-				`/api/feed-posts?feedId=${selectedFeed}&limit=${POSTS_PER_SCROLL}&refresh=true`
+				`/api/feed-posts?feedId=${selectedFeed}&limit=${postsPerScroll}&refresh=true`
 			);
 			if (res.ok) {
 				const json = (await res.json()) as { posts: SerializedPost[]; nextCursor: string | null };

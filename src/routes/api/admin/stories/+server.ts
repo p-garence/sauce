@@ -2,18 +2,20 @@ import { json } from '@sveltejs/kit';
 import { requireApiAdmin } from '$lib/server/auth';
 import { getAdminStories } from '$lib/server/admin';
 import { decodeCursor, encodeCursor } from '$lib/server/cursor';
-import { ADMIN_ITEMS_PER_PAGE, MAX_ADMIN_ITEMS_PER_REQUEST, clampLimit } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
+import { clampLimit } from '$lib/constants';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ request, url }) => {
 	const session = await requireApiAdmin(request);
+	const settings = await getInstanceSettings();
 
 	const cursorStr = url.searchParams.get('cursor');
 	const cursorData = decodeCursor(cursorStr);
 	const limit = clampLimit(
 		url.searchParams.get('limit'),
-		ADMIN_ITEMS_PER_PAGE,
-		MAX_ADMIN_ITEMS_PER_REQUEST
+		settings.performanceSettings.adminItemsPerPage,
+		settings.performanceSettings.maxPostsPerRequest
 	);
 
 	try {

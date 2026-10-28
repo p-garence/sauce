@@ -14,8 +14,8 @@
 	import { enhance } from '$app/forms';
 	import { onDestroy } from 'svelte';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import type { EditorCarouselItem, EmojiItem } from '$lib/types';
-	import { MAX_MEDIA_SIZE_BYTES } from '$lib/constants';
 	import { mediaEditor } from '$lib/client/mediaEditorState.svelte';
 	import { generateId } from '$lib/utils/id';
 	import MentionSuggestions from '$lib/components/ui/MentionSuggestions.svelte';
@@ -78,9 +78,11 @@
 		errorMessage = '';
 
 		if (target.files && target.files.length > 0) {
+			const maxMb = page.data.instanceSettings?.mediaSettings?.maxMediaSizeMb || 1000;
+			const maxBytes = maxMb * 1024 * 1024;
 			const validFiles = Array.from(target.files).filter((file) => {
-				if (file.size > MAX_MEDIA_SIZE_BYTES) {
-					errorMessage = `Le fichier "${file.name}" est trop lourd.`;
+				if (file.size > maxBytes) {
+					errorMessage = `Le fichier "${file.name}" dépasse la limite de ${maxMb} Mo.`;
 					return false;
 				}
 				return true;

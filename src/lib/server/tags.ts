@@ -16,7 +16,7 @@ import {
 	type SQL
 } from 'drizzle-orm';
 import { queryPosts, canSeePost, notHidden } from '$lib/server/posts';
-import { POSTS_PER_GRID, TRENDING_TAGS_LIMIT } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { PostData, PostSortMode } from '$lib/types';
 import type { CursorData } from '$lib/server/cursor';
 import { getOrSetCached, invalidateCachePrefix } from '$lib/server/cache';
@@ -147,11 +147,13 @@ export async function getTagsForPosts(postIds: string[]): Promise<Record<string,
  * Récupère les tags populaires de la semaine (ou les plus populaires globaux en repli).
  */
 export async function getTrendingTags(
-	limit = TRENDING_TAGS_LIMIT,
+	limit?: number,
 	days = 7,
 	viewerId?: string | null
 ): Promise<{ name: string; count: number }[]> {
-	const cacheKey = `trending_tags_${limit}_${days}_${viewerId || 'anon'}`;
+	const settings = await getInstanceSettings();
+	const effectiveLimit = limit ?? settings.performanceSettings.trendingTagsLimit;
+	const cacheKey = `trending_tags_${effectiveLimit}_${days}_${viewerId || 'anon'}`;
 
 	return getOrSetCached(cacheKey, 180, async () => {
 		const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -170,11 +172,11 @@ export async function getTrendingTags(
 			.where(and(gte(postTags.createdAt, since), visibilityFilter))
 			.groupBy(tags.id, tags.name)
 			.orderBy(desc(sql`count(${postTags.postId})`), asc(tags.name))
-			.limit(limit);
+			.limit(effectiveLimit);
 
-		if (trending.length < limit) {
+		if (trending.length < effectiveLimit) {
 			const existingNames = trending.map((t) => t.name);
-			const remaining = limit - trending.length;
+			const remaining = effectiveLimit - trending.length;
 
 			const fallback = await db
 				.select({
@@ -206,7 +208,7 @@ export async function getTrendingTags(
 export async function getPostsByTag(
 	tagName: string,
 	viewerId?: string | null,
-	limitCount: number = POSTS_PER_GRID,
+	limitCount?: number,
 	sortMode: PostSortMode = 'chrono',
 	cursor?: CursorData | null
 ): Promise<{
@@ -214,6 +216,8 @@ export async function getPostsByTag(
 	nextCursor: CursorData | null;
 	tag: { name: string; postCount: number } | null;
 }> {
+	const settings = await getInstanceSettings();
+	const effectiveLimit = limitCount ?? settings.performanceSettings.postsPerGrid;
 	const normalized = normalizeTagName(tagName);
 
 	const foundTag = await db.query.tags.findFirst({
@@ -277,13 +281,13 @@ export async function getPostsByTag(
 
 	const fetchedPosts = await queryPosts({
 		where: and(...conditions),
-		limit: limitCount,
+		limit: effectiveLimit,
 		viewerId: viewerId || '',
 		orderBy: orderByClause
 	});
 
 	let nextCursor: CursorData | null = null;
-	if (fetchedPosts.length === limitCount) {
+	if (fetchedPosts.length === effectiveLimit) {
 		const lastPost = fetchedPosts[fetchedPosts.length - 1];
 		let lastValue: string | number = lastPost.createdAt.toISOString();
 		if (sortMode === 'popular') {

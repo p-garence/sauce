@@ -2,12 +2,13 @@
 	import PageHeader from '$lib/components/navigation/PageHeader.svelte';
 	import InfiniteFeed from '$lib/components/post/InfiniteFeed.svelte';
 	import { useFeed } from '$lib/client/useFeed.svelte.js';
-	import { POSTS_PER_SCROLL } from '$lib/constants.js';
 
 	let { data } = $props();
 
+	let postsPerScroll = $derived(data.instanceSettings?.performanceSettings?.postsPerScroll || 8);
+
 	const feed = useFeed(() => ({
-		loadNumber: POSTS_PER_SCROLL,
+		loadNumber: postsPerScroll,
 		username: data.profile.username || data.profile.id,
 		profileId: data.profile.id,
 		feedType: 'posts',

@@ -13,7 +13,6 @@
 	import PageHeader from '$lib/components/navigation/PageHeader.svelte';
 	import SortSelect from '$lib/components/ui/SortSelect.svelte';
 	import { useFeed } from '$lib/client/useFeed.svelte';
-	import { POSTS_PER_GRID } from '$lib/constants.js';
 	import { goto } from '$app/navigation';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { page } from '$app/state';
@@ -24,6 +23,8 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	let postsPerGrid = $derived(data.instanceSettings?.performanceSettings?.postsPerGrid || 6);
 
 	let currentTab = $state<'posts' | 'likes'>('posts');
 	let serverFollowers = $derived(data.stats.followers);
@@ -39,7 +40,7 @@
 
 	// 1. Hook pour les publications (posts)
 	const postsFeed = useFeed(() => ({
-		loadNumber: POSTS_PER_GRID,
+		loadNumber: postsPerGrid,
 		username: data.profile.username || data.profile.id,
 		profileId: data.profile.id,
 		feedType: 'posts',
@@ -50,7 +51,7 @@
 
 	// 2. Hook pour les favoris (likes)
 	const likesFeed = useFeed(() => ({
-		loadNumber: POSTS_PER_GRID,
+		loadNumber: postsPerGrid,
 		username: data.profile.username || data.profile.id,
 		profileId: data.profile.id,
 		feedType: 'likes',
@@ -73,7 +74,7 @@
 		try {
 			const type = currentTab === 'posts' ? 'posts' : 'likes';
 			const res = await fetch(
-				`/api/user-posts?authorId=${data.profile.id}&type=${type}&sort=${activeFeed.sortMode}&numberOfPost=${POSTS_PER_GRID}`
+				`/api/user-posts?authorId=${data.profile.id}&type=${type}&sort=${activeFeed.sortMode}&numberOfPost=${postsPerGrid}`
 			);
 
 			if (res.ok) {

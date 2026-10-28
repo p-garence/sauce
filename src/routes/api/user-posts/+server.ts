@@ -7,10 +7,12 @@ import { user } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 import type { PostSortMode } from '$lib/types';
-import { POSTS_PER_GRID, MAX_POSTS_PER_REQUEST, clampLimit } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
+import { clampLimit } from '$lib/constants';
 
 export const GET: RequestHandler = async ({ request, url }) => {
 	const session = await requireApiSession(request);
+	const settings = await getInstanceSettings();
 
 	let authorId = url.searchParams.get('authorId');
 	const username = url.searchParams.get('username'); // PostGrid utilise parfois username
@@ -18,8 +20,8 @@ export const GET: RequestHandler = async ({ request, url }) => {
 	const sort = (url.searchParams.get('sort') as PostSortMode) || 'chrono';
 	const numberOfPost = clampLimit(
 		url.searchParams.get('numberOfPost'),
-		POSTS_PER_GRID,
-		MAX_POSTS_PER_REQUEST
+		settings.performanceSettings.postsPerGrid,
+		settings.performanceSettings.maxPostsPerRequest
 	);
 
 	// Décodage du curseur

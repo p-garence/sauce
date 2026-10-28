@@ -16,7 +16,7 @@ import { createUserGroup, updateUserGroup, deleteUserGroup } from '$lib/server/g
 import { bulkUpdateVisibility, makePostsConnections, makePostsPrivate } from '$lib/server/posts';
 import { getUserMediaUsage } from '$lib/server/media';
 import { getTrendingTags } from '$lib/server/tags';
-import { DEFAULT_MAX_INVITES } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { PostVisibility } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -34,8 +34,13 @@ export const load: PageServerLoad = async ({ parent }) => {
 		sessionUser.activeFeedId as string | null
 	);
 
+	const settings = await getInstanceSettings();
 	const mediaUsage = await getUserMediaUsage(sessionUser.id);
-	const trendingTags = await getTrendingTags(10, 7, sessionUser.id);
+	const trendingTags = await getTrendingTags(
+		settings.performanceSettings.trendingTagsLimit,
+		7,
+		sessionUser.id
+	);
 	const blockedUsers = await getBlockedUsersList(sessionUser.id);
 
 	return {
@@ -227,7 +232,8 @@ export const actions: Actions = {
 			.from(user)
 			.where(eq(user.id, session.user.id));
 
-		const limit = currentUser?.maxInvites ?? DEFAULT_MAX_INVITES;
+		const settings = await getInstanceSettings();
+		const limit = currentUser?.maxInvites ?? settings.contentDefaults.defaultMaxInvites;
 
 		if (result.value >= limit) {
 			return fail(400, { message: `Vous avez atteint votre limite de ${limit} clés.` });

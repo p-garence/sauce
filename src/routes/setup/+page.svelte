@@ -31,13 +31,29 @@
 
 	// Étape 2 : Confidentialité
 	// svelte-ignore state_referenced_locally
-	let requireFollowRequest = $state(user.profileVisibility?.requireFollowRequest ?? false);
+	let requireFollowRequest = $state(
+		user.profileVisibility?.requireFollowRequest ??
+			data.instanceSettings?.privacySettings?.defaultRequireFollowRequest ??
+			false
+	);
 	// svelte-ignore state_referenced_locally
-	let requireMessageApproval = $state(user.profileVisibility?.requireMessageApproval ?? false);
+	let requireMessageApproval = $state(
+		user.profileVisibility?.requireMessageApproval ??
+			data.instanceSettings?.privacySettings?.defaultRequireMessageApproval ??
+			false
+	);
 	// svelte-ignore state_referenced_locally
-	let showFollowers = $state(user.profileVisibility?.showFollowers ?? true);
+	let showFollowers = $state(
+		user.profileVisibility?.showFollowers ??
+			data.instanceSettings?.privacySettings?.defaultShowFollowers ??
+			true
+	);
 	// svelte-ignore state_referenced_locally
-	let showFollowing = $state(user.profileVisibility?.showFollowing ?? true);
+	let showFollowing = $state(
+		user.profileVisibility?.showFollowing ??
+			data.instanceSettings?.privacySettings?.defaultShowFollowing ??
+			true
+	);
 
 	// --- NAVIGATION ---
 	function nextStep() {

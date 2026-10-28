@@ -4,11 +4,13 @@ import { messages, chatParticipants } from '$lib/server/db/schema';
 import { eq, and, desc, lt, gt } from 'drizzle-orm';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { MESSAGES_PER_CHAT } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import { formatMessageReactions } from '$lib/server/chat';
 
 export const GET: RequestHandler = async ({ request, url }) => {
 	const session = await requireApiSession(request);
+	const settings = await getInstanceSettings();
+	const perChat = settings.performanceSettings.messagesPerChat;
 
 	const chatId = url.searchParams.get('chatId');
 	const beforeDate = url.searchParams.get('before');
@@ -35,7 +37,7 @@ export const GET: RequestHandler = async ({ request, url }) => {
 			gt(messages.createdAt, participation.clearedAt)
 		),
 		orderBy: [desc(messages.createdAt)],
-		limit: MESSAGES_PER_CHAT,
+		limit: perChat,
 		with: {
 			sender: { columns: { name: true, username: true, image: true } },
 			reactions: {
@@ -52,5 +54,5 @@ export const GET: RequestHandler = async ({ request, url }) => {
 		reactions: formatMessageReactions(m.reactions || [], session.user.id)
 	}));
 
-	return json({ messages: formattedHistory, hasMore: history.length === MESSAGES_PER_CHAT });
+	return json({ messages: formattedHistory, hasMore: history.length === perChat });
 };

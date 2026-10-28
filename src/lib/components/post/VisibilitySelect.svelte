@@ -18,13 +18,25 @@
 		onToggle = null as ((visibility: PostVisibility, groupId?: string | null) => void) | null
 	} = $props();
 
+	let isPublicInstance = $derived(
+		page.data.instanceSettings?.privacySettings?.isPublicInstance !== false
+	);
+
+	let effectiveInitialVisibility = $derived(
+		!postId && !isPublicInstance && initialVisibility === 'public'
+			? (page.data.instanceSettings?.privacySettings?.defaultPostVisibility === 'public'
+					? 'followers'
+					: page.data.instanceSettings?.privacySettings?.defaultPostVisibility) || 'followers'
+			: initialVisibility
+	);
+
 	// L'astuce : La valeur interne du select est un string composite (ex: "public", "network", ou "group:123")
 	function getInternalValue(vis: PostVisibility, gId: string | null) {
 		return vis === 'group' && gId ? `group:${gId}` : vis;
 	}
 
 	// 1. Vérité serveur
-	let serverValue = $derived(getInternalValue(initialVisibility, initialGroupId));
+	let serverValue = $derived(getInternalValue(effectiveInitialVisibility, initialGroupId));
 	// 2. Override optimiste local
 	let optimisticValue = $state<string | null>(null);
 	// 3. Fusion
@@ -96,7 +108,11 @@
 		<Icon name="status.visibility" size={15} />
 	</span>
 	<select bind:value onchange={handleChange} disabled={isLoading} class="visibility-select">
-		<option value="public">Public</option>
+		{#if isPublicInstance}
+			<option value="public">Public</option>
+		{:else if postId && initialVisibility === 'public'}
+			<option value="public" disabled>Public (restreint)</option>
+		{/if}
 		<option value="network">Réseau</option>
 		<option value="followers">Abonné(e)s</option>
 		<option value="private">Moi uniquement</option>

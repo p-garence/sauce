@@ -33,7 +33,7 @@ import {
 	user as userTable
 } from '$lib/server/db/schema';
 import type { PostData, FeedSortMode, PostType, UserFeed } from '$lib/types';
-import { POSTS_PER_SCROLL } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { CursorData } from '../cursor';
 import { getTagsForPosts } from '$lib/server/tags';
 import { canSeePost, notHidden, notSeen, formatPosts } from './helpers';
@@ -162,12 +162,14 @@ export async function queryPosts(options: {
 export async function getFilteredPosts(
 	userId: string,
 	feedId: string | null = null,
-	limitCount = POSTS_PER_SCROLL,
+	limitCount?: number,
 	cursor?: CursorData | null,
 	depth = 0,
 	forceHideSeen = false,
 	forceRefresh = false
 ): Promise<{ posts: PostData[]; nextCursor: CursorData | null }> {
+	const settings = await getInstanceSettings();
+	const effectiveLimit = limitCount ?? settings.performanceSettings.postsPerScroll;
 	const conditions: (SQL | undefined)[] = [];
 
 	conditions.push(canSeePost(userId));
@@ -183,11 +185,24 @@ export async function getFilteredPosts(
 
 		if (feedConfig) {
 			if (feedConfig.source === 'blend' && depth < 2) {
-				return getBlendedFeedPosts(userId, feedConfig, limitCount, cursor, depth + 1, forceRefresh);
+				return getBlendedFeedPosts(
+					userId,
+					feedConfig,
+					effectiveLimit,
+					cursor,
+					depth + 1,
+					forceRefresh
+				);
 			}
 
 			if (feedConfig.source === 'rss') {
-				return getRssFeedPosts(userId, feedConfig as UserFeed, limitCount, cursor, forceRefresh);
+				return getRssFeedPosts(
+					userId,
+					feedConfig as UserFeed,
+					effectiveLimit,
+					cursor,
+					forceRefresh
+				);
 			}
 
 			sortMode = (feedConfig.sortMode as FeedSortMode) || 'chrono';
@@ -386,13 +401,13 @@ export async function getFilteredPosts(
 	const where = and(...conditions);
 	const fetchedPosts = await queryPosts({
 		where,
-		limit: limitCount,
+		limit: effectiveLimit,
 		viewerId: userId,
 		orderBy: orderByClause
 	});
 
 	let nextCursor: CursorData | null = null;
-	if (fetchedPosts.length === limitCount) {
+	if (fetchedPosts.length === effectiveLimit) {
 		const lastPost = fetchedPosts[fetchedPosts.length - 1];
 		nextCursor = buildNextCursor(lastPost, sortMode, randomSeed);
 	}

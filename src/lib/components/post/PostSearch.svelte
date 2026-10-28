@@ -7,10 +7,10 @@
 	import { onMount } from 'svelte';
 	import { searchMemory } from '$lib/client/searchMemory.svelte';
 	import type { PostData } from '$lib/types';
+	import { page } from '$app/state';
 	import PostGrid from '$lib/components/post/PostGrid.svelte'; // 👈 Import du composant
 	import SortSelect from '$lib/components/ui/SortSelect.svelte';
 	import SearchInput from '$lib/components/ui/SearchInput.svelte';
-	import { POSTS_PER_GRID } from '$lib/constants';
 
 	let { id = 'default_posts' }: { id?: string } = $props();
 
@@ -47,7 +47,8 @@
 		}
 
 		try {
-			let url = `/api/search-posts?q=${encodeURIComponent(query)}&sort=${sortMode}&limit=${POSTS_PER_GRID}`;
+			const postsLimit = page.data.instanceSettings?.performanceSettings?.postsPerGrid || 6;
+			let url = `/api/search-posts?q=${encodeURIComponent(query)}&sort=${sortMode}&limit=${postsLimit}`;
 			if (!isNewSearch && nextCursor) {
 				url += `&cursor=${encodeURIComponent(nextCursor)}`;
 			}

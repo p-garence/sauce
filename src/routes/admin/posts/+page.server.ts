@@ -6,7 +6,7 @@
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { assertAdmin, getAdminPosts, getAdminStats, deletePostByAdmin } from '$lib/server/admin';
-import { ADMIN_ITEMS_PER_PAGE } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import { encodeCursor } from '$lib/server/cursor';
 
 function getErrorMessage(err: unknown): string {
@@ -15,9 +15,13 @@ function getErrorMessage(err: unknown): string {
 
 export const load: PageServerLoad = async ({ locals }) => {
 	assertAdmin(locals.user);
+	const settings = await getInstanceSettings();
 
 	const [postsData, stats] = await Promise.all([
-		getAdminPosts({ limit: ADMIN_ITEMS_PER_PAGE, adminUserId: locals.user?.id }),
+		getAdminPosts({
+			limit: settings.performanceSettings.adminItemsPerPage,
+			adminUserId: locals.user?.id
+		}),
 		getAdminStats()
 	]);
 

@@ -6,12 +6,9 @@
 import { db } from '$lib/server/db';
 import { userFeeds, user as userTable } from '$lib/server/db/schema';
 import { eq, count, and } from 'drizzle-orm';
-import {
-	DEFAULT_FEED_CONFIG,
-	VALID_FEED_SORT_MODES,
-	VALID_FEED_TIME_WINDOWS
-} from '$lib/constants';
-import type { FeedSortMode, FeedTimeWindow } from '$lib/types';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
+import { VALID_FEED_SORT_MODES, VALID_FEED_TIME_WINDOWS } from '$lib/constants';
+import type { FeedSource, FeedSortMode, FeedTimeWindow, DefaultFeedConfig } from '$lib/types';
 import { parseTagsInput } from '$lib/utils/validation';
 
 export interface FeedConfigInput {
@@ -127,24 +124,45 @@ export async function getUserFeeds(userId: string, currentActiveFeedId: string |
 
 	let activeFeedId = currentActiveFeedId || null;
 
-	// 1. Si aucun flux, on crée le flux par défaut
+	// 1. Si aucun flux, on crée les flux par défaut
 	if (feeds.length === 0) {
-		const [defaultFeed] = await db
+		const settings = await getInstanceSettings();
+		const defaultFeeds: DefaultFeedConfig[] =
+			settings.contentDefaults.defaultFeeds && settings.contentDefaults.defaultFeeds.length > 0
+				? settings.contentDefaults.defaultFeeds
+				: [
+						{
+							name: 'Chronologique',
+							source: 'public',
+							sortMode: 'chrono',
+							timeWindow: '7d'
+						}
+					];
+
+		const insertedFeeds = await db
 			.insert(userFeeds)
-			.values({
-				userId,
-				...DEFAULT_FEED_CONFIG
-			})
+			.values(
+				defaultFeeds.map((feed) => ({
+					userId,
+					name: feed.name,
+					source: (feed.source as FeedSource) || 'public',
+					sortMode: (feed.sortMode as FeedSortMode) || 'chrono',
+					timeWindow: (feed.timeWindow as FeedTimeWindow) || '7d',
+					icon: feed.icon || null,
+					hideSeen: false,
+					showStories: true
+				}))
+			)
 			.returning();
 
-		feeds = [defaultFeed];
+		feeds = insertedFeeds;
 
-		if (!activeFeedId) {
+		if (!activeFeedId && insertedFeeds.length > 0) {
 			await db
 				.update(userTable)
-				.set({ activeFeedId: defaultFeed.id })
+				.set({ activeFeedId: insertedFeeds[0].id })
 				.where(eq(userTable.id, userId));
-			activeFeedId = defaultFeed.id;
+			activeFeedId = insertedFeeds[0].id;
 		}
 	}
 

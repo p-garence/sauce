@@ -3,9 +3,16 @@ import { db } from '$lib/server/db';
 import { user, userGroups, userGroupMembers, userFeeds } from '$lib/server/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
-import { DEFAULT_FEED_CONFIG } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { Actions, PageServerLoad } from './$types';
-import type { User, UserGroup } from '$lib/types';
+import type {
+	User,
+	UserGroup,
+	DefaultFeedConfig,
+	FeedSource,
+	FeedSortMode,
+	FeedTimeWindow
+} from '$lib/types';
 import {
 	getUserFeeds,
 	createUserFeed,
@@ -30,7 +37,9 @@ export const load: PageServerLoad = async ({ request }) => {
 		throw redirect(302, '/flux');
 	}
 
-	// 3. S'assurer que le groupe par défaut "Amis proches" existe
+	const settings = await getInstanceSettings();
+
+	// 3. S'assurer que le groupe par défaut existe
 	const existingGroups = await db
 		.select({ id: userGroups.id })
 		.from(userGroups)
@@ -38,11 +47,23 @@ export const load: PageServerLoad = async ({ request }) => {
 		.limit(1);
 
 	if (existingGroups.length === 0) {
-		await db.insert(userGroups).values({
-			ownerId: session.user.id,
-			name: 'Amis proches',
-			color: '#10b981'
-		});
+		const defaultGroups =
+			settings.contentDefaults.defaultGroups && settings.contentDefaults.defaultGroups.length > 0
+				? settings.contentDefaults.defaultGroups
+				: [
+						{
+							name: settings.contentDefaults.defaultGroupName || 'Amis proches',
+							color: settings.contentDefaults.defaultGroupColor || '#10b981'
+						}
+					];
+
+		await db.insert(userGroups).values(
+			defaultGroups.map((g) => ({
+				ownerId: session.user.id,
+				name: g.name,
+				color: g.color || '#10b981'
+			}))
+		);
 	}
 
 	const myGroups: UserGroup[] = await db
@@ -66,7 +87,11 @@ export const load: PageServerLoad = async ({ request }) => {
 	);
 
 	// 5. Récupérer les tags populaires pour les suggestions
-	const trendingTags = await getTrendingTags(10, 7, session.user.id);
+	const trendingTags = await getTrendingTags(
+		settings.performanceSettings.trendingTagsLimit,
+		7,
+		session.user.id
+	);
 
 	return {
 		sessionUser: dbUser as User,
@@ -168,9 +193,11 @@ export const actions: Actions = {
 				allowMentions: currentUser?.profileVisibility?.allowMentions ?? true
 			};
 
+			const settings = await getInstanceSettings();
+
 			// TRANSACTION GLOBALE
 			await db.transaction(async (tx) => {
-				// A. S'assurer que le groupe par défaut existe
+				// A. S'assurer que les groupes par défaut existent
 				const [existingGroup] = await tx
 					.select({ id: userGroups.id })
 					.from(userGroups)
@@ -178,11 +205,24 @@ export const actions: Actions = {
 					.limit(1);
 
 				if (!existingGroup) {
-					await tx.insert(userGroups).values({
-						ownerId: session.user.id,
-						name: 'Amis proches',
-						color: '#10b981'
-					});
+					const defaultGroups =
+						settings.contentDefaults.defaultGroups &&
+						settings.contentDefaults.defaultGroups.length > 0
+							? settings.contentDefaults.defaultGroups
+							: [
+									{
+										name: settings.contentDefaults.defaultGroupName || 'Amis proches',
+										color: settings.contentDefaults.defaultGroupColor || '#10b981'
+									}
+								];
+
+					await tx.insert(userGroups).values(
+						defaultGroups.map((g) => ({
+							ownerId: session.user.id,
+							name: g.name,
+							color: g.color || '#10b981'
+						}))
+					);
 				}
 
 				// B. S'assurer qu'un flux existe et récupérer le flux actif
@@ -193,14 +233,35 @@ export const actions: Actions = {
 					.where(eq(userFeeds.userId, session.user.id));
 
 				if (existingFeeds.length === 0) {
-					const [defaultFeed] = await tx
+					const defaultFeeds: DefaultFeedConfig[] =
+						settings.contentDefaults.defaultFeeds &&
+						settings.contentDefaults.defaultFeeds.length > 0
+							? settings.contentDefaults.defaultFeeds
+							: [
+									{
+										name: 'Chronologique',
+										source: 'public',
+										sortMode: 'chrono',
+										timeWindow: '7d'
+									}
+								];
+
+					const inserted = await tx
 						.insert(userFeeds)
-						.values({
-							userId: session.user.id,
-							...DEFAULT_FEED_CONFIG
-						})
+						.values(
+							defaultFeeds.map((feed) => ({
+								userId: session.user.id,
+								name: feed.name,
+								source: (feed.source as FeedSource) || 'public',
+								sortMode: (feed.sortMode as FeedSortMode) || 'chrono',
+								timeWindow: (feed.timeWindow as FeedTimeWindow) || '7d',
+								icon: feed.icon || null,
+								hideSeen: false,
+								showStories: true
+							}))
+						)
 						.returning();
-					activeFeedId = defaultFeed.id;
+					activeFeedId = inserted[0]?.id;
 				} else if (!activeFeedId || !existingFeeds.some((f) => f.id === activeFeedId)) {
 					activeFeedId = existingFeeds[0].id;
 				}

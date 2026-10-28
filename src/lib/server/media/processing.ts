@@ -4,7 +4,8 @@ import crypto from 'node:crypto';
 import { spawn } from 'node:child_process';
 import sharp from 'sharp';
 import type { CarouselItem } from '$lib/types';
-import { MAX_MEDIA_SIZE_BYTES } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
+import { formatBytes } from '$lib/utils/format';
 import { UPLOAD_DIR } from './config';
 
 /**
@@ -107,8 +108,12 @@ export function extractVideoPoster(inputPath: string, outputPath: string): Promi
  * et compresse les vidéos en MP4 optimisé.
  */
 export async function saveUploadedFile(file: File): Promise<CarouselItem> {
-	if (file.size > MAX_MEDIA_SIZE_BYTES) {
-		throw new Error('Fichier trop volumineux');
+	const settings = await getInstanceSettings();
+	const maxMediaSizeMb = settings.mediaSettings.maxMediaSizeMb;
+	const maxBytes = maxMediaSizeMb * 1024 * 1024;
+	const rawSafetyBytes = Math.max(maxBytes * 5, 200 * 1024 * 1024);
+	if (file.size > rawSafetyBytes) {
+		throw new Error('Fichier brut trop volumineux');
 	}
 	await fs.mkdir(UPLOAD_DIR, { recursive: true });
 
@@ -141,6 +146,15 @@ export async function saveUploadedFile(file: File): Promise<CarouselItem> {
 			await fs.unlink(tempFilePath).catch(() => {});
 		}
 
+		const s = await fs.stat(finalFilePath);
+		if (s.size > maxBytes) {
+			await fs.unlink(finalFilePath).catch(() => {});
+			await fs.unlink(posterFilePath).catch(() => {});
+			throw new Error(
+				`Le fichier compressé (${formatBytes(s.size)}) dépasse la limite de ${maxMediaSizeMb} Mo.`
+			);
+		}
+
 		return {
 			type: 'video',
 			content: `/media/${finalFilename}`,
@@ -149,6 +163,11 @@ export async function saveUploadedFile(file: File): Promise<CarouselItem> {
 	} else {
 		const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
 		if (isSvg) {
+			if (buffer.length > maxBytes) {
+				throw new Error(
+					`Le fichier (${formatBytes(buffer.length)}) dépasse la limite de ${maxMediaSizeMb} Mo.`
+				);
+			}
 			const filename = `${id}.svg`;
 			const filePath = path.join(UPLOAD_DIR, filename);
 			await fs.writeFile(filePath, buffer);
@@ -168,6 +187,14 @@ export async function saveUploadedFile(file: File): Promise<CarouselItem> {
 			.webp({ quality: 80 }) // Qualité à 80% (très léger, invisible à l'oeil nu)
 			.toFile(filePath);
 
+		const s = await fs.stat(filePath);
+		if (s.size > maxBytes) {
+			await fs.unlink(filePath).catch(() => {});
+			throw new Error(
+				`Le fichier compressé (${formatBytes(s.size)}) dépasse la limite de ${maxMediaSizeMb} Mo.`
+			);
+		}
+
 		return { type: 'image', content: `/media/${filename}` };
 	}
 }
@@ -185,8 +212,12 @@ export interface SavedMediaFile {
  * et les autres fichiers conservent leur extension sûre.
  */
 export async function saveChatFile(file: File): Promise<SavedMediaFile> {
-	if (file.size > MAX_MEDIA_SIZE_BYTES) {
-		throw new Error('Fichier trop volumineux');
+	const settings = await getInstanceSettings();
+	const maxMediaSizeMb = settings.mediaSettings.maxMediaSizeMb;
+	const maxBytes = maxMediaSizeMb * 1024 * 1024;
+	const rawSafetyBytes = Math.max(maxBytes * 5, 200 * 1024 * 1024);
+	if (file.size > rawSafetyBytes) {
+		throw new Error('Fichier brut trop volumineux');
 	}
 	await fs.mkdir(UPLOAD_DIR, { recursive: true });
 
@@ -210,6 +241,12 @@ export async function saveChatFile(file: File): Promise<SavedMediaFile> {
 		}
 
 		const s = await fs.stat(finalFilePath);
+		if (s.size > maxBytes) {
+			await fs.unlink(finalFilePath).catch(() => {});
+			throw new Error(
+				`Le fichier compressé (${formatBytes(s.size)}) dépasse la limite de ${maxMediaSizeMb} Mo.`
+			);
+		}
 		return {
 			type: 'video',
 			content: `/media/${finalFilename}`,
@@ -219,6 +256,11 @@ export async function saveChatFile(file: File): Promise<SavedMediaFile> {
 	} else if (isImage) {
 		const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
 		if (isSvg) {
+			if (buffer.length > maxBytes) {
+				throw new Error(
+					`Le fichier (${formatBytes(buffer.length)}) dépasse la limite de ${maxMediaSizeMb} Mo.`
+				);
+			}
 			const finalFilename = `${id}.svg`;
 			const filePath = path.join(UPLOAD_DIR, finalFilename);
 			await fs.writeFile(filePath, buffer);
@@ -243,6 +285,12 @@ export async function saveChatFile(file: File): Promise<SavedMediaFile> {
 			.toFile(filePath);
 
 		const s = await fs.stat(filePath);
+		if (s.size > maxBytes) {
+			await fs.unlink(filePath).catch(() => {});
+			throw new Error(
+				`Le fichier compressé (${formatBytes(s.size)}) dépasse la limite de ${maxMediaSizeMb} Mo.`
+			);
+		}
 		return {
 			type: 'image',
 			content: `/media/${finalFilename}`,
@@ -250,6 +298,11 @@ export async function saveChatFile(file: File): Promise<SavedMediaFile> {
 			size: s.size
 		};
 	} else if (isAudio) {
+		if (buffer.length > maxBytes) {
+			throw new Error(
+				`Le fichier (${formatBytes(buffer.length)}) dépasse la limite de ${maxMediaSizeMb} Mo.`
+			);
+		}
 		// Enregistrement / message vocal ou fichier audio
 		const rawExt = path.extname(file.name) || '.webm';
 		const safeExt = rawExt.toLowerCase().slice(0, 10);
@@ -265,6 +318,11 @@ export async function saveChatFile(file: File): Promise<SavedMediaFile> {
 			size: s.size
 		};
 	} else {
+		if (buffer.length > maxBytes) {
+			throw new Error(
+				`Le fichier (${formatBytes(buffer.length)}) dépasse la limite de ${maxMediaSizeMb} Mo.`
+			);
+		}
 		// Fichier brut (PDF, zip, doc, txt, etc.)
 		const rawExt = path.extname(file.name) || '';
 		const safeExt = rawExt.toLowerCase().slice(0, 10);

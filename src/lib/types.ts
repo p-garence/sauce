@@ -403,3 +403,85 @@ export type UserFeed = {
 	createdAt: Date | string;
 	updatedAt: Date | string;
 };
+
+// ==========================================
+// CONFIGURATION DYNAMIQUE DE L'INSTANCE
+// ==========================================
+
+export interface InstancePerformanceSettings {
+	postsPerScroll: number;
+	postsPerGrid: number;
+	trendingTagsLimit: number;
+	messagesPerChat: number;
+	notificationsPerLoad: number;
+	commentsPerLoad: number;
+	usersPerPage: number;
+	maxPostsPerRequest: number;
+	maxCommentsPerRequest: number;
+	maxCommentLength: number;
+	maxUsersSearchLimit: number;
+	adminItemsPerPage: number;
+}
+
+export interface InstancePrivacySettings {
+	isPublicInstance: boolean;
+	defaultPostVisibility: 'public' | 'followers' | 'group' | 'private' | 'network';
+	defaultStoryVisibility: 'public' | 'followers' | 'group' | 'private' | 'network';
+	defaultRequireFollowRequest: boolean;
+	defaultRequireMessageApproval: boolean;
+	defaultShowFollowers: boolean;
+	defaultShowFollowing: boolean;
+}
+
+export interface InstanceMediaSettings {
+	maxMediaSizeMb: number;
+	defaultStorageQuotaBytes: number;
+	orphanGracePeriodHours: number;
+	storyDurationHours: number;
+}
+
+export interface DefaultGroupConfig {
+	name: string;
+	color: string;
+}
+
+export interface DefaultFeedConfig {
+	name: string;
+	source: FeedSource;
+	sortMode: FeedSortMode;
+	timeWindow: FeedTimeWindow;
+	icon?: string;
+}
+
+export interface InstanceContentDefaults {
+	defaultGroups: DefaultGroupConfig[];
+	defaultFeeds: DefaultFeedConfig[];
+	defaultMaxInvites: number;
+	// Rétrocompatibilité
+	defaultGroupName?: string;
+	defaultGroupColor?: string;
+	defaultFeedConfig?: Record<string, unknown>;
+}
+
+export interface InstanceGeneralSettings {
+	instanceName: string;
+	instanceDescription: string;
+	maintenanceMode: boolean;
+}
+
+export interface InstanceSettingsData {
+	id: string;
+	allowedBuiltinIconPacks: string[];
+	allowedCustomIconSetIds: string[];
+	allowedCustomIconSets?: IconSet[];
+	defaultIconPack: string;
+	defaultIconSetId: string | null;
+	defaultIconSet?: IconSet | null;
+	defaultEmojiSetIds: string[];
+	defaultEmojiSets?: EmojiSet[];
+	performanceSettings: InstancePerformanceSettings;
+	privacySettings: InstancePrivacySettings;
+	mediaSettings: InstanceMediaSettings;
+	contentDefaults: InstanceContentDefaults;
+	generalSettings: InstanceGeneralSettings;
+}

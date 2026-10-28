@@ -4,7 +4,7 @@ import { publishPost } from '$lib/server/posts';
 import type { PostVisibility } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 import { getTrendingTags } from '$lib/server/tags';
-import { TRENDING_TAGS_LIMIT } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import { db } from '$lib/server/db';
 import { iconSets, emojiSets } from '$lib/server/db/schema';
 import { and, eq } from 'drizzle-orm';
@@ -12,7 +12,12 @@ import { parseTagsInput } from '$lib/utils/validation';
 
 export const load: PageServerLoad = async ({ parent, url }) => {
 	const { sessionUser } = await parent();
-	const trendingTags = await getTrendingTags(TRENDING_TAGS_LIMIT, 7, sessionUser.id);
+	const settings = await getInstanceSettings();
+	const trendingTags = await getTrendingTags(
+		settings.performanceSettings.trendingTagsLimit,
+		7,
+		sessionUser.id
+	);
 
 	const initialIconSetId = url.searchParams.get('iconSetId');
 	const initialEmojiSetId = url.searchParams.get('emojiSetId');

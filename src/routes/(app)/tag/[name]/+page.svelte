@@ -5,10 +5,11 @@
 	import { SvelteURLSearchParams, SvelteDate } from 'svelte/reactivity';
 	import PageHeader from '$lib/components/navigation/PageHeader.svelte';
 	import PostGrid from '$lib/components/post/PostGrid.svelte';
-	import { POSTS_PER_GRID } from '$lib/constants';
 	import type { PostData, PostSortMode, SerializedPost } from '$lib/types';
 
 	let { data } = $props();
+
+	let postsPerGrid = $derived(data.instanceSettings?.performanceSettings?.postsPerGrid || 6);
 
 	let sortMode = $state<PostSortMode>('chrono');
 	let posts = $state<PostData[]>([]);
@@ -37,7 +38,7 @@
 		try {
 			isLoadingMore = true;
 			const res = await fetch(
-				`/api/tag-posts?tag=${encodeURIComponent(data.tagName)}&sort=${newSort}&numberOfPost=${POSTS_PER_GRID}`
+				`/api/tag-posts?tag=${encodeURIComponent(data.tagName)}&sort=${newSort}&numberOfPost=${postsPerGrid}`
 			);
 			if (res.ok) {
 				const json = await res.json();
@@ -60,7 +61,7 @@
 
 		try {
 			const res = await fetch(
-				`/api/tag-posts?tag=${encodeURIComponent(data.tagName)}&sort=${sortMode}&cursor=${encodeURIComponent(nextCursor)}&numberOfPost=${POSTS_PER_GRID}`
+				`/api/tag-posts?tag=${encodeURIComponent(data.tagName)}&sort=${sortMode}&cursor=${encodeURIComponent(nextCursor)}&numberOfPost=${postsPerGrid}`
 			);
 			if (res.ok) {
 				const json = await res.json();

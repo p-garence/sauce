@@ -15,7 +15,7 @@ import { ensureSystemUser } from '$lib/server/admin';
 import type { PageServerLoad } from './$types';
 import type { PostData } from '$lib/types';
 import type { CursorData } from '$lib/server/cursor';
-import { POSTS_PER_GRID } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { PostSortMode } from '$lib/types';
 
 export const load: PageServerLoad = async ({ params, url, parent }) => {
@@ -55,12 +55,13 @@ export const load: PageServerLoad = async ({ params, url, parent }) => {
 	};
 
 	const sanitizedProfile = sanitizeUserForViewer(profileUser, currentUser.id);
+	const settings = await getInstanceSettings();
 
 	// 2. On récupère les publications classiques
 	const postsResult = await getProfilePosts(
 		currentUser.id,
 		profileUser.id,
-		POSTS_PER_GRID,
+		settings.performanceSettings.postsPerGrid,
 		null,
 		sortMode
 	);
@@ -72,7 +73,11 @@ export const load: PageServerLoad = async ({ params, url, parent }) => {
 	};
 
 	if (isOwnProfile) {
-		likedPostsResult = await getLikedPosts(currentUser.id, profileUser.id, POSTS_PER_GRID);
+		likedPostsResult = await getLikedPosts(
+			currentUser.id,
+			profileUser.id,
+			settings.performanceSettings.postsPerGrid
+		);
 	}
 
 	let pendingCount = 0;

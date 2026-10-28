@@ -11,6 +11,7 @@
 -->
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { page } from '$app/state';
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import { formatBytes } from '$lib/utils/format';
 	import type { UserMediaStoryItem } from '$lib/server/media';
@@ -40,6 +41,9 @@
 
 	let { story, userGroups, onClose, onSaved }: Props = $props();
 
+	let isPublicInstance = $derived(
+		page.data.instanceSettings?.privacySettings?.isPublicInstance !== false
+	);
 	let editStoryVisComposite = $state(
 		untrack(() =>
 			story.visibility === 'group' && story.groupId
@@ -184,7 +188,11 @@
 						}
 					}}
 				>
-					<option value="public">Public (Tout le monde)</option>
+					{#if isPublicInstance}
+						<option value="public">Public (Tout le monde)</option>
+					{:else if story.visibility === 'public'}
+						<option value="public" disabled>Public (restreint par l'instance)</option>
+					{/if}
 					<option value="network">Réseau (Réseau et abonnés)</option>
 					<option value="followers">Abonné(e)s uniquement</option>
 					<option value="private">Moi uniquement (Privé)</option>

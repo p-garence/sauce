@@ -4,6 +4,7 @@ import { user } from '$lib/server/db/schema';
 import { count, ne } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
 import { SYSTEM_USER_ID } from '$lib/server/admin';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
@@ -39,10 +40,21 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 		throw redirect(302, '/flux');
 	}
 
-	const publicRoutes = ['/', '/calendrier', '/login', '/admin-setup'];
-	const isPublicPostRoute = url.pathname.startsWith('/post/');
-	if (!sessionUser && !isPublicPostRoute && !publicRoutes.some((route) => url.pathname === route)) {
-		throw redirect(302, '/');
+	const instanceSettingsData = await getInstanceSettings();
+	const isPrivateInstance = !instanceSettingsData.privacySettings.isPublicInstance;
+
+	if (!sessionUser) {
+		if (isPrivateInstance) {
+			if (url.pathname !== '/login' && url.pathname !== '/admin-setup') {
+				throw redirect(302, '/login');
+			}
+		} else {
+			const publicRoutes = ['/', '/calendrier', '/login', '/admin-setup'];
+			const isPublicPostRoute = url.pathname.startsWith('/post/');
+			if (!isPublicPostRoute && !publicRoutes.some((route) => url.pathname === route)) {
+				throw redirect(302, '/');
+			}
+		}
 	}
 
 	const session =
@@ -57,5 +69,5 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 				}
 			: null;
 
-	return { session };
+	return { session, instanceSettings: instanceSettingsData };
 };

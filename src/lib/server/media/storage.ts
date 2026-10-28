@@ -4,7 +4,7 @@ import { db } from '$lib/server/db';
 import { user, posts, stories, messages, iconSets, emojiSets } from '$lib/server/db/schema';
 import { eq, isNotNull, and } from 'drizzle-orm';
 import type { CarouselItem } from '$lib/types';
-import { DEFAULT_STORAGE_QUOTA_BYTES } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import { UPLOAD_DIR } from './config';
 import { getMediaFileSize } from './processing';
 
@@ -136,7 +136,9 @@ export async function getUserMediaUsage(userId: string): Promise<UserMediaUsage>
 		where: eq(user.id, userId),
 		columns: { storageQuotaBytes: true }
 	});
-	const quotaBytes = currentUser?.storageQuotaBytes ?? DEFAULT_STORAGE_QUOTA_BYTES;
+	const settings = await getInstanceSettings();
+	const quotaBytes =
+		currentUser?.storageQuotaBytes ?? settings.mediaSettings.defaultStorageQuotaBytes;
 
 	const userPosts = await db.query.posts.findMany({
 		where: eq(posts.authorId, userId),

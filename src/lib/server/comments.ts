@@ -5,12 +5,8 @@ import { eq, desc, asc, sql, isNull, and, or } from 'drizzle-orm';
 import { sendNotification } from '$lib/server/notifications';
 import { notifyMentions } from '$lib/server/mentions';
 import { assertCanSeePost, notBlockedSql, isValidUuid } from '$lib/server/permissions';
-import {
-	COMMENTS_PER_LOAD,
-	MAX_COMMENTS_PER_REQUEST,
-	MAX_COMMENT_LENGTH,
-	clampLimit
-} from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
+import { clampLimit } from '$lib/constants';
 import type { NotificationPayload } from '$lib/types';
 
 export interface CommentFetchOptions {
@@ -24,7 +20,12 @@ export interface CommentFetchOptions {
 
 export async function getComments(options: CommentFetchOptions) {
 	const { postId, viewerId, parentId, sort = 'newest' } = options;
-	const safeLimit = clampLimit(options.limit, COMMENTS_PER_LOAD, MAX_COMMENTS_PER_REQUEST);
+	const settings = await getInstanceSettings();
+	const safeLimit = clampLimit(
+		options.limit,
+		settings.performanceSettings.commentsPerLoad,
+		settings.performanceSettings.maxCommentsPerRequest
+	);
 	const safePage = Math.max(1, Math.floor(Number(options.page) || 1));
 	const offset = (safePage - 1) * safeLimit;
 
@@ -127,8 +128,12 @@ export async function createComment(params: {
 	if (!trimmed) {
 		throw error(400, 'Le commentaire ne peut pas être vide.');
 	}
-	if (trimmed.length > MAX_COMMENT_LENGTH) {
-		throw error(400, `Le commentaire ne peut pas dépasser ${MAX_COMMENT_LENGTH} caractères.`);
+	const settings = await getInstanceSettings();
+	if (trimmed.length > settings.performanceSettings.maxCommentLength) {
+		throw error(
+			400,
+			`Le commentaire ne peut pas dépasser ${settings.performanceSettings.maxCommentLength} caractères.`
+		);
 	}
 
 	// SÉCURITÉ : Vérifier que l'auteur du commentaire a accès à la publication
@@ -309,8 +314,12 @@ export async function updateComment(params: {
 	if (!trimmed) {
 		throw error(400, 'Le commentaire ne peut pas être vide.');
 	}
-	if (trimmed.length > MAX_COMMENT_LENGTH) {
-		throw error(400, `Le commentaire ne peut pas dépasser ${MAX_COMMENT_LENGTH} caractères.`);
+	const settings = await getInstanceSettings();
+	if (trimmed.length > settings.performanceSettings.maxCommentLength) {
+		throw error(
+			400,
+			`Le commentaire ne peut pas dépasser ${settings.performanceSettings.maxCommentLength} caractères.`
+		);
 	}
 
 	const existing = await db.query.comments.findFirst({

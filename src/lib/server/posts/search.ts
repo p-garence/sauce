@@ -2,7 +2,7 @@ import { and, sql, eq, or, desc, ilike, lt, type SQL } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { posts, postLikes, hiddenPosts, user, follows } from '$lib/server/db/schema';
 import type { PostData } from '$lib/types';
-import { POSTS_PER_GRID } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { CursorData } from '../cursor';
 import { getTagsForPosts } from '$lib/server/tags';
 import { canSeePost, notHidden, formatPosts } from './helpers';
@@ -27,9 +27,11 @@ export async function searchPosts(
 	viewerId: string,
 	query: string,
 	sortMode: 'chrono' | 'popular' | 'popular_week',
-	limitCount = POSTS_PER_GRID,
+	limitCount?: number,
 	cursor?: CursorData | null
 ): Promise<{ posts: PostData[]; nextCursor: CursorData | null }> {
+	const settings = await getInstanceSettings();
+	const effectiveLimit = limitCount ?? settings.performanceSettings.postsPerGrid;
 	const hasQuery = Boolean(query && query.trim());
 	const isFollowingAuthor = sql`EXISTS(SELECT 1 FROM ${follows} f WHERE f.follower_id = ${viewerId} AND f.following_id = ${posts.authorId} AND f.status = 'accepted')`;
 	const isFollowerAuthor = sql`EXISTS(SELECT 1 FROM ${follows} f WHERE f.follower_id = ${posts.authorId} AND f.following_id = ${viewerId} AND f.status = 'accepted')`;
@@ -171,7 +173,7 @@ export async function searchPosts(
 		.innerJoin(user, eq(posts.authorId, user.id))
 		.where(and(...conditions))
 		.orderBy(...orderByClause)
-		.limit(limitCount);
+		.limit(effectiveLimit);
 
 	const flatRows = rows.map((row) => ({
 		...row.post,
@@ -186,7 +188,7 @@ export async function searchPosts(
 	const formattedPosts = formatPosts(flatRows as DbPostRow[], tagsMap);
 
 	let nextCursor: CursorData | null = null;
-	if (formattedPosts.length === limitCount) {
+	if (formattedPosts.length === effectiveLimit) {
 		const lastRow = rows[rows.length - 1];
 		const lastDate =
 			lastRow.post.createdAt instanceof Date

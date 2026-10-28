@@ -159,9 +159,10 @@ export const roadmapData: RoadmapCategory[] = [
 			},
 			{ title: 'Systeme de notification serveur ', status: 'done' },
 			{ title: 'Systeme de report', status: 'todo' },
-			{ title: 'Changement des constante serveur ', status: 'todo' },
+			{ title: 'Changement des constante serveur ', status: 'done' },
 			{ title: 'System de permissions modérateur / admin', status: 'todo' },
-			{ title: 'Systeme de Sauvegardes', status: 'todo' },
+			{ title: 'Systeme de Sauvegardes', status: 'done' },
+			{ title: 'Systeme de Mise à jour', status: 'todo' },
 			{ title: 'Interface', status: 'done' }
 		]
 	},

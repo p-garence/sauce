@@ -14,6 +14,7 @@
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import type { UserGroup } from '$lib/types';
 
 	/**
@@ -26,6 +27,9 @@
 
 	let { userGroups = [] }: Props = $props();
 
+	let isPublicInstance = $derived(
+		page.data.instanceSettings?.privacySettings?.isPublicInstance !== false
+	);
 	let selectedVisibility = $state<string>('followers');
 	let updatePosts = $state(true);
 	let updateStories = $state(true);
@@ -73,7 +77,9 @@
 						}
 					}}
 				>
-					<option value="public">Public (Tout le monde)</option>
+					{#if isPublicInstance}
+						<option value="public">Public (Tout le monde)</option>
+					{/if}
 					<option value="network">Réseau (Réseau et abonnés)</option>
 					<option value="followers">Abonné(e)s uniquement</option>
 					<option value="private">Moi uniquement (Privé)</option>

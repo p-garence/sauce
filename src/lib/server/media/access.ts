@@ -18,6 +18,7 @@ import {
 } from '$lib/server/db/schema';
 import { sql, eq, and, or, inArray } from 'drizzle-orm';
 import { canSeePostSql, canSeeStorySql } from '$lib/server/permissions';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 
 /**
  * Résultat du contrôle d'accès à un fichier média.
@@ -32,12 +33,13 @@ export interface MediaAccessResult {
  * Lève une exception HttpError (401 si non authentifié alors que requis, 403 si interdit).
  *
  * Règles appliquées :
- * - Avatars d'utilisateurs : Publics.
+ * - Instance privée : Accès strictement réservé aux utilisateurs connectés.
+ * - Avatars d'utilisateurs : Publics (ou réseau si instance privée).
  * - Pièces jointes de chat : Privées, réservées aux participants de la conversation.
  * - Publications : Selon la visibilité du post (public, followers, réseau, groupe, privé).
  * - Stories : Selon la visibilité de la story ou si référencée dans une réponse de chat.
  * - Packs d'icônes / émojis : Publics si publiés ou packs par défaut, sinon réservés au créateur ou utilisateur l'ayant enregistré.
- * - Brouillons / nouveaux uploads : Fenêtre de grâce de 2h réservée aux utilisateurs connectés.
+ * - Brouillons / nouveaux uploads : Fenêtre de grâce configurée réservée aux utilisateurs connectés.
  *
  * @param filename Nom de base du fichier nettoyé (ex: `uuid.webp`)
  * @param viewerId Identifiant de l'utilisateur connecté ou `null` si visiteur anonyme
@@ -49,6 +51,13 @@ export async function canAccessMediaFile(
 	viewerId: string | null,
 	fileMtimeMs: number
 ): Promise<MediaAccessResult> {
+	const settings = await getInstanceSettings();
+	const isPublicInstance = settings.privacySettings.isPublicInstance !== false;
+
+	if (!isPublicInstance && !viewerId) {
+		throw error(401, 'Non autorisé. Cette instance est privée.');
+	}
+
 	const mediaUrl = `/media/${filename}`;
 
 	// A0. Vérification rapide pour les avatars d'utilisateurs (publics par nature)
@@ -267,8 +276,9 @@ export async function canAccessMediaFile(
 				}
 			} else {
 				// E. Politique Fail-Close : fichier non rattaché en BDD.
-				// Autorisé uniquement pour un utilisateur connecté pendant la fenêtre de brouillon (< 2h).
-				const isRecentUpload = Date.now() - fileMtimeMs < 2 * 60 * 60 * 1000;
+				// Autorisé uniquement pour un utilisateur connecté pendant la fenêtre de brouillon.
+				const graceHours = settings.mediaSettings.orphanGracePeriodHours || 2;
+				const isRecentUpload = Date.now() - fileMtimeMs < graceHours * 60 * 60 * 1000;
 				if (!viewerId || !isRecentUpload) {
 					throw error(403, "Vous n'avez pas accès à ce média.");
 				}
@@ -277,7 +287,9 @@ export async function canAccessMediaFile(
 	}
 
 	const isPublicImmutable =
-		(isAvatar || isPublicPost || isPublicStory || isPublicAsset) && !isChatAttachment;
+		isPublicInstance &&
+		(isAvatar || isPublicPost || isPublicStory || isPublicAsset) &&
+		!isChatAttachment;
 
 	return { isPublicImmutable };
 }

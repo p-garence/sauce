@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import { getFilteredPosts } from '$lib/server/posts';
 import { getUserFeeds } from '$lib/server/flux';
-import { POSTS_PER_SCROLL } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import { encodeCursor } from '$lib/server/cursor';
 import type { PageServerLoad } from './$types';
 
@@ -18,7 +18,12 @@ export const load: PageServerLoad = async ({ parent }) => {
 	);
 
 	// 3. Récupération des posts
-	const result = await getFilteredPosts(userId, activeFeedId, POSTS_PER_SCROLL);
+	const settings = await getInstanceSettings();
+	const result = await getFilteredPosts(
+		userId,
+		activeFeedId,
+		settings.performanceSettings.postsPerScroll
+	);
 
 	return {
 		myFeeds,

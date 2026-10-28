@@ -4,7 +4,7 @@ import { db } from '$lib/server/db';
 import { posts, iconSets, emojiSets } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { getTagsForPosts, getTrendingTags } from '$lib/server/tags';
-import { TRENDING_TAGS_LIMIT } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { PageServerLoad, Actions } from './$types';
 import type { CarouselItem } from '$lib/types';
 import { isValidUuid, parseTagsInput } from '$lib/utils/validation';
@@ -51,7 +51,12 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 	if (post.authorId !== sessionUser.id) throw error(403, 'Accès refusé');
 
 	const tagsMap = await getTagsForPosts([post.id]);
-	const trendingTags = await getTrendingTags(TRENDING_TAGS_LIMIT, 7, sessionUser.id);
+	const settings = await getInstanceSettings();
+	const trendingTags = await getTrendingTags(
+		settings.performanceSettings.trendingTagsLimit,
+		7,
+		sessionUser.id
+	);
 
 	return {
 		post: {
@@ -69,7 +74,8 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 		},
 		trendingTags,
 		userOwnedIconSets,
-		userOwnedEmojiSets
+		userOwnedEmojiSets,
+		instanceSettings: settings
 	};
 };
 

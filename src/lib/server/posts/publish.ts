@@ -12,8 +12,10 @@ import {
 	deleteMediaFiles,
 	diffRemovedMedia,
 	getUserMediaUsage,
+	getMediaFileSize,
 	formatBytes
 } from '$lib/server/media';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import { syncPostTags, extractTags } from '$lib/server/tags';
 import { notifyMentions } from '$lib/server/mentions';
 import { createPost } from './crud';
@@ -49,7 +51,7 @@ export async function publishPost(input: PublishPostInput) {
 		authorId,
 		caption,
 		explicitTags,
-		visibility,
+		visibility: rawVisibility,
 		groupId,
 		layout,
 		files,
@@ -58,9 +60,17 @@ export async function publishPost(input: PublishPostInput) {
 	} = input;
 
 	const validStandardVisibilities = ['public', 'followers', 'group', 'private', 'network'];
-	if (!validStandardVisibilities.includes(visibility)) {
+	if (!validStandardVisibilities.includes(rawVisibility)) {
 		throw new Error('Problème avec la visibilité');
 	}
+
+	const settings = await getInstanceSettings();
+	const visibility: PostVisibility =
+		!settings.privacySettings.isPublicInstance && rawVisibility === 'public'
+			? settings.privacySettings.defaultPostVisibility !== 'public'
+				? settings.privacySettings.defaultPostVisibility
+				: 'followers'
+			: rawVisibility;
 
 	if (visibility === 'group') {
 		if (!groupId) {
@@ -96,17 +106,17 @@ export async function publishPost(input: PublishPostInput) {
 		}
 	}
 
-	// Vérification du quota utilisateur
-	const incomingSize = files.reduce((acc, f) => acc + (f.size || 0), 0);
-	const usage = await getUserMediaUsage(authorId);
-	if (usage.totalBytes + incomingSize > usage.quotaBytes) {
-		const remaining = Math.max(0, usage.quotaBytes - usage.totalBytes);
-		throw new Error(`Quota de stockage dépassé. Espace restant : ${formatBytes(remaining)}.`);
+	// Vérification du quota utilisateur (avant / après compression)
+	const hasIncomingFiles = files.some((f) => (f.size || 0) > 0);
+	const usage = hasIncomingFiles ? await getUserMediaUsage(authorId) : null;
+	if (usage && usage.totalBytes >= usage.quotaBytes) {
+		throw new Error('Quota de stockage atteint.');
 	}
 
 	// Reconstruction du carrousel et traitement des médias
 	const finalCarousel: CarouselItem[] = [];
 	let fileIndex = 0;
+	let compressedBatchBytes = 0;
 
 	try {
 		for (const item of layout || []) {
@@ -122,6 +132,16 @@ export async function publishPost(input: PublishPostInput) {
 
 				const saved = await saveUploadedFile(file);
 				finalCarousel.push(saved);
+
+				if (usage) {
+					compressedBatchBytes += await getMediaFileSize(saved.content);
+					if (usage.totalBytes + compressedBatchBytes > usage.quotaBytes) {
+						const remaining = Math.max(0, usage.quotaBytes - usage.totalBytes);
+						throw new Error(
+							`Quota de stockage dépassé après compression. Espace restant : ${formatBytes(remaining)}.`
+						);
+					}
+				}
 			}
 		}
 
@@ -230,10 +250,22 @@ export async function updatePublishedPost(input: UpdatePublishedPostInput) {
 		}
 	}
 
+	const settings = await getInstanceSettings();
 	const validVisibilities = ['public', 'network', 'followers', 'private', 'group'] as const;
-	const visibility = (validVisibilities as readonly string[]).includes(rawVisibility || '')
+	let visibility = (validVisibilities as readonly string[]).includes(rawVisibility || '')
 		? (rawVisibility as 'public' | 'network' | 'followers' | 'private' | 'group')
 		: existingPost.visibility;
+
+	if (
+		!settings.privacySettings.isPublicInstance &&
+		visibility === 'public' &&
+		existingPost.visibility !== 'public'
+	) {
+		visibility =
+			settings.privacySettings.defaultPostVisibility !== 'public'
+				? settings.privacySettings.defaultPostVisibility
+				: 'followers';
+	}
 
 	const resolvedGroupId = rawGroupId?.trim() || existingPost.groupId || null;
 
@@ -250,13 +282,10 @@ export async function updatePublishedPost(input: UpdatePublishedPostInput) {
 	}
 
 	// Vérification quota pour les nouveaux fichiers ajoutés
-	const incomingSize = files.reduce((acc, f) => acc + (f.size || 0), 0);
-	if (incomingSize > 0) {
-		const usage = await getUserMediaUsage(authorId);
-		if (usage.totalBytes + incomingSize > usage.quotaBytes) {
-			const remaining = Math.max(0, usage.quotaBytes - usage.totalBytes);
-			throw new Error(`Quota de stockage dépassé. Espace restant : ${formatBytes(remaining)}.`);
-		}
+	const hasIncomingFiles = files.some((f) => (f.size || 0) > 0);
+	const usage = hasIncomingFiles ? await getUserMediaUsage(authorId) : null;
+	if (usage && usage.totalBytes >= usage.quotaBytes) {
+		throw new Error('Quota de stockage atteint.');
 	}
 
 	// Liste blanche des médias appartenant déjà à ce post
@@ -266,30 +295,48 @@ export async function updatePublishedPost(input: UpdatePublishedPostInput) {
 	);
 
 	const finalCarousel: CarouselItem[] = [];
+	const newlySavedMedia: CarouselItem[] = [];
 	let fileIndex = 0;
+	let compressedBatchBytes = 0;
 
-	for (const item of layout) {
-		if (item.type === 'text') {
-			const textVal = (item.content || item.text || '').trim();
-			if (textVal || (!rawIconSetId && !rawEmojiSetId)) {
-				finalCarousel.push({
-					type: 'text',
-					content: item.content || item.text || '',
-					align: item.align
-				});
-			}
-		} else if (item.content && item.content.startsWith('/media/')) {
-			if (!existingMediaUrls.has(item.content)) {
-				throw new Error('Média existant non autorisé.');
-			}
-			finalCarousel.push({ type: item.type as 'image' | 'video', content: item.content });
-		} else if (item.type === 'media' || !item.content) {
-			const file = files[fileIndex++];
-			if (file && file.size > 0) {
-				const saved = await saveUploadedFile(file);
-				finalCarousel.push(saved);
+	try {
+		for (const item of layout) {
+			if (item.type === 'text') {
+				const textVal = (item.content || item.text || '').trim();
+				if (textVal || (!rawIconSetId && !rawEmojiSetId)) {
+					finalCarousel.push({
+						type: 'text',
+						content: item.content || item.text || '',
+						align: item.align
+					});
+				}
+			} else if (item.content && item.content.startsWith('/media/')) {
+				if (!existingMediaUrls.has(item.content)) {
+					throw new Error('Média existant non autorisé.');
+				}
+				finalCarousel.push({ type: item.type as 'image' | 'video', content: item.content });
+			} else if (item.type === 'media' || !item.content) {
+				const file = files[fileIndex++];
+				if (file && file.size > 0) {
+					const saved = await saveUploadedFile(file);
+					newlySavedMedia.push(saved);
+					finalCarousel.push(saved);
+
+					if (usage) {
+						compressedBatchBytes += await getMediaFileSize(saved.content);
+						if (usage.totalBytes + compressedBatchBytes > usage.quotaBytes) {
+							const remaining = Math.max(0, usage.quotaBytes - usage.totalBytes);
+							throw new Error(
+								`Quota de stockage dépassé après compression. Espace restant : ${formatBytes(remaining)}.`
+							);
+						}
+					}
+				}
 			}
 		}
+	} catch (err) {
+		await deleteMediaFiles(newlySavedMedia);
+		throw err;
 	}
 
 	if (finalCarousel.length === 0 && !rawIconSetId && !rawEmojiSetId) {

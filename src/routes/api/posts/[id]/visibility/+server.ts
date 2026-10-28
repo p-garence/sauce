@@ -3,6 +3,7 @@ import { requireApiSession } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import { posts, userGroups } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { RequestHandler } from './$types';
 
 export const PATCH: RequestHandler = async ({ params, request }) => {
@@ -17,6 +18,19 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 		// 1. Validation de la visibilité
 		const validStandardVisibilities = ['public', 'followers', 'group', 'private', 'network'];
 		let isValid = validStandardVisibilities.includes(visibility);
+
+		if (visibility === 'public') {
+			const settings = await getInstanceSettings();
+			if (!settings.privacySettings.isPublicInstance) {
+				return json(
+					{
+						error:
+							"La visibilité publique n'est pas autorisée lorsque l'instance est en mode privé."
+					},
+					{ status: 400 }
+				);
+			}
+		}
 
 		if (visibility === 'group') {
 			if (!groupId || typeof groupId !== 'string') {

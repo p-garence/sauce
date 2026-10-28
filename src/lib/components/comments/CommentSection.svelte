@@ -11,8 +11,8 @@
 	 */
 
 	import { slide } from 'svelte/transition';
+	import { page } from '$app/state';
 	import type { CommentData } from '$lib/types';
-	import { COMMENTS_PER_LOAD } from '$lib/constants';
 	import CommentItem from '$lib/components/comments/CommentItem.svelte';
 	import CommentComposer from '$lib/components/comments/CommentComposer.svelte';
 
@@ -36,7 +36,7 @@
 	let sortBy = $state<'newest' | 'oldest' | 'top'>('newest');
 	let commentPage = $state(1);
 	let hasMore = $state(false);
-	const LIMIT = COMMENTS_PER_LOAD;
+	let LIMIT = $derived(page.data.instanceSettings?.performanceSettings?.commentsPerLoad || 5);
 
 	let replyTo = $state<{ id: string; username: string } | null>(null);
 	let composerRef = $state<ReturnType<typeof CommentComposer> | null>(null);

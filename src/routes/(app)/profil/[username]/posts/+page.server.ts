@@ -6,7 +6,7 @@ import { user } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { getProfilePosts } from '$lib/server/posts';
 import { encodeCursor } from '$lib/server/cursor';
-import { POSTS_PER_SCROLL } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { PageServerLoad } from './$types';
 import type { PostSortMode } from '$lib/types';
 
@@ -28,11 +28,11 @@ export const load: PageServerLoad = async ({ request, params, url }) => {
 
 	const sortMode = (url.searchParams.get('sort') as PostSortMode) || 'chrono';
 
-	// 👇 On passe sortMode à la fonction
+	const settings = await getInstanceSettings();
 	const result = await getProfilePosts(
 		session.user.id,
 		targetUser.id,
-		POSTS_PER_SCROLL,
+		settings.performanceSettings.postsPerScroll,
 		null,
 		sortMode
 	);

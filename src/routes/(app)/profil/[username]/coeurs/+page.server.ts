@@ -4,7 +4,7 @@ import { user } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { getLikedPosts } from '$lib/server/posts';
 import { encodeCursor } from '$lib/server/cursor';
-import { POSTS_PER_SCROLL } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { PageServerLoad } from './$types';
 import type { PostSortMode } from '$lib/types';
 
@@ -20,7 +20,12 @@ export const load: PageServerLoad = async ({ params, parent, url }) => {
 		throw error(403, 'Accès refusé : les publications aimées sont privées.');
 	}
 
-	const result = await getLikedPosts(sessionUser.id, targetUser.id, POSTS_PER_SCROLL);
+	const settings = await getInstanceSettings();
+	const result = await getLikedPosts(
+		sessionUser.id,
+		targetUser.id,
+		settings.performanceSettings.postsPerScroll
+	);
 
 	const sortMode = (url.searchParams.get('sort') as PostSortMode) || 'chrono';
 

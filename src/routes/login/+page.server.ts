@@ -5,6 +5,8 @@ import { eq, and, isNull, or } from 'drizzle-orm';
 import { redirect, fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
+import { getInstanceSettings } from '$lib/server/instanceSettings';
+
 export const actions: Actions = {
 	// L'inscription via clé d'invitation
 	registerWithKey: async ({ request }) => {
@@ -86,9 +88,29 @@ export const actions: Actions = {
 				return fail(400, { message: "Clé d'invitation invalide ou déjà utilisée." });
 			}
 
+			const settings = await getInstanceSettings();
+			const defaultPrivacy = settings.privacySettings;
+
 			await db
 				.update(user)
-				.set({ invitedById: validKey.createdBy, username: username })
+				.set({
+					invitedById: validKey.createdBy,
+					username: username,
+					maxInvites: settings.contentDefaults.defaultMaxInvites,
+					storageQuotaBytes: settings.mediaSettings.defaultStorageQuotaBytes,
+					profileVisibility: {
+						bio: true,
+						site: false,
+						age: false,
+						genre: false,
+						contactEmail: false,
+						requireFollowRequest: defaultPrivacy.defaultRequireFollowRequest ?? false,
+						requireMessageApproval: defaultPrivacy.defaultRequireMessageApproval ?? false,
+						showFollowers: defaultPrivacy.defaultShowFollowers ?? true,
+						showFollowing: defaultPrivacy.defaultShowFollowing ?? true,
+						allowMentions: true
+					}
+				})
 				.where(eq(user.id, newUser.user.id));
 		} catch (error: unknown) {
 			const err = error as { body?: { message?: string } };

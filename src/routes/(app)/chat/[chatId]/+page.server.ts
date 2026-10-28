@@ -3,7 +3,7 @@ import { requireSession } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import { chatParticipants, messages, notifications } from '$lib/server/db/schema';
 import { eq, and, desc, gt } from 'drizzle-orm';
-import { MESSAGES_PER_CHAT } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { PageServerLoad, Actions } from './$types';
 import {
 	softDeleteChat,
@@ -52,11 +52,13 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 	if (!participation) throw error(403, 'Accès refusé ou conversation introuvable');
 
 	const chat = participation.chat;
+	const settings = await getInstanceSettings();
+	const perChat = settings.performanceSettings.messagesPerChat;
 
 	const chatMessages = await db.query.messages.findMany({
 		where: and(eq(messages.chatId, params.chatId), gt(messages.createdAt, participation.clearedAt)),
 		orderBy: [desc(messages.createdAt)],
-		limit: MESSAGES_PER_CHAT,
+		limit: perChat,
 		with: {
 			sender: { columns: { name: true, username: true, image: true } },
 			reactions: {
@@ -118,7 +120,7 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 		image,
 		messages: formattedMessages,
 		currentUserId,
-		hasMore: chatMessages.length === MESSAGES_PER_CHAT,
+		hasMore: chatMessages.length === perChat,
 		otherUserId,
 		adminOnlyMessaging: chat.adminOnlyMessaging,
 		isAdmin: participation.isAdmin,

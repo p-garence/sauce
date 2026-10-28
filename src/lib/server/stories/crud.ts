@@ -11,9 +11,11 @@ import {
 	saveUploadedFile,
 	deleteMediaFiles,
 	getUserMediaUsage,
+	getMediaFileSize,
 	formatBytes
 } from '$lib/server/media';
 import { assertGroupOwner } from '$lib/server/permissions';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { StoryItem, PostVisibility } from '$lib/types';
 
 /**
@@ -32,28 +34,53 @@ export async function createStory(params: {
 	customHours?: number;
 	isArchived?: boolean;
 }): Promise<StoryItem> {
+	const settings = await getInstanceSettings();
 	const {
 		authorId,
 		file,
 		caption,
-		visibility = 'public',
+		visibility: rawVisibility = settings.privacySettings.defaultStoryVisibility || 'public',
 		groupId,
 		duration = '24h',
 		customHours = 72,
 		isArchived = true
 	} = params;
 
+	const visibility: PostVisibility =
+		!settings.privacySettings.isPublicInstance && rawVisibility === 'public'
+			? settings.privacySettings.defaultStoryVisibility !== 'public'
+				? settings.privacySettings.defaultStoryVisibility
+				: 'followers'
+			: rawVisibility;
+
 	if (visibility === 'group' && groupId) {
 		await assertGroupOwner(authorId, groupId);
 	}
 
 	const usage = await getUserMediaUsage(authorId);
-	if (usage.totalBytes + (file.size || 0) > usage.quotaBytes) {
-		const remaining = Math.max(0, usage.quotaBytes - usage.totalBytes);
-		throw error(413, `Quota de stockage dépassé. Espace restant : ${formatBytes(remaining)}.`);
+	if (usage.totalBytes >= usage.quotaBytes) {
+		throw error(413, 'Quota de stockage atteint.');
 	}
 
-	const saved = await saveUploadedFile(file);
+	let saved;
+	try {
+		saved = await saveUploadedFile(file);
+	} catch (err) {
+		throw error(
+			413,
+			err instanceof Error ? err.message : 'Erreur lors du traitement du fichier média.'
+		);
+	}
+
+	const compressedSize = await getMediaFileSize(saved.content);
+	if (usage.totalBytes + compressedSize > usage.quotaBytes) {
+		await deleteMediaFiles([saved]);
+		const remaining = Math.max(0, usage.quotaBytes - usage.totalBytes);
+		throw error(
+			413,
+			`Quota de stockage dépassé après compression. Espace restant : ${formatBytes(remaining)}.`
+		);
+	}
 
 	let expiresAt: Date;
 	if (duration === 'never') {
@@ -65,8 +92,9 @@ export async function createStory(params: {
 		const hours = Math.max(1, customHours || 72);
 		expiresAt = new Date(Date.now() + hours * 3600 * 1000);
 	} else {
-		// Par défaut 24h
-		expiresAt = new Date(Date.now() + 24 * 3600 * 1000);
+		// Par défaut : durée configurée pour l'instance
+		const defaultHours = settings.mediaSettings.storyDurationHours || 24;
+		expiresAt = new Date(Date.now() + defaultHours * 3600 * 1000);
 	}
 
 	const [created] = await db
@@ -194,9 +222,21 @@ export async function updateStory(
 			return { success: false, message: 'Story introuvable ou non autorisée' };
 		}
 
+		const settings = await getInstanceSettings();
 		const setPayload: Partial<typeof stories.$inferInsert> = {};
 
 		if (updates.visibility !== undefined) {
+			if (
+				!settings.privacySettings.isPublicInstance &&
+				updates.visibility === 'public' &&
+				existing.visibility !== 'public'
+			) {
+				return {
+					success: false,
+					message:
+						"La visibilité publique n'est pas autorisée lorsque l'instance est en mode privé."
+				};
+			}
 			setPayload.visibility = updates.visibility;
 			if (updates.visibility === 'group') {
 				if (updates.groupId) {
@@ -221,7 +261,8 @@ export async function updateStory(
 				const hours = Math.max(1, updates.customHours || 72);
 				setPayload.expiresAt = new Date(Date.now() + hours * 3600 * 1000);
 			} else if (updates.duration === '24h') {
-				setPayload.expiresAt = new Date(Date.now() + 24 * 3600 * 1000);
+				const defaultHours = settings.mediaSettings.storyDurationHours || 24;
+				setPayload.expiresAt = new Date(Date.now() + defaultHours * 3600 * 1000);
 			}
 		} else if (updates.expiresAt) {
 			setPayload.expiresAt = new Date(updates.expiresAt);

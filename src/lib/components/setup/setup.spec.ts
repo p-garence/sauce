@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { DEFAULT_FEED_CONFIG } from '$lib/constants';
+import { DEFAULT_INSTANCE_SETTINGS } from '$lib/server/instanceSettings';
 
 describe("Logique métier de l'onboarding (/setup)", () => {
 	describe('Étape 1 : Validation du Profil', () => {
@@ -70,11 +70,12 @@ describe("Logique métier de l'onboarding (/setup)", () => {
 
 	describe('Étape 3 : Configuration du premier flux par défaut', () => {
 		it('possède les paramètres par défaut conformes pour le flux initial', () => {
-			expect(DEFAULT_FEED_CONFIG.name).toBe('Chronologique');
-			expect(DEFAULT_FEED_CONFIG.source).toBe('public');
-			expect(DEFAULT_FEED_CONFIG.sortMode).toBe('chrono');
-			expect(DEFAULT_FEED_CONFIG.timeWindow).toBe('7d');
-			expect(DEFAULT_FEED_CONFIG.hideSeen).toBe(false);
+			const config = DEFAULT_INSTANCE_SETTINGS.contentDefaults.defaultFeedConfig!;
+			expect(config.name).toBe('Chronologique');
+			expect(config.source).toBe('public');
+			expect(config.sortMode).toBe('chrono');
+			expect(config.timeWindow).toBe('7d');
+			expect(config.hideSeen).toBe(false);
 		});
 	});
 

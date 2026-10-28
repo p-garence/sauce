@@ -1,6 +1,7 @@
 import { db } from '$lib/server/db';
 import { posts, stories, userGroups } from '$lib/server/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { PostVisibility } from '$lib/types';
 
 export interface BulkVisibilityInput {
@@ -19,6 +20,15 @@ export interface BulkVisibilityInput {
  */
 export async function bulkUpdateVisibility(userId: string, input: BulkVisibilityInput) {
 	const { visibility, groupId, updatePosts = true, updateStories = true } = input;
+
+	if (visibility === 'public') {
+		const settings = await getInstanceSettings();
+		if (!settings.privacySettings.isPublicInstance) {
+			throw new Error(
+				"La visibilité publique n'est pas autorisée lorsque l'instance est en mode privé."
+			);
+		}
+	}
 
 	if (visibility === 'group') {
 		if (!groupId) {

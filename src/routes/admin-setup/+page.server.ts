@@ -4,6 +4,7 @@ import { user } from '$lib/server/db/schema';
 import { eq, ne } from 'drizzle-orm';
 import { redirect, fail } from '@sveltejs/kit';
 import { SYSTEM_USER_ID } from '$lib/server/admin';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -48,12 +49,28 @@ export const actions: Actions = {
 			});
 
 			if (newUser && newUser.user) {
-				// 2. On met à jour la DB avec le rôle ET le username.
+				const settings = await getInstanceSettings();
+				const defaultPrivacy = settings.privacySettings;
+				// 2. On met à jour la DB avec le rôle, le username et les quotas par défaut.
 				await db
 					.update(user)
 					.set({
 						role: 'admin',
-						username: username
+						username: username,
+						maxInvites: settings.contentDefaults.defaultMaxInvites,
+						storageQuotaBytes: settings.mediaSettings.defaultStorageQuotaBytes,
+						profileVisibility: {
+							bio: true,
+							site: false,
+							age: false,
+							genre: false,
+							contactEmail: false,
+							requireFollowRequest: defaultPrivacy.defaultRequireFollowRequest ?? false,
+							requireMessageApproval: defaultPrivacy.defaultRequireMessageApproval ?? false,
+							showFollowers: defaultPrivacy.defaultShowFollowers ?? true,
+							showFollowing: defaultPrivacy.defaultShowFollowing ?? true,
+							allowMentions: true
+						}
 					})
 					.where(eq(user.id, newUser.user.id));
 			} else {

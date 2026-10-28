@@ -17,7 +17,6 @@
 	import { mediaEditor } from '$lib/client/mediaEditorState.svelte';
 	import { clearMainFeedState } from '$lib/client/feedMemory.svelte';
 	import { generateId } from '$lib/utils/id';
-	import { MAX_MEDIA_SIZE_BYTES } from '$lib/constants.js';
 	import PageHeader from '$lib/components/navigation/PageHeader.svelte';
 	import MentionSuggestions from '$lib/components/ui/MentionSuggestions.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
@@ -34,7 +33,8 @@
 		EmojiSet,
 		IconSet,
 		PostVisibility,
-		TrendingTagItem
+		TrendingTagItem,
+		InstanceSettingsData
 	} from '$lib/types';
 
 	interface Props {
@@ -51,6 +51,7 @@
 			trendingTags?: TrendingTagItem[];
 			userOwnedIconSets?: IconSet[];
 			userOwnedEmojiSets?: EmojiSet[];
+			instanceSettings?: InstanceSettingsData;
 		};
 		form?: { success?: boolean; message?: string };
 	}
@@ -113,9 +114,11 @@
 		errorMessage = '';
 
 		if (target.files && target.files.length > 0) {
+			const maxMb = data.instanceSettings?.mediaSettings?.maxMediaSizeMb || 1000;
+			const maxBytes = maxMb * 1024 * 1024;
 			const validFiles = Array.from(target.files).filter((file) => {
-				if (file.size > MAX_MEDIA_SIZE_BYTES) {
-					errorMessage = `Le fichier "${file.name}" est trop lourd.`;
+				if (file.size > maxBytes) {
+					errorMessage = `Le fichier "${file.name}" dépasse la taille maximale de ${maxMb} Mo.`;
 					return false;
 				}
 				return true;

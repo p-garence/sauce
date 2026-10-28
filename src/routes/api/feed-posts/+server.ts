@@ -3,17 +3,23 @@ import { requireApiSession } from '$lib/server/auth';
 import { getFilteredPosts } from '$lib/server/posts';
 import { decodeCursor, encodeCursor } from '$lib/server/cursor';
 import type { RequestHandler } from './$types';
-import { POSTS_PER_SCROLL, MAX_POSTS_PER_REQUEST, clampLimit } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
+import { clampLimit } from '$lib/constants';
 
 export const GET: RequestHandler = async ({ request, url }) => {
 	const session = await requireApiSession(request);
+	const settings = await getInstanceSettings();
 
 	// Le front nous envoie un Base64 Opaque, on le décode
 	const cursorStr = url.searchParams.get('cursor');
 	const cursorData = decodeCursor(cursorStr);
 
 	const feedId = url.searchParams.get('feedId');
-	const limit = clampLimit(url.searchParams.get('limit'), POSTS_PER_SCROLL, MAX_POSTS_PER_REQUEST);
+	const limit = clampLimit(
+		url.searchParams.get('limit'),
+		settings.performanceSettings.postsPerScroll,
+		settings.performanceSettings.maxPostsPerRequest
+	);
 	const forceRefresh = url.searchParams.get('refresh') === 'true';
 
 	try {

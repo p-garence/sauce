@@ -37,6 +37,7 @@
 
 	type AdminPath =
 		| '/admin'
+		| '/admin/settings'
 		| '/admin/users'
 		| '/admin/permissions'
 		| '/admin/posts'
@@ -101,8 +102,12 @@
 			]
 		},
 		{
-			title: 'Personnalisation',
+			title: 'Configuration',
 			items: [
+				{
+					href: '/admin/settings',
+					label: 'Paramètres du serveur'
+				},
 				{
 					href: '/admin/appearance',
 					label: 'Apparence et packs'

@@ -11,8 +11,8 @@
 	 */
 
 	import { slide } from 'svelte/transition';
+	import { page } from '$app/state';
 	import type { CommentData } from '$lib/types';
-	import { COMMENTS_PER_LOAD } from '$lib/constants';
 	import CommentBaseItem from '$lib/components/comments/CommentBaseItem.svelte';
 	import CommentReplyItem from '$lib/components/comments/CommentReplyItem.svelte';
 
@@ -36,7 +36,7 @@
 
 	let { comment = $bindable(), postId, onReply, onDeleted, onUpdated }: Props = $props();
 
-	const LIMIT = COMMENTS_PER_LOAD;
+	let LIMIT = $derived(page.data.instanceSettings?.performanceSettings?.commentsPerLoad || 5);
 
 	function handleReplyDeleted(replyId: string, softDeleted?: boolean) {
 		if (!comment.replies) return;

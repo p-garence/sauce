@@ -11,10 +11,10 @@
 	 * - Envoyer les données vers l'API `/api/stories`.
 	 */
 
-	import { onDestroy } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { MAX_MEDIA_SIZE_BYTES } from '$lib/constants';
+	import { page } from '$app/state';
 	import { mediaEditor } from '$lib/client/mediaEditorState.svelte';
 	import { clearMainFeedState } from '$lib/client/feedMemory.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
@@ -30,9 +30,28 @@
 
 	let { onPublished }: Props = $props();
 
+	let isPublicInstance = $derived(
+		page.data.instanceSettings?.privacySettings?.isPublicInstance !== false
+	);
+	let defaultStoryVisibility = $derived<PostVisibility>(
+		!isPublicInstance
+			? (page.data.instanceSettings?.privacySettings?.defaultStoryVisibility === 'public'
+					? 'followers'
+					: page.data.instanceSettings?.privacySettings?.defaultStoryVisibility) || 'followers'
+			: page.data.instanceSettings?.privacySettings?.defaultStoryVisibility || 'public'
+	);
+	let defaultStoryHours = $derived(
+		page.data.instanceSettings?.mediaSettings?.storyDurationHours || 24
+	);
+
 	let storyMedia = $state<{ file: File; url: string; type: 'image' | 'video' } | null>(null);
 	let storyCaption = $state('');
-	let storyVisibility = $state<PostVisibility>('public');
+	let storyVisibility = $state<PostVisibility>(untrack(() => defaultStoryVisibility));
+	$effect(() => {
+		if (!isPublicInstance && storyVisibility === 'public') {
+			storyVisibility = defaultStoryVisibility;
+		}
+	});
 	let storyGroupId = $state<string | null>(null);
 	let storyDuration = $state<'24h' | '48h' | 'custom' | 'never'>('24h');
 	let storyCustomHours = $state(72);
@@ -65,8 +84,10 @@
 
 		if (target.files && target.files.length > 0) {
 			const file = target.files[0];
-			if (file.size > MAX_MEDIA_SIZE_BYTES) {
-				errorMessage = `Le fichier "${file.name}" est trop lourd.`;
+			const maxMb = page.data.instanceSettings?.mediaSettings?.maxMediaSizeMb || 1000;
+			const maxBytes = maxMb * 1024 * 1024;
+			if (file.size > maxBytes) {
+				errorMessage = `Le fichier "${file.name}" dépasse la limite de ${maxMb} Mo.`;
 				target.value = '';
 				return;
 			}
@@ -256,7 +277,7 @@
 						class:active={storyDuration === '24h'}
 						onclick={() => (storyDuration = '24h')}
 					>
-						24h
+						{defaultStoryHours}h
 					</button>
 					<button
 						type="button"

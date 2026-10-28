@@ -1,19 +1,11 @@
-export const POSTS_PER_SCROLL = 8;
-export const POSTS_PER_GRID = 6;
-export const TRENDING_TAGS_LIMIT = 10;
-
-export const MESSAGES_PER_CHAT = 10;
-export const NOTIFICATIONS_PER_LOAD = 10;
-export const COMMENTS_PER_LOAD = 5;
-
-export const USERS_PER_PAGE = 5;
-
-export const MAX_POSTS_PER_REQUEST = 48;
-export const MAX_COMMENTS_PER_REQUEST = 50;
-export const MAX_COMMENT_LENGTH = 2000;
-export const ADMIN_ITEMS_PER_PAGE = 20;
-export const MAX_ADMIN_ITEMS_PER_REQUEST = 100;
-export const MAX_USERS_SEARCH_LIMIT = 20;
+/**
+ * @module lib/constants
+ * @description Constantes et énumérations techniques immuables de l'application.
+ *
+ * NOTE : Les constantes dynamiques configurables par l'instance (performances, pagination,
+ * quotas de stockage, visibilités par défaut, configurations de flux) sont désormais
+ * gérées dans les paramètres d'instance ($lib/server/instanceSettings et page.data.instanceSettings).
+ */
 
 export function clampLimit(
 	raw: string | number | null | undefined,
@@ -24,37 +16,6 @@ export function clampLimit(
 	if (Number.isNaN(parsed) || parsed < 1) return defaultLimit;
 	return Math.min(parsed, maxLimit);
 }
-
-export const DEFAULT_FEED_CONFIG = {
-	name: 'Chronologique',
-	source: 'public' as const,
-	groupIds: [] as string[],
-	excludedGroupIds: [] as string[],
-	contentTypeFilterMode: 'all' as const,
-	contentTypes: [] as string[],
-	carouselContentTypeFilterMode: 'all' as const,
-	carouselContentTypes: [] as string[],
-	tagFilterMode: 'all' as const,
-	includeTags: [] as string[],
-	sortMode: 'chrono' as const,
-	timeWindow: '7d' as const,
-	hideSeen: false,
-	showStories: true,
-	blendFeedAId: null as string | null,
-	blendFeedBId: null as string | null,
-	blendRatio: 50
-};
-
-export const DEFAULT_GROUP_CONFIG = (id: string) => {
-	return {
-		ownerId: id,
-		name: 'Amis proches',
-		color: '#10b981' // Vert
-	};
-};
-
-export const MAX_MEDIA_SIZE_MB = 1000;
-export const MAX_MEDIA_SIZE_BYTES = MAX_MEDIA_SIZE_MB * 1024 * 1024;
 
 export interface EditorFont {
 	id: string;
@@ -117,6 +78,7 @@ export const VALID_POST_VISIBILITIES = [
 	'private',
 	'network'
 ] as const;
+
 export const VALID_FEED_SORT_MODES = [
 	'chrono',
 	'trending',
@@ -124,8 +86,7 @@ export const VALID_FEED_SORT_MODES = [
 	'discussed',
 	'random'
 ] as const;
-export const VALID_FEED_TIME_WINDOWS = ['24h', '7d', '30d', 'all'] as const;
-export const VALID_FEED_SOURCES = ['public', 'following', 'groups', 'blend'] as const;
 
-export const DEFAULT_STORAGE_QUOTA_BYTES = 2 * 1024 * 1024 * 1024; // 2 Go
-export const DEFAULT_MAX_INVITES = 10;
+export const VALID_FEED_TIME_WINDOWS = ['24h', '7d', '30d', 'all'] as const;
+
+export const VALID_FEED_SOURCES = ['public', 'following', 'groups', 'blend'] as const;

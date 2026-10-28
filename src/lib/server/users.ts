@@ -3,16 +3,18 @@ import { user as userTable, follows } from '$lib/server/db/schema';
 import { and, or, ilike, ne, notInArray, sql, type SQL } from 'drizzle-orm';
 import type { UserSearchResult } from '$lib/types';
 import type { CursorData } from './cursor';
-import { USERS_PER_PAGE } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import { notBlockedSql } from '$lib/server/permissions';
 
 export async function searchOrGetNetworkUsers(
 	currentUserId: string,
 	query: string,
-	limitCount = USERS_PER_PAGE,
+	limitCount?: number,
 	cursor?: CursorData | null,
 	excludeIds: string[] = []
 ): Promise<{ users: UserSearchResult[]; nextCursor: CursorData | null }> {
+	const settings = await getInstanceSettings();
+	const safeLimit = limitCount ?? settings.performanceSettings.usersPerPage;
 	// Définitions SQL strictes pour savoir qui est qui
 	const isFollowingSql = sql`EXISTS(SELECT 1 FROM ${follows} f WHERE f.follower_id = ${currentUserId} AND f.following_id = ${userTable.id} AND f.status = 'accepted')`;
 	const isFollowerSql = sql`EXISTS(SELECT 1 FROM ${follows} f WHERE f.follower_id = ${userTable.id} AND f.following_id = ${currentUserId} AND f.status = 'accepted')`;
@@ -75,11 +77,11 @@ export async function searchOrGetNetworkUsers(
 	const fetchedUsers = await baseQuery
 		.where(and(...conditions))
 		.orderBy(sql`${networkScore} DESC`, userTable.username)
-		.limit(limitCount);
+		.limit(safeLimit);
 
 	// GÉNÉRATION DU NOUVEAU CURSEUR
 	let nextCursor: CursorData | null = null;
-	if (fetchedUsers.length === limitCount) {
+	if (fetchedUsers.length === safeLimit) {
 		const lastUser = fetchedUsers[fetchedUsers.length - 1];
 
 		let score = 0;

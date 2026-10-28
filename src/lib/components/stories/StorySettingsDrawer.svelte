@@ -10,6 +10,7 @@
     - Valider et soumettre les modifications
 -->
 <script lang="ts">
+	import { page } from '$app/state';
 	import type { StoryItem, PostVisibility, UserGroup } from '$lib/types';
 	import Icon from '$lib/components/ui/Icon.svelte';
 
@@ -39,6 +40,9 @@
 		onSave
 	}: Props = $props();
 
+	let isPublicInstance = $derived(
+		page.data.instanceSettings?.privacySettings?.isPublicInstance !== false
+	);
 	let editVisibilityComposite = $state('public');
 	let editIsArchived = $state(true);
 	let editDuration = $state<'keep' | '24h' | '48h' | 'custom' | 'never'>('keep');
@@ -139,7 +143,11 @@
 							}
 						}}
 					>
-						<option value="public">Public (Tout le monde)</option>
+						{#if isPublicInstance}
+							<option value="public">Public (Tout le monde)</option>
+						{:else if currentStory.visibility === 'public'}
+							<option value="public" disabled>Public (restreint par l'instance)</option>
+						{/if}
 						<option value="network">Réseau (Réseau et abonnés)</option>
 						<option value="followers">Abonné(e)s uniquement</option>
 						<option value="private">Moi uniquement (Privé)</option>

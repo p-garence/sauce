@@ -4,10 +4,12 @@ import { db } from '$lib/server/db';
 import { notifications } from '$lib/server/db/schema';
 import { eq, desc, and, lt, sql } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
-import { NOTIFICATIONS_PER_LOAD } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 
 export const GET: RequestHandler = async ({ request, url }) => {
 	const session = await requireApiSession(request);
+	const settings = await getInstanceSettings();
+	const perLoad = settings.performanceSettings.notificationsPerLoad;
 	const cursor = url.searchParams.get('cursor');
 	const cursorDate = cursor ? new Date(cursor) : null;
 	const validCursorDate = cursorDate && !Number.isNaN(cursorDate.getTime()) ? cursorDate : null;
@@ -36,11 +38,11 @@ export const GET: RequestHandler = async ({ request, url }) => {
 		where: whereClause,
 		with: { actor: { columns: { username: true, name: true, image: true } } },
 		orderBy: [desc(notifications.createdAt)],
-		limit: NOTIFICATIONS_PER_LOAD + 1
+		limit: perLoad + 1
 	});
 
-	const hasMore = notifs.length > NOTIFICATIONS_PER_LOAD;
-	const results = hasMore ? notifs.slice(0, NOTIFICATIONS_PER_LOAD) : notifs;
+	const hasMore = notifs.length > perLoad;
+	const results = hasMore ? notifs.slice(0, perLoad) : notifs;
 
 	return json({
 		notifications: results,

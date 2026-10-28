@@ -11,6 +11,7 @@ import { cleanupExpiredStories } from '$lib/server/stories';
 import { ensureOptimizationIndexes } from '$lib/server/db/indexes';
 import { ensureSystemUser } from '$lib/server/admin';
 import { initBackupScheduler } from '$lib/server/backup';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 
 let lastStoryCleanup = 0;
 let hasInitBackupScheduler = false;
@@ -76,6 +77,23 @@ export const handle: Handle = async ({ event, resolve }) => {
 	} else {
 		event.locals.session = null;
 		event.locals.user = null;
+	}
+
+	// SÉCURITÉ MODE PRIVÉ : Si l'instance est privée, bloquer tout accès API / média non authentifié
+	if (!building && !event.locals.user) {
+		const isApiOrMedia =
+			(event.url.pathname.startsWith('/api/') && !event.url.pathname.startsWith('/api/auth/')) ||
+			event.url.pathname.startsWith('/media/');
+
+		if (isApiOrMedia) {
+			const settings = await getInstanceSettings();
+			if (!settings.privacySettings.isPublicInstance) {
+				return new Response(JSON.stringify({ error: 'Non autorisé. Cette instance est privée.' }), {
+					status: 401,
+					headers: { 'Content-Type': 'application/json' }
+				});
+			}
+		}
 	}
 
 	// 2. On laisse svelteKitHandler gérer la requête

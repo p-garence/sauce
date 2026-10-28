@@ -4,6 +4,7 @@ import { db } from '$lib/server/db';
 import { user, posts, messages, comments } from '$lib/server/db/schema';
 import { isNotNull, ilike, or } from 'drizzle-orm';
 import type { CarouselItem, EmojiItem } from '$lib/types';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import { UPLOAD_DIR } from './config';
 
 export interface OrphanMediaItem {
@@ -55,10 +56,13 @@ export function extractMediaFilenames(text: string | null | undefined): string[]
  * @param gracePeriodMs Période de grâce (en ms) durant laquelle un fichier récent n'est pas
  * considéré comme orphelin (par défaut 2 heures), afin de protéger les envois et brouillons en cours.
  */
-export async function getOrphanMedia(
-	gracePeriodMs: number = 2 * 3600 * 1000
-): Promise<OrphanMediaStats> {
+export async function getOrphanMedia(gracePeriodMs?: number): Promise<OrphanMediaStats> {
 	try {
+		const settings = await getInstanceSettings();
+		const effectiveGracePeriod =
+			typeof gracePeriodMs === 'number'
+				? gracePeriodMs
+				: settings.mediaSettings.orphanGracePeriodHours * 3600 * 1000;
 		await fs.mkdir(UPLOAD_DIR, { recursive: true });
 		const diskFiles = await fs.readdir(UPLOAD_DIR);
 
@@ -185,7 +189,7 @@ export async function getOrphanMedia(
 					const stats = await fs.stat(filePath);
 					// Période de grâce : si le fichier a été modifié il y a moins de `gracePeriodMs`,
 					// il peut s'agir d'un upload en cours ou d'un brouillon non encore sauvegardé.
-					if (now - stats.mtime.getTime() < gracePeriodMs) {
+					if (now - stats.mtime.getTime() < effectiveGracePeriod) {
 						continue;
 					}
 

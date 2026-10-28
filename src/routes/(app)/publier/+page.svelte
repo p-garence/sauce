@@ -22,7 +22,6 @@
 		PostVisibility,
 		TrendingTagItem
 	} from '$lib/types';
-	import { MAX_MEDIA_SIZE_BYTES } from '$lib/constants';
 	import { mediaEditor } from '$lib/client/mediaEditorState.svelte';
 	import { clearProfileState } from '$lib/client/profileMemory.svelte.js';
 	import { clearMainFeedState } from '$lib/client/feedMemory.svelte';
@@ -65,7 +64,22 @@
 	let attachedEmojiSet = $state<EmojiSet | null>(untrack(() => data.initialEmojiSet || null));
 
 	let caption = $state('');
-	let visibility = $state<PostVisibility>('public');
+	let isPublicInstance = $derived(
+		page.data.instanceSettings?.privacySettings?.isPublicInstance !== false
+	);
+	let defaultVisibility = $derived<PostVisibility>(
+		!isPublicInstance
+			? (page.data.instanceSettings?.privacySettings?.defaultPostVisibility === 'public'
+					? 'followers'
+					: page.data.instanceSettings?.privacySettings?.defaultPostVisibility) || 'followers'
+			: page.data.instanceSettings?.privacySettings?.defaultPostVisibility || 'public'
+	);
+	let visibility = $state<PostVisibility>(untrack(() => defaultVisibility));
+	$effect(() => {
+		if (!isPublicInstance && visibility === 'public') {
+			visibility = defaultVisibility;
+		}
+	});
 	let groupId = $state<string | null>(null);
 	let fileInput = $state<HTMLInputElement>();
 
@@ -100,9 +114,11 @@
 		errorMessage = '';
 
 		if (target.files && target.files.length > 0) {
+			const maxMb = page.data.instanceSettings?.mediaSettings?.maxMediaSizeMb || 1000;
+			const maxBytes = maxMb * 1024 * 1024;
 			const validFiles = Array.from(target.files).filter((file) => {
-				if (file.size > MAX_MEDIA_SIZE_BYTES) {
-					errorMessage = `Le fichier "${file.name}" est trop lourd.`;
+				if (file.size > maxBytes) {
+					errorMessage = `Le fichier "${file.name}" dépasse la taille maximale de ${maxMb} Mo.`;
 					return false;
 				}
 				return true;
@@ -471,6 +487,13 @@
 					/>
 				</div>
 
+				{#if !isPublicInstance}
+					<p class="private-instance-note">
+						L'instance étant configurée en mode privé, les nouvelles publications ne peuvent pas
+						être publiques.
+					</p>
+				{/if}
+
 				<div class="submit-section">
 					<button
 						type="submit"
@@ -719,5 +742,11 @@
 	}
 	.btn-publish:disabled {
 		opacity: 0.5;
+	}
+	.private-instance-note {
+		margin: 6px 0 0 0;
+		font-size: 0.82rem;
+		color: #eab308;
+		line-height: 1.4;
 	}
 </style>

@@ -3,10 +3,10 @@ import { requireApiSession } from '$lib/server/auth';
 import {
 	saveUploadedFile,
 	getUserMediaUsage,
+	getMediaFileSize,
 	formatBytes,
 	deleteMediaFiles
 } from '$lib/server/media';
-import { MAX_MEDIA_SIZE_BYTES, MAX_MEDIA_SIZE_MB } from '$lib/constants';
 import type { RequestHandler } from './$types';
 import type { CarouselItem } from '$lib/types';
 
@@ -21,16 +21,13 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ success: false, message: 'Aucun fichier fourni' }, { status: 400 });
 	}
 
-	// 2. Vérification du quota utilisateur
-	const totalIncomingBytes = files.reduce((acc, f) => acc + (f.size || 0), 0);
+	// 2. Vérification initiale du quota utilisateur
 	const usage = await getUserMediaUsage(session.user.id);
-
-	if (usage.totalBytes + totalIncomingBytes > usage.quotaBytes) {
-		const remainingBytes = Math.max(0, usage.quotaBytes - usage.totalBytes);
+	if (usage.totalBytes >= usage.quotaBytes) {
 		return json(
 			{
 				success: false,
-				message: `Quota de stockage dépassé. Espace restant : ${formatBytes(remainingBytes)} (limite totale : ${formatBytes(usage.quotaBytes)}).`
+				message: `Quota de stockage atteint (limite totale : ${formatBytes(usage.quotaBytes)}).`
 			},
 			{ status: 413 }
 		);
@@ -38,34 +35,45 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const uploadedMedia = [];
 	const savedItems: CarouselItem[] = [];
+	let compressedBatchBytes = 0;
 
 	try {
-		// 3. Traitement et vérification des fichiers
+		// 3. Traitement (compression) et vérification de la taille / du quota après compression
 		for (const file of files) {
 			if (file.size === 0) continue;
 
-			if (file.size > MAX_MEDIA_SIZE_BYTES) {
-				// Nettoyer les fichiers déjà écrits lors de cette requête
+			const saved = await saveUploadedFile(file);
+			savedItems.push(saved);
+
+			const compressedSize = await getMediaFileSize(saved.content);
+			compressedBatchBytes += compressedSize;
+
+			if (usage.totalBytes + compressedBatchBytes > usage.quotaBytes) {
 				await deleteMediaFiles(savedItems);
+				const remainingBytes = Math.max(0, usage.quotaBytes - usage.totalBytes);
 				return json(
 					{
 						success: false,
-						message: `Le fichier ${file.name} dépasse la limite de ${MAX_MEDIA_SIZE_MB} Mo.`
+						message: `Quota de stockage dépassé après compression. Espace restant : ${formatBytes(remainingBytes)} (limite totale : ${formatBytes(usage.quotaBytes)}).`
 					},
 					{ status: 413 }
 				);
 			}
 
-			const saved = await saveUploadedFile(file);
-			savedItems.push(saved);
 			uploadedMedia.push({ type: saved.type, url: saved.content });
 		}
 
 		// 4. On renvoie les URLs générées
 		return json({ success: true, media: uploadedMedia });
 	} catch (err) {
-		// En cas d'erreur de traitement, on nettoie les fichiers créés
+		// En cas d'erreur de traitement (dont dépassement de maxMediaSizeMb après compression), on nettoie les fichiers créés
 		await deleteMediaFiles(savedItems);
-		throw err;
+		return json(
+			{
+				success: false,
+				message: err instanceof Error ? err.message : 'Erreur lors du traitement du fichier.'
+			},
+			{ status: 413 }
+		);
 	}
 };

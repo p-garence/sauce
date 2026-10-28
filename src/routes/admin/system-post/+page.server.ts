@@ -15,7 +15,7 @@ import {
 } from '$lib/server/media';
 import { broadcastSystemNotification } from '$lib/server/notifications';
 import { getTrendingTags } from '$lib/server/tags';
-import { TRENDING_TAGS_LIMIT } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { CarouselItem } from '$lib/types';
 
 function getErrorMessage(err: unknown): string {
@@ -24,7 +24,12 @@ function getErrorMessage(err: unknown): string {
 
 export const load: PageServerLoad = async ({ locals }) => {
 	assertAdmin(locals.user);
-	const trendingTags = await getTrendingTags(TRENDING_TAGS_LIMIT, 7, locals.user?.id);
+	const settings = await getInstanceSettings();
+	const trendingTags = await getTrendingTags(
+		settings.performanceSettings.trendingTagsLimit,
+		7,
+		locals.user?.id
+	);
 	return {
 		trendingTags
 	};

@@ -1,7 +1,7 @@
 import { json, isHttpError } from '@sveltejs/kit';
 import { requireApiSession } from '$lib/server/auth';
 import { updateComment, deleteComment } from '$lib/server/comments';
-import { MAX_COMMENT_LENGTH } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
 import type { RequestHandler } from './$types';
 
 export const PATCH: RequestHandler = async ({ params, request }) => {
@@ -20,9 +20,12 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 			return json({ error: 'Le contenu du commentaire ne peut pas être vide' }, { status: 400 });
 		}
 
-		if (content.trim().length > MAX_COMMENT_LENGTH) {
+		const settings = await getInstanceSettings();
+		if (content.trim().length > settings.performanceSettings.maxCommentLength) {
 			return json(
-				{ error: `Le commentaire ne peut pas dépasser ${MAX_COMMENT_LENGTH} caractères.` },
+				{
+					error: `Le commentaire ne peut pas dépasser ${settings.performanceSettings.maxCommentLength} caractères.`
+				},
 				{ status: 400 }
 			);
 		}

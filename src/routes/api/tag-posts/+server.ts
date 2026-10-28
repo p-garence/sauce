@@ -4,10 +4,12 @@ import { getPostsByTag } from '$lib/server/tags';
 import { decodeCursor, encodeCursor } from '$lib/server/cursor';
 import type { RequestHandler } from './$types';
 import type { PostSortMode } from '$lib/types';
-import { POSTS_PER_GRID, MAX_POSTS_PER_REQUEST, clampLimit } from '$lib/constants';
+import { getInstanceSettings } from '$lib/server/instanceSettings';
+import { clampLimit } from '$lib/constants';
 
 export const GET: RequestHandler = async ({ request, url }) => {
 	const session = await requireApiSession(request);
+	const settings = await getInstanceSettings();
 
 	const tag = url.searchParams.get('tag');
 	if (!tag) {
@@ -17,8 +19,8 @@ export const GET: RequestHandler = async ({ request, url }) => {
 	const sort = (url.searchParams.get('sort') as PostSortMode) || 'chrono';
 	const numberOfPost = clampLimit(
 		url.searchParams.get('numberOfPost'),
-		POSTS_PER_GRID,
-		MAX_POSTS_PER_REQUEST
+		settings.performanceSettings.postsPerGrid,
+		settings.performanceSettings.maxPostsPerRequest
 	);
 	const cursorStr = url.searchParams.get('cursor');
 	const cursorData = decodeCursor(cursorStr);
