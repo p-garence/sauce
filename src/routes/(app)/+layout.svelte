@@ -171,11 +171,13 @@
 		z-index: var(--z-nav);
 	}
 
-	:global(body.keyboard-open) .bottom-nav {
+	:global(body.keyboard-open) .bottom-nav,
+	:global(.app-layout:has(.chat-page:focus-within)) .bottom-nav {
 		display: none !important;
 	}
 
-	:global(body.keyboard-open) .app-content {
+	:global(body.keyboard-open) .app-content,
+	:global(.app-layout:has(.chat-page:focus-within)) .app-content {
 		padding-bottom: 0 !important;
 	}
 

@@ -464,6 +464,29 @@
 			}
 		};
 
+		const handleFocusIn = (e: FocusEvent) => {
+			const target = e.target as HTMLElement | null;
+			if (target && target.closest('.chat-input-area')) {
+				isKeyboardOpen = true;
+				scrollToBottom();
+			}
+		};
+		const handleFocusOut = () => {
+			setTimeout(() => {
+				const active = document.activeElement;
+				if (!active || !active.closest('.chat-input-area')) {
+					if (window.visualViewport) {
+						isKeyboardOpen = baseViewportHeight - window.visualViewport.height > 120;
+					} else {
+						isKeyboardOpen = false;
+					}
+				}
+			}, 150);
+		};
+
+		document.addEventListener('focusin', handleFocusIn);
+		document.addEventListener('focusout', handleFocusOut);
+
 		if (window.visualViewport) {
 			window.visualViewport.addEventListener('resize', handleResize);
 			window.visualViewport.addEventListener('scroll', handleResize);
@@ -473,6 +496,8 @@
 		return () => {
 			document.removeEventListener('visibilitychange', handleVisibilityChange);
 			window.removeEventListener('focus', handleWindowFocus);
+			document.removeEventListener('focusin', handleFocusIn);
+			document.removeEventListener('focusout', handleFocusOut);
 			if ('serviceWorker' in navigator && navigator.serviceWorker) {
 				navigator.serviceWorker.removeEventListener('message', handleSwMessage);
 			}
@@ -487,9 +512,18 @@
 			document.body.classList.remove('keyboard-open');
 		};
 	});
-</script>
 
-<svelte:body class:keyboard-open={isKeyboardOpen} />
+	$effect(() => {
+		if (typeof document !== 'undefined') {
+			document.body.classList.toggle('keyboard-open', isKeyboardOpen);
+		}
+		return () => {
+			if (typeof document !== 'undefined') {
+				document.body.classList.remove('keyboard-open');
+			}
+		};
+	});
+</script>
 
 <div
 	class="chat-page"
@@ -613,7 +647,7 @@
 		position: fixed;
 		left: 0;
 		right: 0;
-		z-index: 70;
+		z-index: 101;
 	}
 
 	.messages-container {
