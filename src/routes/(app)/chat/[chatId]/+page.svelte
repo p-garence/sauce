@@ -461,31 +461,26 @@
 			isKeyboardOpen = baseViewportHeight - vv.height > 120;
 			if (!wasKeyboardOpen && isKeyboardOpen) {
 				scrollToBottom();
+			} else if (wasKeyboardOpen && !isKeyboardOpen) {
+				// Clavier fermé (ex: touche Retour Android) -> retirer le focus pour restaurer l'état au repos
+				if (
+					document.activeElement instanceof HTMLElement &&
+					document.activeElement.closest('.chat-input-area')
+				) {
+					document.activeElement.blur();
+				}
 			}
 		};
 
 		const handleFocusIn = (e: FocusEvent) => {
 			const target = e.target as HTMLElement | null;
 			if (target && target.closest('.chat-input-area')) {
-				isKeyboardOpen = true;
-				scrollToBottom();
+				setTimeout(scrollToBottom, 100);
+				setTimeout(scrollToBottom, 300);
 			}
-		};
-		const handleFocusOut = () => {
-			setTimeout(() => {
-				const active = document.activeElement;
-				if (!active || !active.closest('.chat-input-area')) {
-					if (window.visualViewport) {
-						isKeyboardOpen = baseViewportHeight - window.visualViewport.height > 120;
-					} else {
-						isKeyboardOpen = false;
-					}
-				}
-			}, 150);
 		};
 
 		document.addEventListener('focusin', handleFocusIn);
-		document.addEventListener('focusout', handleFocusOut);
 
 		if (window.visualViewport) {
 			window.visualViewport.addEventListener('resize', handleResize);
@@ -497,7 +492,6 @@
 			document.removeEventListener('visibilitychange', handleVisibilityChange);
 			window.removeEventListener('focus', handleWindowFocus);
 			document.removeEventListener('focusin', handleFocusIn);
-			document.removeEventListener('focusout', handleFocusOut);
 			if ('serviceWorker' in navigator && navigator.serviceWorker) {
 				navigator.serviceWorker.removeEventListener('message', handleSwMessage);
 			}
@@ -647,6 +641,10 @@
 		position: fixed;
 		left: 0;
 		right: 0;
+		z-index: 50;
+	}
+
+	:global(body.keyboard-open) .chat-page {
 		z-index: 101;
 	}
 
