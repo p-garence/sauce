@@ -26,7 +26,7 @@
 	</header>
 
 	<div class="page-body">
-		<AdminUsersTab users={data.users} />
+		<AdminUsersTab users={data.users} currentUserId={data.currentUserId} />
 	</div>
 </div>
 

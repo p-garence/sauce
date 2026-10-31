@@ -1,16 +1,17 @@
+<!--
+  @component AdminUsersTab
+  @domain Admin / Users
+  @description Onglet d'administration et de modération des utilisateurs avec menu contextuel d'actions
+  @responsibilities
+  - Afficher la liste des utilisateurs enregistrés avec filtrage instantané par pseudo, nom ou email
+  - Renommer des utilisateurs et modifier leur quota d'espace multimédia (upload)
+  - Proposer un menu d'options contextuel (...) par utilisateur : Mail de reset, Bannir/Débannir, Ajouter des clés, Nommer admin
+-->
 <script lang="ts">
-	/**
-	 * @component AdminUsersTab
-	 * @domain Admin / Users
-	 * @description Onglet d'administration et de modération des utilisateurs
-	 * @responsibilities
-	 * - Afficher la liste des utilisateurs enregistrés avec filtrage instantané par pseudo, nom ou email
-	 * - Renommer des utilisateurs et modifier leur quota d'espace multimédia (upload)
-	 * - Bannir ou réactiver des comptes
-	 * - Attribuer des invitations supplémentaires (+5 clés) ou promouvoir en administrateur
-	 * - Supprimer définitivement un compte et ses ressources associées
-	 */
 	import { enhance } from '$app/forms';
+	import { tick } from 'svelte';
+	import ActionMenu from '$lib/components/ui/ActionMenu.svelte';
+	import type { MenuAction } from '$lib/types';
 
 	export interface AdminUserItem {
 		id: string;
@@ -27,11 +28,18 @@
 	interface Props {
 		/** Liste des utilisateurs retournés par le serveur */
 		users: AdminUserItem[];
+		/** Identifiant de l'administrateur connecté */
+		currentUserId?: string;
 	}
 
-	let { users = [] }: Props = $props();
+	let { users = [], currentUserId = '' }: Props = $props();
 
 	let userSearch = $state('');
+	let hiddenActionForm = $state<HTMLFormElement>();
+	let targetActionUrl = $state('?/toggleBan');
+	let selectedUserId = $state('');
+	let feedbackMessage = $state<string | null>(null);
+	let feedbackType = $state<'success' | 'error'>('success');
 
 	const filteredUsers = $derived(
 		users.filter((u) => {
@@ -44,6 +52,72 @@
 			);
 		})
 	);
+
+	function submitAction(actionName: string, userId: string, confirmMessage?: string) {
+		if (confirmMessage && !confirm(confirmMessage)) return;
+		selectedUserId = userId;
+		targetActionUrl = `?/${actionName}`;
+		tick().then(() => {
+			hiddenActionForm?.requestSubmit();
+		});
+	}
+
+	function getUserActions(u: AdminUserItem): MenuAction[] {
+		const list: MenuAction[] = [
+			{
+				label: 'Mail de reset',
+				onClick: () => {
+					submitAction(
+						'sendResetPassword',
+						u.id,
+						`Envoyer un email de réinitialisation de mot de passe à ${u.username || u.name || 'cet utilisateur'} (${u.email}) ?`
+					);
+				}
+			},
+			{
+				label: `Ajouter des clés (+5)`,
+				onClick: () => {
+					submitAction(
+						'addInvites',
+						u.id,
+						`Augmenter le quota de ${u.username || u.name || 'cet utilisateur'} de 5 clés d'invitation ?`
+					);
+				}
+			}
+		];
+
+		if (u.role !== 'admin') {
+			list.push({
+				label: 'Nommer admin',
+				onClick: () => {
+					submitAction(
+						'makeAdmin',
+						u.id,
+						`Accorder les droits administrateur à ${u.username || u.name || 'cet utilisateur'} ?`
+					);
+				}
+			});
+		}
+
+		if (!currentUserId || currentUserId !== u.id) {
+			list.push({
+				label: u.isBanned ? 'Débannir' : 'Bannir',
+				variant: u.isBanned ? 'default' : 'danger',
+				dividerBelow: false,
+				onClick: () => {
+					submitAction(
+						'toggleBan',
+						u.id,
+						u.isBanned
+							? `Débannir et réactiver le compte de ${u.username || u.name || 'cet utilisateur'} ?`
+							: `Bannir le compte de ${u.username || u.name || 'cet utilisateur'} ? Ses sessions seront immédiatement révoquées.`
+					);
+				}
+			});
+		}
+
+		return list;
+	}
 
 	function promptRename(
 		e: MouseEvent,
@@ -86,6 +160,45 @@
 </script>
 
 <section class="tab-section">
+	<!-- RETOUR VISUEL APRÈS ACTION -->
+	{#if feedbackMessage}
+		<div class="feedback-banner {feedbackType}">
+			<span>{feedbackMessage}</span>
+			<button
+				type="button"
+				class="close-feedback-btn"
+				onclick={() => (feedbackMessage = null)}
+				aria-label="Fermer le message"
+			>
+				✕
+			</button>
+		</div>
+	{/if}
+
+	<!-- FORMULAIRE TECHNIQUE POUR LES ACTIONS DU MENU -->
+	<form
+		bind:this={hiddenActionForm}
+		method="POST"
+		action={targetActionUrl}
+		use:enhance={() => {
+			return async ({ result, update }) => {
+				if (result.type === 'success') {
+					const resData = result.data as { message?: string } | undefined;
+					feedbackMessage = resData?.message || 'Action exécutée avec succès.';
+					feedbackType = 'success';
+				} else if (result.type === 'failure') {
+					const resData = result.data as { message?: string } | undefined;
+					feedbackMessage = resData?.message || 'Une erreur est survenue lors du traitement.';
+					feedbackType = 'error';
+				}
+				await update();
+			};
+		}}
+		class="hidden-form"
+	>
+		<input type="hidden" name="userId" value={selectedUserId} />
+	</form>
+
 	<div class="section-toolbar">
 		<input
 			type="search"
@@ -104,7 +217,7 @@
 					<th>Statut</th>
 					<th>Quota Médias</th>
 					<th>Parrain</th>
-					<th>Actions</th>
+					<th class="actions-header">Actions</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -172,56 +285,9 @@
 							{/if}
 						</td>
 						<td class="actions-cell">
-							<!-- BANNIR / DÉBANNIR -->
-							<form method="POST" action="?/toggleBan" use:enhance>
-								<input type="hidden" name="userId" value={u.id} />
-								<input type="hidden" name="isBanned" value={u.isBanned.toString()} />
-								<button class="btn {u.isBanned ? 'btn-green' : 'btn-orange'}">
-									{u.isBanned ? 'Débannir' : 'Bannir'}
-								</button>
-							</form>
-
-							<!-- +5 CLÉS -->
-							<form
-								method="POST"
-								action="?/addInvites"
-								use:enhance
-								onsubmit={(e) => {
-									if (!confirm(`Augmenter le quota de ${u.username} à ${u.maxInvites + 5} clés ?`))
-										e.preventDefault();
-								}}
-							>
-								<input type="hidden" name="userId" value={u.id} />
-								<button class="btn btn-purple" title="Ajouter +5 au quota d'invitations">
-									+5 Clés ({u.maxInvites})
-								</button>
-							</form>
-
-							<!-- NOMMER ADMIN -->
-							{#if u.role !== 'admin'}
-								<form method="POST" action="?/makeAdmin" use:enhance>
-									<input type="hidden" name="userId" value={u.id} />
-									<button class="btn btn-blue">Nommer Admin</button>
-								</form>
-							{/if}
-
-							<!-- SUPPRIMER -->
-							<form
-								method="POST"
-								action="?/deleteUser"
-								use:enhance
-								onsubmit={(e) => {
-									if (
-										!confirm(
-											'Attention, suppression définitive. Tous ses posts et fichiers seront supprimés. Continuer ?'
-										)
-									)
-										e.preventDefault();
-								}}
-							>
-								<input type="hidden" name="userId" value={u.id} />
-								<button class="btn btn-red">Supprimer</button>
-							</form>
+							<div class="actions-wrapper">
+								<ActionMenu actions={getUserActions(u)} />
+							</div>
 						</td>
 					</tr>
 				{/each}
@@ -231,6 +297,47 @@
 </section>
 
 <style>
+	.hidden-form {
+		display: none;
+	}
+
+	.feedback-banner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 10px 16px;
+		border-radius: 8px;
+		font-size: 0.9rem;
+		margin-bottom: 16px;
+	}
+
+	.feedback-banner.success {
+		background-color: #ecfdf5;
+		color: #065f46;
+		border: 1px solid #a7f3d0;
+	}
+
+	.feedback-banner.error {
+		background-color: #fef2f2;
+		color: #991b1b;
+		border: 1px solid #fecaca;
+	}
+
+	.close-feedback-btn {
+		background: none;
+		border: none;
+		font-size: 1rem;
+		line-height: 1;
+		cursor: pointer;
+		color: inherit;
+		opacity: 0.7;
+		padding: 4px;
+	}
+
+	.close-feedback-btn:hover {
+		opacity: 1;
+	}
+
 	.section-toolbar {
 		display: flex;
 		justify-content: space-between;
@@ -256,6 +363,8 @@
 
 	.table-container {
 		overflow-x: auto;
+		min-height: 280px;
+		padding-bottom: 60px;
 	}
 
 	.admin-table {
@@ -337,43 +446,21 @@
 		color: #991b1b;
 	}
 
+	.actions-header {
+		text-align: right;
+		width: 60px;
+		padding-right: 16px;
+	}
+
 	.actions-cell {
-		display: flex;
-		gap: 6px;
-		flex-wrap: wrap;
+		text-align: right;
+		width: 60px;
+		padding-right: 16px;
 	}
 
-	.btn {
-		padding: 6px 10px;
-		border: none;
-		border-radius: 6px;
-		font-size: 0.8rem;
-		font-weight: 600;
-		cursor: pointer;
-		color: white;
-		text-decoration: none;
+	.actions-wrapper {
 		display: inline-flex;
-		align-items: center;
-		transition: opacity 0.15s ease;
-	}
-
-	.btn:hover {
-		opacity: 0.9;
-	}
-
-	.btn-orange {
-		background: #f97316;
-	}
-	.btn-green {
-		background: #16a34a;
-	}
-	.btn-blue {
-		background: #2563eb;
-	}
-	.btn-red {
-		background: #dc2626;
-	}
-	.btn-purple {
-		background: #9333ea;
+		justify-content: flex-end;
+		position: relative;
 	}
 </style>
