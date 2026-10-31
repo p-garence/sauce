@@ -34,7 +34,19 @@ export const actions: Actions = {
 		const form = await request.formData();
 		const userId = form.get('userId') as string;
 		try {
-			await toggleUserBan(userId, locals.user!.id);
+			await toggleUserBan(locals.user!.id, userId);
+			return { success: true };
+		} catch (err) {
+			return fail(400, { message: getErrorMessage(err) });
+		}
+	},
+
+	makeAdmin: async ({ request, locals }) => {
+		assertAdmin(locals.user);
+		const form = await request.formData();
+		const userId = form.get('userId') as string;
+		try {
+			await updateUserRole(locals.user!.id, userId, 'admin');
 			return { success: true };
 		} catch (err) {
 			return fail(400, { message: getErrorMessage(err) });
@@ -45,9 +57,9 @@ export const actions: Actions = {
 		assertAdmin(locals.user);
 		const form = await request.formData();
 		const userId = form.get('userId') as string;
-		const role = form.get('role') as string;
+		const role = (form.get('role') as string) || 'admin';
 		try {
-			await updateUserRole(userId, role, locals.user!.id);
+			await updateUserRole(locals.user!.id, userId, role);
 			return { success: true };
 		} catch (err) {
 			return fail(400, { message: getErrorMessage(err) });
@@ -59,7 +71,7 @@ export const actions: Actions = {
 		const form = await request.formData();
 		const userId = form.get('userId') as string;
 		try {
-			await deleteUserByAdmin(userId, locals.user!.id);
+			await deleteUserByAdmin(locals.user!.id, userId);
 			return { success: true };
 		} catch (err) {
 			return fail(400, { message: getErrorMessage(err) });
@@ -83,9 +95,10 @@ export const actions: Actions = {
 		assertAdmin(locals.user);
 		const form = await request.formData();
 		const userId = form.get('userId') as string;
-		const count = parseInt(form.get('count') as string, 10);
+		const countRaw = form.get('count');
+		const count = countRaw ? parseInt(countRaw as string, 10) : 5;
 		try {
-			await addInvitesToUser(locals.user!.id, userId, count);
+			await addInvitesToUser(locals.user!.id, userId, Number.isNaN(count) ? 5 : count);
 			return { success: true };
 		} catch (err) {
 			return fail(400, { message: getErrorMessage(err) });
@@ -96,8 +109,18 @@ export const actions: Actions = {
 		assertAdmin(locals.user);
 		const form = await request.formData();
 		const userId = form.get('userId') as string;
+		const quotaGBRaw = form.get('quotaGB');
 		const quotaBytesRaw = form.get('quotaBytes');
-		const quotaBytes = quotaBytesRaw ? parseInt(quotaBytesRaw as string, 10) : 0;
+		let quotaBytes = 0;
+		if (quotaGBRaw !== null && quotaGBRaw !== '') {
+			const gb = parseFloat(quotaGBRaw as string);
+			if (Number.isNaN(gb) || gb < 0) {
+				return fail(400, { message: 'Quota invalide.' });
+			}
+			quotaBytes = Math.round(gb * 1024 * 1024 * 1024);
+		} else if (quotaBytesRaw !== null && quotaBytesRaw !== '') {
+			quotaBytes = parseInt(quotaBytesRaw as string, 10);
+		}
 		try {
 			await updateUserQuota(locals.user!.id, userId, quotaBytes);
 			return { success: true };

@@ -38,7 +38,7 @@ export const actions: Actions = {
 		const form = await request.formData();
 		const postId = form.get('postId') as string;
 		try {
-			await deletePostByAdmin(postId, locals.user!.id);
+			await deletePostByAdmin(locals.user!.id, postId);
 			return { success: true };
 		} catch (err) {
 			return fail(400, { message: getErrorMessage(err) });
