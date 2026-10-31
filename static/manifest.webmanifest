@@ -1,10 +1,14 @@
 {
+  "id": "/",
   "name": "Sauce et Ail",
   "short_name": "Sauce et Ail",
   "description": "Réseau social Sauce et Ail",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "orientation": "portrait",
   "background_color": "#121212",
   "theme_color": "#121212",

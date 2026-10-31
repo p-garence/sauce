@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation';
 	import { onMount, onDestroy, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { globalStream } from '$lib/client/globalStreamState.svelte';
@@ -41,6 +42,10 @@
 					}
 					if (event.data.entityId) {
 						globalStream.markNotifsForEntityAsRead(event.data.entityId);
+					}
+					const target = event.data.rawUrl || event.data.url;
+					if (target) {
+						goto(target);
 					}
 				}
 			};

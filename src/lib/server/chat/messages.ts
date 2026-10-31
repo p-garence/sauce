@@ -115,7 +115,11 @@ export async function sendChatMessage(
 					title: senderDisplayName,
 					body: finalPreview,
 					url: `/chat/${chatId}`,
-					tag: `chat-${chatId}`
+					tag: `chat-${chatId}`,
+					data: {
+						entityId: chatId,
+						type: 'message'
+					}
 				}).catch((err) => console.error('[ChatPush] Erreur push:', err));
 			})
 			.catch((err) => console.error('[ChatPush] Erreur lecture destinataire:', err));

@@ -123,21 +123,25 @@ sw.addEventListener('notificationclick', (event) => {
 				entityId: notifData.entityId
 			};
 
+			// Normalisation d'URL pour comparaison robuste (sans trailing slash ni hash)
+			const normalize = (u: string) => u.split('#')[0].replace(/\/+$/, '');
+			const targetNorm = normalize(targetUrl);
+
 			// 1. Si une fenêtre est déjà exactement sur l'URL cible, on lui donne le focus et on lui signale le clic
 			for (const client of clientList) {
-				if (client.url === targetUrl && 'focus' in client) {
+				if (normalize(client.url) === targetNorm && 'focus' in client) {
 					client.postMessage(messagePayload);
 					return client.focus();
 				}
 			}
 
-			// 2. Si une fenêtre de l'appli (ex: PWA installée) est déjà ouverte,
-			// on la ramène au premier plan ET on la navigue vers l'URL cible
+			// 2. Si une fenêtre de l'appli (ex: PWA installée ou onglet) est ouverte,
+			// on lui transmet l'événement pour naviguer en interne via SvelteKit (goto) et on lui donne le focus.
+			// Cela évite un client.navigate() brutal qui détruit le contexte PWA sous Firefox Mobile.
 			for (const client of clientList) {
-				if ('navigate' in client && 'focus' in client) {
-					await client.focus();
+				if (client.url.startsWith(sw.location.origin) && 'focus' in client) {
 					client.postMessage(messagePayload);
-					return client.navigate(targetUrl);
+					return client.focus();
 				}
 			}
 
